@@ -10,6 +10,6 @@ class IGSSearchFolder(Interface):
 class ITopicSummary(Interface):
   """Summary Information about a topic"""
 
-class IGSTopicsSearchItemContentProvider(ITopicSummary, IContentProvider):
+class IGSTopicsSearchItemContentProvider(IContentProvider):
   """A single-entry in the results for a search of the topics on a site.
   """

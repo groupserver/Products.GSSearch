@@ -116,7 +116,7 @@
       
       <ul id="topicsList" class="searchResults">
           <tal:block tal:repeat="i python:range(0, 10)">
-            <li tal:content="i"/>
+            <li tal:replace="structure provider:groupserver.TopicsSearchItem"/>
           </tal:block>
       </ul>
       <p class="more">

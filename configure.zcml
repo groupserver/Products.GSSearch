@@ -8,8 +8,7 @@
   <browser:page for=".interfaces.IGSSearchFolder" name="search.html"
     template="browser/templates/search_prototype.pt" 
     permission="zope2.Public" />
-
-
+    
   <class
     class=".topicSearchItemContentProvider.TopicsSearchItemContentProvider">
     <implements
@@ -20,6 +19,6 @@
     factory=".topicSearchItemContentProvider.TopicsSearchItemContentProvider"
     for="zope.interface.Interface  zope.publisher.interfaces.browser.IDefaultBrowserLayer"
     provides="zope.contentprovider.interfaces.IContentProvider"
-    name="groupserver.TopicSearchItem"/>
+    name="groupserver.TopicsSearchItem"/>
 
 </configure>

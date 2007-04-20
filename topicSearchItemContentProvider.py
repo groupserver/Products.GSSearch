@@ -1,5 +1,6 @@
-#from interfaces import ITopic
+from interfaces import IGSTopicsSearchItemContentProvider
 
+import zope.component
 from zope.contentprovider.interfaces import IContentProvider, UpdateNotCalled
 from zope.interface import implements, Interface
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
@@ -7,13 +8,17 @@ from zope.component import adapts, provideAdapter
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 
 class TopicsSearchItemContentProvider(object):
-#    implements()
+#    implements( IContentProvider )
 #    adapts(zope.interface.Interface,
 #           zope.publisher.interfaces.browser.IDefaultBrowserLayer,
 #           zope.interface.Interface)
     
     def __init__(self, context, request, view):
+        self.__parent = view
         self.__updated = False
+        self.context = context
+        self.request = request
+        self.view = view
         
     def update(self):
         self.__updated = True
