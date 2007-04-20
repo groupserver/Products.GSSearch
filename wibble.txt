@@ -1,0 +1,153 @@
+class ITopicSummary(Interface):
+  """Summary Information about a topic"""
+
+  topic_id = TextLine(
+    title=u"Topic ID",
+    description=u"Unique identifier of the topic.",
+    required=True)
+
+  group_id = TextLine(
+    title=u"Group ID",
+    description=u"Identifier of the group that the topic belongs to.",
+    required=False)
+
+  site_id = TextLine(
+    title=u"Site ID",
+    description=u"Identifier of the site that the group belongs to.",
+    required=False)
+    
+  subject = TextLine(
+    title=u"Subject",
+    description=u"Subject of the posts in the topic.",
+    missing_value=u"")
+
+  post_count = Int(
+    title=u"Post Count",
+    description=u"Number of posts in the topic.",
+    min = 1,
+    required=True)
+    
+  first_post_id = TextLine(
+    title=u"First Post ID",
+    description=u"Unique identifier of the first post in the topic.")
+
+  latest_post_date = Datetime(
+    title=u"Latest Post Date",
+    description=u"Date that the most recent post was made to the topic.",
+    required=True)
+
+  latest_post_id = TextLine(
+    title=u"Latest Post ID",
+    description=u"Unique identifier of the most recent post in the topic.")
+
+class ITopic(ITopicSummary):
+  """Complete information about a topic"""
+  
+  first_post_date = Datetime(
+    title=u"First Post Date",
+    description=u"Date that the first post was made to the topic",
+    required=True)
+    
+  posts = List(
+    title=u"Posts",
+    description=u"List of posts in a topic",
+    unique=True)
+
+class IPost(Interface):
+  """Information about a post"""
+  post_id = TextLine(
+      title=u"Post ID",
+      description=u"Unique Identifier of a post",
+      required=True)
+
+  topic_id = TextLine(
+    title=u"Topic ID",
+    description=u"Unique identifier of the topic.",
+    required=True)
+
+  group_id = TextLine(
+    title=u"Group ID",
+    description=u"Identifier of the group that the topic belongs to.",
+    required=False)
+
+  site_id = TextLine(
+    title=u"Site ID",
+    description=u"Identifier of the site that the group belongs to.",
+    required=False)
+
+  user_id = TextLine(
+    title=u"User ID",
+    description=u"Identifier of the user who authored the post.",
+    required=True)
+    
+  subject = TextLine(
+    title=u"Subject",
+    description=u"Subject of the post.",
+    missing_value=u"")
+
+  date = Datetime(
+    title=u"Date",
+    description=u"Date the post was made",
+    required=True)
+    
+  body = Text(
+    title=u"Body",
+    description=u"Body of the post",
+    missing_value=u"")
+
+  body_content = Text(
+    title=u"Main Body Content",
+    description=u"Content of the body, with quoting and signatures removed.",
+    missing_value=u"")
+  
+  body_remainder = Text(
+    title=u"Body Remainder",
+    description=u"Bottom-quoting and signatures of the body.",
+    missing_value=u"")
+
+  has_attachments = Bool(
+    title=u"Has Attachments",
+    description=u"Post has files attached.",
+    missing_value=False)
+
+
+class IFileSummary(Interface):
+  file_id = TextLine(
+    title=u"File ID",
+    description=u"Unique Identifier of the file.",
+    required=True)
+    
+  filename = TextLine(
+    title=u"Filename",
+    description=u"Name of the file.",
+    required=True)
+    
+  size = Int(
+    title=u"File Size",
+    description=u"Size of the file in bytes.",
+    missing_value=0,
+    min=0)
+    
+  mime_type = TextLine(
+    title=u"MIME Type",
+    description=u"The MIME type of the file.",
+    missing_value=u"application/octet-stream")
+  
+  date = Datetype(
+    title=u"Post Date",
+    description=u"The date the file was posted.",
+    required=True)
+  
+  post_id = TextLine(
+    title=u"Post ID",
+    description=u"Identifier of the post the file was attached to.",
+    missing_value=u'')
+    
+  topic_id = TextLine(
+    title=u"Topic ID",
+    description=u"Identifier of the topic the file was added to.",
+    missing_value=u'')
+
+class IGSTopicsSearchItemContentProvider(ITopicSummary, IContentProvider):
+  """A single-entry in the results for a search of the topics on a site.
+  """
