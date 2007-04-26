@@ -7,7 +7,7 @@ from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.component import adapts, provideAdapter
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 
-class TopicsSearchItemContentProvider(object):
+class TopicResultItemContentProvider(object):
 #    implements( IContentProvider )
 #    adapts(zope.interface.Interface,
 #           zope.publisher.interfaces.browser.IDefaultBrowserLayer,

@@ -36,6 +36,8 @@ class GSTopicResultsContentProvider(object):
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
+          retval = 'I am the topic results'
+          return retval
           
       #########################################
       # Non standard methods below this point #

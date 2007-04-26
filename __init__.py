@@ -1,2 +1,2 @@
-# This space intentionally left blank
+import topicResultsContentProvider
 
