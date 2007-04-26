@@ -1,12 +1,27 @@
+import zope.component
+import zope.viewlet.interfaces, zope.contentprovider.interfaces 
+from zope.schema import *
 from zope.interface import Interface
-from zope.schema import Field, Datetime, Int, TextLine, Text, Bool, List
-from zope.viewlet.interfaces import IViewletManager
-from zope.contentprovider.interfaces import IContentProvider
-
 
 class IGSSearchFolder(Interface):
-  pass
+    pass
 
-class IGSTopicsSearchItemContentProvider(IContentProvider):
-  """A single-entry in the results for a search of the topics on a site.
-  """
+# There are six content providers: three for the lists of topics, files
+#    and profiles, and three for the respective list-items.
+
+class IGSTopicResultsContentProvider(Interface):
+      """The GroupServer Topic Results Content Provider"""
+      
+      foo = Text(
+          title=u"I am a fish", 
+          required=False, 
+          default=u"bar")
+
+class IGSTopicResultItemContentProvider(Interface):
+      """The Content Provider for a single result in the list of topics"""
+      
+      foo = Text(
+          title=u"I am a fish", 
+          required=False, 
+          default=u"wibble")
+

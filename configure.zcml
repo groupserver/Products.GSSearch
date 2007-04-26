@@ -5,35 +5,26 @@
   xmlns:sqlos="http://namespaces.sqlobject.org/sqlos"
   xmlns:five="http://namespaces.zope.org/five">
 
-  <five:implements class="OFS.Folder.Folder"
+  <!-- declare a marker interface on the Folder class to allow us 
+    to add marker Interfaces, views and adaptation -->
+  <five:implements 
+    class="OFS.Folder.Folder"
     interface="zope.app.folder.interfaces.IFolder" />
-
-  <five:implements
-    class=".GSSearchFolder.GSSearchFolder"
-    interface=".interfaces.IGSSearchFolder" />
+  <!-- make it known to Five -->
+  <five:traversable 
+    class="OFS.Folder.Folder" />
+  
+  <!--View of the index-page -->
+  <browser:page 
+    for=".interfaces.IGSSearchFolder" 
+    name="index.html"
+    class=".view.GSSearchView"
+    template="browser/templates/search.pt" 
+    permission="zope2.View" />
     
-  <browser:page for=".interfaces.IGSSearchFolder" name="search.html"
-    template="browser/templates/search_prototype.pt" 
-    permission="zope2.Public" />
-
-  <!-- A marker interface -->
-  <interface interface=".interfaces.IGSSearchFolder"
+  <interface 
+    interface=".interfaces.IGSSearchFolder"
     type="zope.app.content.interfaces.IContentType" />
 
-  <!--Interfaces-->
-  <interface interface=".interfaces.IGSTopicsSearchItemContentProvider"
-    type="zope.contentprovider.interfaces.ITALNamespaceData"/>
-
-  <class
-    class=".topicSearchItemContentProvider.TopicsSearchItemContentProvider">
-    <implements
-      interface=".interfaces.IGSTopicsSearchItemContentProvider"/>
-  </class>
-
-  <adapter 
-    factory=".topicSearchItemContentProvider.TopicsSearchItemContentProvider"
-    for="zope.interface.Interface  zope.publisher.interfaces.browser.IDefaultBrowserLayer"
-    provides="zope.contentprovider.interfaces.IContentProvider"
-    name="groupserver.TopicsSearchItem"/>
-
 </configure>
+
