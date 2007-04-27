@@ -25,6 +25,21 @@
   <interface 
     interface=".interfaces.IGSSearchFolder"
     type="zope.app.content.interfaces.IContentType" />
+    
+  <interface 
+    interface=".interfaces.IGSTopicResultsContentProvider"
+    type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
+  <interface 
+    interface=".interfaces.IGSPostResultsContentProvider"
+    type="zope.contentprovider.interfaces.ITALNamespaceData"/>
+
+  <interface 
+    interface=".interfaces.IGSFileResultsContentProvider"
+    type="zope.contentprovider.interfaces.ITALNamespaceData"/>
+
+  <interface 
+    interface=".interfaces.IGSProfileResultsContentProvider"
+    type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 </configure>
 

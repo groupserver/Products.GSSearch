@@ -3,11 +3,10 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <tal:block xmlns:tal="http://xml.zope.org/namespaces/tal">
   <html xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:metal="http://xml.zope.org/namespaces/metal"
-    metal:use-macro="context/@@groupserver_layout/page">
+    xmlns:metal="http://xml.zope.org/namespaces/metal">
     <head>
       <!--Todo: add the division name.-->
-      <title metal:fill-slot="title">
+      <title>
         I am a fish
       </title>
       
@@ -17,7 +16,7 @@
         content="This template is used to render the search page on GroupServer" />
       <meta name="date" content="2007-04-26"/>
       
-      <tal:block metal:fill-slot="javascript">
+      <tal:block>
         <script type="text/javascript"
           src="/++resource++prototype/prototype.js">&#160;</script>
         <script type="text/javascript"
@@ -27,8 +26,15 @@
       </tal:block>
     </head>
     <body>
-      <tal:block metal:fill-slot="body">
-        <p tal:replace="structure provider:groupserver.TopicResults">The baby was 
+      <tal:block>
+        <p tal:define="searchText python:'Availability';"
+          tal:replace="structure provider:groupserver.TopicResults">The baby was 
+          human, mostly.</p>
+        <p tal:replace="structure provider:groupserver.PostResults">The baby was 
+          human, mostly.</p>
+        <p tal:replace="structure provider:groupserver.FileResults">The baby was 
+          human, mostly.</p>
+        <p tal:replace="structure provider:groupserver.ProfileResults">The baby was 
           human, mostly.</p>
       </tal:block>
     </body>

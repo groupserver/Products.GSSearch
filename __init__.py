@@ -1,2 +1,3 @@
-import topicResultsContentProvider
+import topicResultsContentProvider, postResultsContentProvider
+import fileResultsContentProvider, profileResultsContentProvider
 
