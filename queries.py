@@ -9,14 +9,24 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         statement = self.topicTable.select()
         
-        statement.append_whereclause(subjectStr ==
-          self.topicTable.c.original_subject)
+        subjCol = self.topicTable.c.original_subject
+        statement.append_whereclause(subjCol.like('%%%s%%' % subjectStr))
         
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))
         
-        r = statement.execute
+        r = statement.execute()
         
-        return []
+        retval = []
+        if r.rowcount:
+            retval = [ {'last_post_id': x['last_post_id'], 
+                        'first_post_id': x['first_post_id'], 
+                        'group_id': x['group_id'], 
+                        'site_id': x['site_id'], 
+                        'subject': unicode(x['original_subject'], 'utf-8'), 
+                        'date': x['last_post_date'], 
+                        'num_posts': x['num_posts']} for x in r ]
+        
+        return retval
 

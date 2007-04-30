@@ -48,8 +48,8 @@ def test_emailmessage():
       ...                                             database='onlinegroups.net')
       
       >>> mq = queries.MessageQuery( {}, alchemy_adaptor )
-      >>> mq.topic_search_subect('foo')
-      []
+      >>> [t['subject'] for t in mq.topic_search_subect('Avail')]
+      [u'Availability']
       
     Clean up:
       >>> tearDown()
