@@ -1,3 +1,4 @@
 import topicResultsContentProvider, postResultsContentProvider
 import fileResultsContentProvider, profileResultsContentProvider
+import queries
 

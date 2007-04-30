@@ -12,6 +12,7 @@ import Products.XWFMailingListManager.view
 import Products.GSContent, Products.XWFCore.XWFUtils
 
 from interfaces import IGSTopicResultsContentProvider
+from queries import MessageQuery
 
 class GSTopicResultsContentProvider(object):
       """GroupServer Topic Search-Results Content Provider
@@ -31,6 +32,11 @@ class GSTopicResultsContentProvider(object):
           
       def update(self):
           self.__updated = True
+
+          self.da = self.context.zsqlalchemy 
+          assert self.da, 'No data-adaptor found'
+          self.messageQuery = MessageQuery(self.context, self.da)
+
           
       def render(self):
           if not self.__updated:
@@ -44,7 +50,10 @@ class GSTopicResultsContentProvider(object):
       #########################################
       # Non standard methods below this point #
       #########################################
+      
+      def subject_search(self, searchText):
+          pass
 
 zope.component.provideAdapter(GSTopicResultsContentProvider,
-                              provides=zope.contentprovider.interfaces.IContentProvider,
-                              name="groupserver.TopicResults")
+    provides=zope.contentprovider.interfaces.IContentProvider,
+    name="groupserver.TopicResults")
