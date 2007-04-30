@@ -6,11 +6,11 @@ import zope.pagetemplate.pagetemplatefile
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.viewlet.interfaces, zope.contentprovider.interfaces 
 
+from Products.PythonScripts.standard import html_quote
 import DocumentTemplate
+
 import Products.XWFMailingListManager.view
-
 import Products.GSContent, Products.XWFCore.XWFUtils
-
 from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
 
@@ -44,7 +44,8 @@ class GSTopicResultsContentProvider(object):
               raise interfaces.UpdateNotCalled
                             
           l = r'  <li><a href="/r/topic/%s">%s</a></li>'
-          topicStr = '\n'.join([l % (t['last_post_id'], t['subject']) 
+          topicStr = '\n'.join([l % (t['last_post_id'], 
+                                     html_quote(t['subject']))
                                 for t in self.topics])
          
           retval = u'''<p>I am the topic results</p>
