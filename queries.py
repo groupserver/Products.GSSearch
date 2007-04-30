@@ -30,3 +30,25 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         return retval
 
+    def topic_search_keyword(self, keyword, limit=12, offset=0):
+        """Search for a particular keyword in the list of topics."""
+        
+        statement = self.topic_word_countTable.select()
+        
+        statement.append_whereclause(self.topic_word_countTable.c.word == \
+          keyword)
+        
+        statement.limit = limit
+        statement.offset = offset
+        statement.order_by(sa.desc(self.topic_word_countTable.c.count))
+        
+        r = statement.execute()
+        
+        retval = []
+        if r.rowcount:
+            retval = [ {'topic_id': x['topic_id'], 
+                        'word': unicode(x['word'], 'utf-8'), 
+                        'count': x['count']} for x in r ]
+        
+        return retval
+
