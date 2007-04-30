@@ -8,5 +8,7 @@ class GSSearchView(Products.Five.BrowserView):
         self.context = context
         self.request = request
         self.siteInfo = IGSSiteInfo( context )
+        
+        self.searchText = self.request.get('searchText', '')
 
 Globals.InitializeClass( GSSearchView )

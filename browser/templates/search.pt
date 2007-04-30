@@ -27,7 +27,7 @@
     </head>
     <body>
       <tal:block>
-        <p tal:define="searchText python:'Availability';"
+        <p tal:define="searchText python:view.searchText;"
           tal:replace="structure provider:groupserver.TopicResults">The baby was 
           human, mostly.</p>
         <p tal:replace="structure provider:groupserver.PostResults">The baby was 

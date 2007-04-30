@@ -37,14 +37,20 @@ class GSTopicResultsContentProvider(object):
           assert self.da, 'No data-adaptor found'
           self.messageQuery = MessageQuery(self.context, self.da)
 
+          self.topics = self.subject_search(self.searchText)
           
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
+                            
+          l = r'  <li><a href="/r/topic/%s">%s</a></li>'
+          topicStr = '\n'.join([l % (t['last_post_id'], t['subject']) 
+                                for t in self.topics])
+         
           retval = u'''<p>I am the topic results</p>
             <ul>
-              <li>Search Text: %s</li>
-            </ul>''' % self.searchText
+            %s
+            </ul>''' % topicStr
           return retval
           
       #########################################
@@ -52,8 +58,12 @@ class GSTopicResultsContentProvider(object):
       #########################################
       
       def subject_search(self, searchText):
-          pass
+          assert hasattr(self, 'messageQuery')
+          assert self.messageQuery
 
+          topics = self.messageQuery.topic_search_subect(searchText)
+          return topics
+          
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
     name="groupserver.TopicResults")
