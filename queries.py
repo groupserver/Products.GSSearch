@@ -29,7 +29,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                         'group_id': x['group_id'], 
                         'site_id': x['site_id'], 
                         'subject': unicode(x['original_subject'], 'utf-8'), 
-                        'date': x['last_post_date'], 
+                        'last_post_date': x['last_post_date'], 
                         'num_posts': x['num_posts']} for x in r ]
         
         return retval

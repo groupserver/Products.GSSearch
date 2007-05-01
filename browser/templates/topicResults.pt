@@ -9,6 +9,13 @@
         <a class="group" href="#" 
           tal:attributes="href string:/groups/group/${topic/group_id};"
           tal:content="topic/group_name"/>
+        <span class="postCount">
+          <span class="cardinal" tal:content="topic/num_posts"/>
+          posts</span>,
+        <span class="dates">
+            last post on
+            <span class="date" tal:content="topic/last_post_date"/>
+        </span>
       </li>
     </tal:block>
   </ul>

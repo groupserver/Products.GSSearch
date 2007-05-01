@@ -72,7 +72,6 @@ class GSTopicResultsContentProvider(object):
           for topic in topics:
               group = getattr(groupsObj, topic['group_id'])
               topic['group_name'] = group.title_or_id()
-          print topics[0]
           return topics
           
       def get_visible_group_ids(self):
