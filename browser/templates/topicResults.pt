@@ -1,5 +1,5 @@
 <tal:block tal:define="topics options/topics">
-  <ul>
+  <ol>
     <tal:block tal:repeat="topic topics">
       <li id="abc123" tal:attributes="id topic/topic_id">
         <a class="topic" href="#"
@@ -18,5 +18,5 @@
         </span>
       </li>
     </tal:block>
-  </ul>
+  </ol>
 </tal:block>

@@ -41,15 +41,18 @@ class GSTopicResultsContentProvider(object):
 
           subjectTopics = self.subject_search(self.searchText)
           keywordTopics = self.keyword_search(self.searchText)
-          self.topics = subjectTopics + keywordTopics
-          self.topics.sort(self.date_sort)
+          #allTopics = subjectTopics + keywordTopics
+          #self.topics = self.remove_duplicate_topics(allTopics)
+          #self.topics.sort(self.date_sort)
+          
+          self.topics = self.keyword_subject_search(self.searchText)
           
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
 
           pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-          r = pageTemplate(topics=self.topics)
+          r = pageTemplate(topics=self.topics[:self.limit])
          
           return r
           
@@ -57,24 +60,33 @@ class GSTopicResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
       
-      def subject_search(self, searchText, group_ids=[]):
+      def subject_search(self, searchText):
           assert hasattr(self, 'messageQuery')
           assert self.messageQuery
 
           group_ids = self.get_visible_group_ids()
           siteId = self.siteInfo.get_id()
           topics = self.messageQuery.topic_search_subect(searchText, 
-            siteId, group_ids)
+            siteId, group_ids, limit=self.limit)
           topics = self.add_group_names_to_topics(topics)
           return topics
       
-      def keyword_search(self, keyword, group_ids=[]):
+      def keyword_search(self, keyword):
           group_ids = self.get_visible_group_ids()
           siteId = self.siteInfo.get_id()
           topics = self.messageQuery.topic_search_keyword(keyword,
-            siteId, group_ids)
+            siteId, group_ids, limit=self.limit)
           topics = self.add_group_names_to_topics(topics)
           return topics
+
+      def keyword_subject_search(self, keyword):
+          group_ids = self.get_visible_group_ids()
+          siteId = self.siteInfo.get_id()
+          topics = self.messageQuery.topic_search_keyword_subject(keyword,
+            siteId, group_ids, limit=self.limit)
+          topics = self.add_group_names_to_topics(topics)
+          return topics
+
           
       def add_group_names_to_topics(self, topics):
           ts = topics
@@ -120,6 +132,16 @@ class GSTopicResultsContentProvider(object):
               retval = -1
 
           return retval
+
+      def remove_duplicate_topics(self, topics):
+          ts = topics
+          
+          topicsSeen = []
+          
+          for topic in ts:
+              if topic['topic_id'] not in topicsSeen:
+                  topicsSeen.append(ts)
+          return ts
           
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,

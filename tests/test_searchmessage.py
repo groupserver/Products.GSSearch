@@ -52,6 +52,8 @@ def test_emailmessage():
       [u'Availability']
       >>> [t['subject'] for t in mq.topic_search_keyword('fish', 'ogs', [])]
       [u'Availability', u'Interesting site']
+      >>> [t['subject'] for t in mq.topic_search_keyword_subject('Avail', 'ogs', [])]
+      [u'Availability', u'Permissions on Web Feed']
       
     Clean up:
       >>> tearDown()
