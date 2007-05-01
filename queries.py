@@ -4,10 +4,13 @@ import sqlalchemy as sa
 class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     """Query the message database"""
     
-    def topic_search_subect(self, subjectStr, limit=12, offset=0):
+    def topic_search_subect(self, subjectStr, site_id, group_ids=[], 
+        limit=12, offset=0):
         """Search for a particular subject in the list of topics."""
         
         statement = self.topicTable.select()
+        aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
+        aswc(self, statement, self.topicTable, site_id, group_ids)
         
         subjCol = self.topicTable.c.original_subject
         statement.append_whereclause(subjCol.like('%%%s%%' % subjectStr))
@@ -20,7 +23,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         retval = []
         if r.rowcount:
-            retval = [ {'last_post_id': x['last_post_id'], 
+            retval = [ {'topic_id': x['topic_id'],
+                        'last_post_id': x['last_post_id'], 
                         'first_post_id': x['first_post_id'], 
                         'group_id': x['group_id'], 
                         'site_id': x['site_id'], 

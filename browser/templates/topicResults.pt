@@ -1,0 +1,15 @@
+<tal:block tal:define="topics options/topics">
+  <ul>
+    <tal:block tal:repeat="topic topics">
+      <li id="abc123" tal:attributes="id topic/topic_id">
+        <a class="topic" href="#"
+          tal:attributes="href string:/r/topic/${topic/last_post_id}"
+          tal:content="topic/subject"/>
+        in
+        <a class="group" href="#" 
+          tal:attributes="href string:/groups/group/${topic/group_id};"
+          tal:content="topic/group_name"/>
+      </li>
+    </tal:block>
+  </ul>
+</tal:block>

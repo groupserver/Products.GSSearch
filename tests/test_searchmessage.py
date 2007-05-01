@@ -48,7 +48,7 @@ def test_emailmessage():
       ...                                             database='onlinegroups.net')
       
       >>> mq = queries.MessageQuery( {}, alchemy_adaptor )
-      >>> [t['subject'] for t in mq.topic_search_subect('Avail')]
+      >>> [t['subject'] for t in mq.topic_search_subect('Avail', 'ogs', [])]
       [u'Availability']
       >>> mq.topic_search_keyword('fish')
        [{'count': 22, 'word': u'fish', 'topic_id': '5s7NnxmGiamrckAB4hQTPv'}, {'count': 1, 'word': u'fish', 'topic_id': '7jjdNB9j84RkfbekYvNK5E'}]

@@ -36,11 +36,12 @@ class IGSSearchResults(Interface):
 class IGSTopicResultsContentProvider(IContentProvider, IGSSearchResults):
     """The GroupServer Topic Results Content Provider"""
 
-    foo = Text(
-        title=u"I am a fish", 
-        required=False, 
-        default=u"bar")
-
+    pageTemplateFileName = Text(title=u"Page Template File Name",
+      description=u"""The name of the ZPT file that is used to render the
+                       results.""",
+      required=False,
+      default=u"browser/templates/topicResults.pt")
+      
 class IGSPostResultsContentProvider(IContentProvider, IGSSearchResults):
       """The GroupServer Post Results Content Provider"""
       
