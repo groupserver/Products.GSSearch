@@ -13,7 +13,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         aswc(self, statement, self.topicTable, site_id, group_ids)
         
         subjCol = self.topicTable.c.original_subject
-        statement.append_whereclause(subjCol.like('%%%s%%' % subjectStr))
+        regexp = '.*%s.*' % subjectStr.lower()
+        statement.append_whereclause(subjCol.op('~*')(regexp))
         
         statement.limit = limit
         statement.offset = offset
