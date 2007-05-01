@@ -53,8 +53,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))
         
-        #print statement
-        
         r = statement.execute()
         
         retval = []
@@ -108,3 +106,25 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                         'num_posts': x['num_posts']} for x in r ]
         
         return retval
+    
+    def count_topics(self):
+        countTable = self.topic_word_countTable
+        statement = sa.select([sa.func.count(countTable.c.topic_id.distinct())])
+        r = statement.execute()
+        return r.scalar()
+        
+    def count_total_topic_word(self, word):
+        """Count the totoal number of topics that contain a particular word"""
+        countTable = self.topic_word_countTable
+        statement = sa.select([sa.func.count(countTable.c.topic_id.distinct())])
+        statement.append_whereclause(countTable.c.word == word)
+
+        r = statement.execute()
+        return r.scalar()
+
+    def count_words(self):
+        countTable = self.topic_word_countTable
+        statement = sa.select([sa.func.sum(countTable.c.count)])
+        r = statement.execute()
+        return r.scalar()
+

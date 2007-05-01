@@ -41,11 +41,14 @@ class GSTopicResultsContentProvider(object):
 
           subjectTopics = self.subject_search(self.searchText)
           keywordTopics = self.keyword_search(self.searchText)
-          #allTopics = subjectTopics + keywordTopics
-          #self.topics = self.remove_duplicate_topics(allTopics)
-          #self.topics.sort(self.date_sort)
+          allTopics = subjectTopics + keywordTopics
+          self.topics = self.remove_duplicate_topics(allTopics)
+          self.topics.sort(self.date_sort)
+                    
+          #self.topics = self.keyword_subject_search(self.searchText)
           
-          self.topics = self.keyword_subject_search(self.searchText)
+          #self.idf(self.searchText)
+          #self.tf(self.searchText)
           
       def render(self):
           if not self.__updated:
@@ -137,11 +140,37 @@ class GSTopicResultsContentProvider(object):
           ts = topics
           
           topicsSeen = []
-          
+          topicIDsSeen = []
+          i = 1
           for topic in ts:
-              if topic['topic_id'] not in topicsSeen:
-                  topicsSeen.append(ts)
-          return ts
+              if topic['topic_id'] not in topicIDsSeen:
+                  topicsSeen.append(topic)
+                  topicIDsSeen.append(topic['topic_id'])
+          return topicsSeen
+      
+      # I am doing the wrong totals: they should be for a topic.
+      
+      def tf(self, word):
+          """Get the term frequency for a word"""
+          #n = self.messageQuery.count_word_in_topic(topicId, word )
+          
+          snk = self.messageQuery.count_words()
+          print 'Total number of words: %d' % snk
+          
+      def idf(self, word):
+          """Get the inverse document fequency for a word"""
+          import math
+          d = self.messageQuery.count_topics()
+          print 'Total number of topics: %d' % (d)
+          ddeti = self.messageQuery.count_total_topic_word(word)
+          ddeti = ddeti and (ddeti * 1.0) or 1.0
+          print 'Count of topics containing "%s": %d' % (word, ddeti)
+          idf = math.log10(d/ddeti)
+          print 'idf for "%s": %f' % (word, idf)
+          return idf
+          
+      def tf_idf(self, word):
+          return tf * idf
           
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
