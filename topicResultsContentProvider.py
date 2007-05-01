@@ -39,9 +39,10 @@ class GSTopicResultsContentProvider(object):
           self.messageQuery = MessageQuery(self.context, self.da)
           self.siteInfo = GSSiteInfo(self.context)
 
-          groups = self.get_visible_group_ids()
-          self.topics = self.subject_search(self.searchText, 
-              site_id=self.siteInfo.get_id(), group_ids=groups)
+          subjectTopics = self.subject_search(self.searchText)
+          keywordTopics = self.keyword_search(self.searchText)
+          self.topics = subjectTopics + keywordTopics
+          self.topics.sort(self.date_sort)
           
       def render(self):
           if not self.__updated:
@@ -56,24 +57,39 @@ class GSTopicResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
       
-      def subject_search(self, searchText, site_id, group_ids=[]):
+      def subject_search(self, searchText, group_ids=[]):
           assert hasattr(self, 'messageQuery')
           assert self.messageQuery
 
+          group_ids = self.get_visible_group_ids()
+          siteId = self.siteInfo.get_id()
+          topics = self.messageQuery.topic_search_subect(searchText, 
+            siteId, group_ids)
+          topics = self.add_group_names_to_topics(topics)
+          return topics
+      
+      def keyword_search(self, keyword, group_ids=[]):
+          group_ids = self.get_visible_group_ids()
+          siteId = self.siteInfo.get_id()
+          topics = self.messageQuery.topic_search_keyword(keyword,
+            siteId, group_ids)
+          topics = self.add_group_names_to_topics(topics)
+          return topics
+          
+      def add_group_names_to_topics(self, topics):
+          ts = topics
+          
           site_root = self.context.site_root()
-          siteId = self.view.siteInfo.get_id()
+          siteId = self.siteInfo.get_id()
           site = getattr(getattr(site_root, 'Content'), siteId)
           groupsObj = getattr(site, 'groups')
 
-          topics = self.messageQuery.topic_search_subect(searchText, 
-            site_id, group_ids)
-            
-          # Add a group-name to each topic
-          for topic in topics:
+          for topic in ts:
               group = getattr(groupsObj, topic['group_id'])
               topic['group_name'] = group.title_or_id()
-          return topics
-          
+          return ts
+      
+      
       def get_visible_group_ids(self):
           site_root = self.context.site_root()
           siteId = self.view.siteInfo.get_id()
@@ -92,6 +108,17 @@ class GSTopicResultsContentProvider(object):
                   visibleGroups.append(group)
           
           retval = [g.getId() for g in visibleGroups]
+          return retval
+          
+      def date_sort(self, a, b):
+          retval = 0
+          if a['last_post_date'] < b['last_post_date']:
+              retval = 1
+          elif a['last_post_date'] == b['last_post_date']:
+              retval = 0
+          else:
+              retval = -1
+
           return retval
           
 zope.component.provideAdapter(GSTopicResultsContentProvider,
