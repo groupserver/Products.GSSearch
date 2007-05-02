@@ -16,6 +16,13 @@
             last post on
             <span class="date" tal:content="topic/last_post_date"/>
         </span>
+        <span class="keywords">
+          <ul>
+            <tal:block tal:repeat="keyword topic/keywords">
+              <li tal:content="keyword/word"></li>
+            </tal:block>
+          </ul>
+        </span>
       </li>
     </tal:block>
   </ol>

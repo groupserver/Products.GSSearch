@@ -1,4 +1,4 @@
-import sys, re, datetime, time, types, string
+import sys, re, datetime, time, types, string, math
 import Products.Five, DateTime, Globals
 import zope.schema
 import zope.app.pagetemplate.viewpagetemplatefile
@@ -44,18 +44,19 @@ class GSTopicResultsContentProvider(object):
           allTopics = subjectTopics + keywordTopics
           self.topics = self.remove_duplicate_topics(allTopics)
           self.topics.sort(self.date_sort)
-                    
-          #self.topics = self.keyword_subject_search(self.searchText)
+          self.topics = self.topics[:self.limit]
           
-          #self.idf(self.searchText)
-          #self.tf(self.searchText)
+          self.totalNumTopics = self.messageQuery.count_topics()
+          #self.topics = self.keyword_subject_search(self.searchText)
+          #self.get_keywords_for_topic(self.topics[0]['topic_id'])
+          self.add_keywords_to_topics()
           
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
 
           pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-          r = pageTemplate(topics=self.topics[:self.limit])
+          r = pageTemplate(topics=self.topics)
          
           return r
           
@@ -148,30 +149,34 @@ class GSTopicResultsContentProvider(object):
                   topicIDsSeen.append(topic['topic_id'])
           return topicsSeen
       
-      # I am doing the wrong totals: they should be for a topic.
-      
-      def tf(self, word):
-          """Get the term frequency for a word"""
-          #n = self.messageQuery.count_word_in_topic(topicId, word )
+      def get_keywords_for_topic(self, topicId):
+          words = self.messageQuery.topic_word_count(topicId)
+          twc = sum([w['count'] for w in words]) * 1.0
+          ddet = self.messageQuery.count_total_topic_word
+
+          words = [{'word':  w['word'],
+                    'count': w['count'],
+                    'tfidf': (w['count']/twc)*\
+                              math.log10(self.totalNumTopics/\
+                                         float(ddet(w['word'])))}
+                    for w in words]
+          words.sort(self.keywords_sort)
+          return words
           
-          snk = self.messageQuery.count_words()
-          print 'Total number of words: %d' % snk
-          
-      def idf(self, word):
-          """Get the inverse document fequency for a word"""
-          import math
-          d = self.messageQuery.count_topics()
-          print 'Total number of topics: %d' % (d)
-          ddeti = self.messageQuery.count_total_topic_word(word)
-          ddeti = ddeti and (ddeti * 1.0) or 1.0
-          print 'Count of topics containing "%s": %d' % (word, ddeti)
-          idf = math.log10(d/ddeti)
-          print 'idf for "%s": %f' % (word, idf)
-          return idf
-          
-      def tf_idf(self, word):
-          return tf * idf
-          
+      def keywords_sort(self, a, b):
+          if a['tfidf'] < b['tfidf']:
+              retval = 1
+          elif a['tfidf'] == b['tfidf']:
+              retval = 0
+          else:
+              retval = -1
+          return retval
+
+      def add_keywords_to_topics(self):
+          for topic in self.topics:
+              keywords = self.get_keywords_for_topic(topic['topic_id'])
+              topic['keywords'] = keywords[:6]
+              
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
     name="groupserver.TopicResults")

@@ -127,4 +127,30 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement = sa.select([sa.func.sum(countTable.c.count)])
         r = statement.execute()
         return r.scalar()
+        
+    def count_word_in_topic(self, word, topicId):
+        """Count the number of times word occurs in a topic"""
+        countTable = self.topic_word_countTable
+        statement = sa.select([countTable.c.count])
+        statement.append_whereclause(countTable.c.topic_id == topicId)
+        statement.append_whereclause(countTable.c.word == word)
+        r = statement.execute()
+        retval = 0
+        if r.rowcount:
+            val = [{'count': x['count']} for x in r]
+            retval = val[0]['count']
+        return retval
+        
+    def topic_word_count(self, topicId):
+        """Get a count for the words in a topic"""
+        countTable = self.topic_word_countTable
+        statement = countTable.select()
+        statement.append_whereclause(countTable.c.topic_id == topicId)
+        r = statement.execute()
+        retval = {}
+        if r.rowcount:
+            retval = [{'topic_id': x['topic_id'],
+                       'word': x['word'],
+                       'count': x['count']} for x in r]
+        return retval
 
