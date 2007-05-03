@@ -6,6 +6,8 @@ from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.viewlet.interfaces, zope.contentprovider.interfaces 
 
+from Products.PluginIndexes.TextIndex.Lexicon import stop_words as STOP_WORDS
+
 from Products.PythonScripts.standard import html_quote
 import DocumentTemplate
 
@@ -158,7 +160,7 @@ class GSTopicResultsContentProvider(object):
                     'tfidf': (w['count']/twc)*\
                               math.log10(self.totalNumTopics/\
                                          float(wc.get('word', 1)))}
-                    for w in words if (len(w['word']) > 3)]
+                    for w in words if ((len(w['word']) > 3) and (w['word'] not in STOP_WORDS))]
                     # --=mpj17=-- The trailing if-statement simulates the
                     #   removal of stop-words, but it also improves 
                     #   performance of the list comprehension.
