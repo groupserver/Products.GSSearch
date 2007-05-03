@@ -3,6 +3,16 @@ import sqlalchemy as sa
 
 class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     """Query the message database"""
+
+    def __init__(self, context, da):
+        super_query = Products.XWFMailingListManager.queries.MessageQuery
+        super_query.__init__(self, context, da)
+
+        session = da.getSession()
+        metadata = session.getMetaData()
+
+        self.word_countTable = sa.Table('word_count', metadata, 
+          autoload=True)
     
     def topic_search_subect(self, subjectStr, site_id, group_ids=[], 
         limit=12, offset=0):
@@ -113,17 +123,31 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         r = statement.execute()
         return r.scalar()
         
+    def word_counts(self):
+        statement = self.word_countTable.select()
+        r = statement.execute()
+        retval = {}
+        if r.rowcount:
+            for x in r:
+                retval[unicode(x['word'], 'utf-8')] = x['count']
+        return retval
+        
     def count_total_topic_word(self, word):
         """Count the totoal number of topics that contain a particular word"""
-        countTable = self.topic_word_countTable
-        statement = sa.select([sa.func.count(countTable.c.topic_id.distinct())])
+        countTable = self.word_countTable
+        statement = countTable.select()
         statement.append_whereclause(countTable.c.word == word)
 
         r = statement.execute()
-        return r.scalar()
+        retval = 0
+        if r.rowcount:
+            v = [{'count': x['count']} for x in r]
+            print len(v)
+            retval = v[0]['count']
+        return retval
 
     def count_words(self):
-        countTable = self.topic_word_countTable
+        countTable = self.word_countTable
         statement = sa.select([sa.func.sum(countTable.c.count)])
         r = statement.execute()
         return r.scalar()

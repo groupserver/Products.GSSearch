@@ -47,6 +47,7 @@ class GSTopicResultsContentProvider(object):
           self.topics = self.topics[:self.limit]
           
           self.totalNumTopics = self.messageQuery.count_topics()
+          self.wordCounts = self.messageQuery.word_counts()
           #self.topics = self.keyword_subject_search(self.searchText)
           #self.get_keywords_for_topic(self.topics[0]['topic_id'])
           self.add_keywords_to_topics()
@@ -151,14 +152,13 @@ class GSTopicResultsContentProvider(object):
       
       def get_keywords_for_topic(self, topicId):
           words = self.messageQuery.topic_word_count(topicId)
-          twc = sum([w['count'] for w in words]) * 1.0
-          ddet = self.messageQuery.count_total_topic_word
-
+          twc = float(sum([w['count'] for w in words]))
+          wc = self.wordCounts
           words = [{'word':  w['word'],
                     'count': w['count'],
                     'tfidf': (w['count']/twc)*\
                               math.log10(self.totalNumTopics/\
-                                         float(ddet(w['word'])))}
+                                         float(wc['word']))}
                     for w in words]
           words.sort(self.keywords_sort)
           return words
