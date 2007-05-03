@@ -158,7 +158,11 @@ class GSTopicResultsContentProvider(object):
                     'tfidf': (w['count']/twc)*\
                               math.log10(self.totalNumTopics/\
                                          float(wc.get('word', 1)))}
-                    for w in words]
+                    for w in words if (len(w['word']) > 3)]
+                    # --=mpj17=-- The trailing if-statement simulates the
+                    #   removal of stop-words, but it also improves 
+                    #   performance of the list comprehension.
+                    
           words.sort(self.keywords_sort)
           return words
           
