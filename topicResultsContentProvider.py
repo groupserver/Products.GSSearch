@@ -157,8 +157,7 @@ class GSTopicResultsContentProvider(object):
           words = [{'word':  w['word'],
                     'count': w['count'],
                     'tfidf': (w['count']/twc)*\
-                              math.log10(self.totalNumTopics/\
-                                         float(wc['word']))}
+                              math.log10(1/float(wc['word']))}
                     for w in words]
           words.sort(self.keywords_sort)
           return words
