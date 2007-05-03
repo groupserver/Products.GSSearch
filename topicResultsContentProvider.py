@@ -6,7 +6,7 @@ from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.viewlet.interfaces, zope.contentprovider.interfaces 
 
-from Products.PluginIndexes.TextIndex.Lexicon import stop_words as STOP_WORDS
+from Products.XWFMailingListManager.stopwords import en as STOP_WORDS
 
 from Products.PythonScripts.standard import html_quote
 import DocumentTemplate
