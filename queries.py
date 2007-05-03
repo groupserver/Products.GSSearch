@@ -119,7 +119,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     
     def count_topics(self):
         countTable = self.topicTable
-        statement = sa.select([sa.func.count(countTable.c.topic_id.distinct())])
+        statement = sa.select([sa.func.count(countTable.c.topic_id)])
         r = statement.execute()
         return r.scalar()
         
