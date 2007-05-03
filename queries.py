@@ -118,13 +118,16 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         return retval
     
     def count_topics(self):
-        countTable = self.topic_word_countTable
+        countTable = self.topicTable
         statement = sa.select([sa.func.count(countTable.c.topic_id.distinct())])
         r = statement.execute()
         return r.scalar()
         
     def word_counts(self):
         statement = self.word_countTable.select()
+        # The following where clause speeds up the query: we will assume 1
+        #   later on, if the word is not in the dictionary.
+        statement.append_whereclause(self.word_countTable.c.count > 1)
         r = statement.execute()
         retval = {}
         if r.rowcount:
@@ -171,7 +174,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement = countTable.select()
         statement.append_whereclause(countTable.c.topic_id == topicId)
         r = statement.execute()
-        retval = {}
+        retval = []
         if r.rowcount:
             retval = [{'topic_id': x['topic_id'],
                        'word': x['word'],
