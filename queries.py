@@ -72,7 +72,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         aswc(self, statement, self.topicTable, site_id, group_ids)
 
         if (len(keywords) == 1):
-            statement.append_whereclause(countTable.c.word == keyword.lower())
+            statement.append_whereclause(countTable.c.word == keywords[0].lower())
         else: # len(keywords) > 1
             conds = [(countTable.c.word == k.lower()) for k in keywords]
             statement.append_whereclause(sa.or_(*conds))
