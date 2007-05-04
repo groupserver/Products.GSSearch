@@ -118,8 +118,9 @@ class GSTopicResultsContentProvider(object):
           groupsObj = getattr(site, 'groups')
 
           for topic in ts:
-              group = getattr(groupsObj, topic['group_id'])
-              topic['group_name'] = group.title_or_id()
+              if hasattr(groupsObj, topic['group_id']):
+                  group = getattr(groupsObj, topic['group_id'])
+                  topic['group_name'] = group.title_or_id()
           return ts
                 
       def date_sort(self, a, b):
