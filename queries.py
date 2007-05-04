@@ -24,17 +24,19 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         aswc(self, statement, self.topicTable, site_id, group_ids)
         
         subjCol = self.topicTable.c.original_subject
-        
+
         if (len(keywords) == 1):
             regexp = '.*%s.*' % keywords[0].lower()
             statement.append_whereclause(subjCol.op('~*')(regexp))
-        else: # len(keywords) > 1
+        elif (len(keywords) > 1):
             # For each keyword, construct a regular expression match
             #   against the subject, and or them all together
             regexp = r'.*%s.*'
             conds = [subjCol.op('~*')(regexp % k ) for k in keywords]
             statement.append_whereclause(sa.or_(*conds))
-            
+        else: # (len(keywords) == 0)
+            # We do not need to do anything if there are no keywords
+            pass
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))
@@ -73,10 +75,12 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
         if (len(keywords) == 1):
             statement.append_whereclause(countTable.c.word == keywords[0].lower())
-        else: # len(keywords) > 1
+        elif(len(keywords) > 1):
             conds = [(countTable.c.word == k.lower()) for k in keywords]
             statement.append_whereclause(sa.or_(*conds))
-            
+        else: # (len(keywords) == 0)
+            # We do not need to do anything if there are no keywords.
+            pass
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))

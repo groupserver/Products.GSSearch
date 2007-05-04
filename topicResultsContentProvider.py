@@ -53,7 +53,8 @@ class GSTopicResultsContentProvider(object):
           keywordTopics = self.keyword_search(searchKeywords, groupIds)
           allTopics = subjectTopics + keywordTopics
 
-          self.topics = self.remove_duplicate_topics(allTopics)
+          self.topics = self.remove_non_existant_groups(allTopics)
+          self.topics = self.remove_duplicate_topics(self.topics)
           self.topics.sort(self.date_sort)
           self.topics = self.topics[:self.limit]
           
@@ -77,10 +78,7 @@ class GSTopicResultsContentProvider(object):
       #########################################
       
       def get_visible_group_ids(self):
-          site_root = self.context.site_root()
-          siteId = self.view.siteInfo.get_id()
-          site = getattr(getattr(site_root, 'Content'), siteId)
-          groupsObj = getattr(site, 'groups')
+          groupsObj = self.get_groups_object()
           allGroups = groupsObj.objectValues(['Folder', 'Folder (Ordered)'])
           
           visibleGroups = []
@@ -93,6 +91,14 @@ class GSTopicResultsContentProvider(object):
                   visibleGroups.append(group)
           retval = [g.getId() for g in visibleGroups]
           return retval
+
+      def get_groups_object(self):
+          site_root = self.context.site_root()
+          siteId = self.siteInfo.get_id()
+          site = getattr(getattr(site_root, 'Content'), siteId)
+          groupsObj = getattr(site, 'groups')
+          
+          return groupsObj
 
       def subject_search(self, keywords, groupIds):
           assert hasattr(self, 'messageQuery')
@@ -111,12 +117,7 @@ class GSTopicResultsContentProvider(object):
           
       def add_group_names_to_topics(self, topics):
           ts = topics
-          
-          site_root = self.context.site_root()
-          siteId = self.siteInfo.get_id()
-          site = getattr(getattr(site_root, 'Content'), siteId)
-          groupsObj = getattr(site, 'groups')
-
+          groupsObj = self.get_groups_object()
           for topic in ts:
               if hasattr(groupsObj, topic['group_id']):
                   group = getattr(groupsObj, topic['group_id'])
@@ -145,6 +146,17 @@ class GSTopicResultsContentProvider(object):
                   topicsSeen.append(topic)
                   topicIDsSeen.append(topic['topic_id'])
           return topicsSeen
+          
+      def remove_non_existant_groups(self, topics):
+          groupsObj = self.get_groups_object()
+          folders = ['Folder', 'Folder (Ordered)']
+          groupIds = [group.getId() 
+                      for group in groupsObj.objectValues(folders)]
+          
+          retval = [topic for topic in topics 
+                    if (topic['group_id'] in groupIds)]
+          
+          return retval
       
       def get_keywords_for_topic(self, topicId):
           words = self.messageQuery.topic_word_count(topicId)
