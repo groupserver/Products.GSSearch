@@ -14,18 +14,27 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         self.word_countTable = sa.Table('word_count', metadata, 
           autoload=True)
     
-    def topic_search_subect(self, subjectStr, site_id, group_ids=[], 
+    def topic_search_subect(self, keywords, site_id, group_ids=[], 
         limit=12, offset=0):
         """Search for a particular subject in the list of topics."""
         
         statement = self.topicTable.select()
-        aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
+        sc = Products.XWFMailingListManager.queries.MessageQuery
+        aswc = sc.__add_std_where_clauses
         aswc(self, statement, self.topicTable, site_id, group_ids)
         
         subjCol = self.topicTable.c.original_subject
-        regexp = '.*%s.*' % subjectStr.lower()
-        statement.append_whereclause(subjCol.op('~*')(regexp))
         
+        if (len(keywords) == 1):
+            regexp = '.*%s.*' % keywords[0].lower()
+            statement.append_whereclause(subjCol.op('~*')(regexp))
+        else: # len(keywords) > 1
+            # For each keyword, construct a regular expression match
+            #   against the subject, and or them all together
+            regexp = r'.*%s.*'
+            conds = [subjCol.op('~*')(regexp % k ) for k in keywords]
+            statement.append_whereclause(sa.or_(*conds))
+            
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))
@@ -45,20 +54,29 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         return retval
 
-    def topic_search_keyword(self, keyword, site_id, group_ids=[],
+    def topic_search_keyword(self, keywords, site_id, group_ids=[],
         limit=12, offset=0):
         """Search for a particular keyword in the list of topics."""
+        
+        countTable = self.topic_word_countTable
         
         cols = [self.topicTable.c.topic_id, self.topicTable.c.group_id,
           self.topicTable.c.site_id, self.topicTable.c.original_subject,
           self.topicTable.c.first_post_id, self.topicTable.c.last_post_id,
           self.topicTable.c.last_post_date, self.topicTable.c.num_posts]
         statement = sa.select(cols, 
-          self.topicTable.c.topic_id == self.topic_word_countTable.c.topic_id)
-        aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
+          self.topicTable.c.topic_id == countTable.c.topic_id)
+
+        sc = Products.XWFMailingListManager.queries.MessageQuery
+        aswc = sc.__add_std_where_clauses
         aswc(self, statement, self.topicTable, site_id, group_ids)
-        statement.append_whereclause(self.topic_word_countTable.c.word == \
-          keyword.lower())
+
+        if (len(keywords) == 1):
+            statement.append_whereclause(countTable.c.word == keyword.lower())
+        else: # len(keywords) > 1
+            conds = [(countTable.c.word == k.lower()) for k in keywords]
+            statement.append_whereclause(sa.or_(*conds))
+            
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))

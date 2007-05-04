@@ -16,6 +16,21 @@ class IGSSearchResults(Interface):
         required=False,
         default=u""
     )
+    
+    groupId = TextLine(
+        title=u"Group Identifier",
+        description=u"Unique Identifier for a group",
+        required=False
+    )
+    
+    groupIds = List(
+        title=u"Group IDs",
+        description=u"The groups to search in; defaults to all visible groups",
+        required=False,
+        default=[],
+        value_type=groupId,
+        unique=True,
+    )
 
     limit = Int(
         title=u"Limit",
@@ -41,6 +56,14 @@ class IGSTopicResultsContentProvider(IContentProvider, IGSSearchResults):
                        results.""",
       required=False,
       default=u"browser/templates/topicResults.pt")
+      
+    keywordLimit = Int(
+        title=u"Keyword Limit",
+        description=u"The number of keywords to show",
+        required=False,
+        min=0,
+        default=6,
+    )
       
 class IGSPostResultsContentProvider(IContentProvider, IGSSearchResults):
       """The GroupServer Post Results Content Provider"""
