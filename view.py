@@ -1,9 +1,10 @@
 import sys, re, datetime, time
-import Products.Five, DateTime, Globals
-from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
+import DateTime, Globals
+
+from Products.Five import BrowserView
 from Products.GSContent.interfaces import IGSSiteInfo
 
-class GSSearchView(Products.Five.BrowserView):
+class GSSearchView(BrowserView):
     def __init__(self, context, request):
         self.context = context
         self.request = request

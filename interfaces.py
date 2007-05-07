@@ -59,7 +59,7 @@ class IGSTopicResultsContentProvider(IContentProvider, IGSSearchResults):
       
     keywordLimit = Int(
         title=u"Keyword Limit",
-        description=u"The number of keywords to show",
+        description=u"The number of keywords to show in the results",
         required=False,
         min=0,
         default=6,

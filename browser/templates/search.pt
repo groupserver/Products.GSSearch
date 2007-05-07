@@ -26,7 +26,8 @@
       </tal:block>
     </head>
     <body>
-      <tal:block>
+      <form enctype="multipart/form-data" method="get"
+        action="." tal:attributes="action request/URL">
         <p tal:define="searchText python:view.searchText;
           groupIds python:[view.groupId]"
           tal:replace="structure provider:groupserver.TopicResults">The baby was 
@@ -37,7 +38,12 @@
           human, mostly.</p>
         <p tal:replace="structure provider:groupserver.ProfileResults">The baby was 
           human, mostly.</p>
-      </tal:block>
+          
+          <input type="text" class="text" name="searchText"
+            id="searchText" title="Text to search for"
+            tal:attributes="value request/searchText | nothing"/>
+          <input type="submit" class="button" value="Search"/>
+      </form>
     </body>
   </html>
 </tal:block>
