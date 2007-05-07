@@ -1,50 +1,76 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<tal:block xmlns:tal="http://xml.zope.org/namespaces/tal">
-  <html xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:metal="http://xml.zope.org/namespaces/metal">
-    <head>
-      <!--Todo: add the division name.-->
-      <title>
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:metal="http://xml.zope.org/namespaces/metal"
+  metal:use-macro="context/@@groupserver_layout/page">
+  <head>
+    <title metal:fill-slot="title">
+      <span tal:replace="python:view.get_title()">
         I am a fish
-      </title>
-      
-      <meta name="title" content="Standard Template for Search"/>
-      <meta name="author" content="Michael JasonSmith" />
-      <meta name="description" 
-        content="This template is used to render the search page on GroupServer" />
-      <meta name="date" content="2007-04-26"/>
-      
-      <tal:block>
-        <script type="text/javascript"
-          src="/++resource++prototype/prototype.js">&#160;</script>
-        <script type="text/javascript"
-          src="/++resource++scriptaculous/scriptaculous.js">&#160;</script>
+      </span>
+    </title>      
+
+    <meta name="title" content="Standard Template for Search"/>
+    <meta name="author" content="Michael JasonSmith" />
+    <meta name="description" 
+      content="This template is used to render the search page on GroupServer" />
+    <meta name="date" content="2007-04-26"/>
+        
+    <tal:block metal:fill-slot="javascript">
       <script type="text/javascript"
-          src="/++resource++post.js">&#160;</script>
-      </tal:block>
-    </head>
-    <body>
+        src="/++resource++prototype/prototype.js">&#160;</script>
+      <script type="text/javascript"
+        src="/++resource++scriptaculous/scriptaculous.js">&#160;</script>
+      <script type="text/javascript"
+        src="/++resource++post.js">&#160;</script>
+    </tal:block>
+  </head>
+  <body>
+    <tal:block metal:fill-slot="body">
       <form enctype="multipart/form-data" method="get"
-        action="." tal:attributes="action request/URL">
-        <p tal:define="searchText python:view.searchText;
-          groupIds python:[view.groupId]"
-          tal:replace="structure provider:groupserver.TopicResults">The baby was 
-          human, mostly.</p>
-        <p tal:replace="structure provider:groupserver.PostResults">The baby was 
-          human, mostly.</p>
-        <p tal:replace="structure provider:groupserver.FileResults">The baby was 
-          human, mostly.</p>
-        <p tal:replace="structure provider:groupserver.ProfileResults">The baby was 
-          human, mostly.</p>
+        action="." tal:attributes="action request/URL"
+        tal:define="searchText python:view.searchText;
+        groupIds python:[view.groupId]">
           
+        <div id="topics" tal:condition="view/view_topics">
+          <h2 tal:condition="not:view/only_topics_shown">Topics</h2>
+          <ul>
+            <li tal:condition="not:view/only_topics_shown">
+              <a href="#" title="View topics"
+                tal:attributes="href view/only_topics_link">Show 
+                only topics</a>
+            </li>
+            <li><a href="#"
+              tal:attributes="href view/only_posts_link">Show only 
+              posts</a></li>
+          </ul>
+          <p tal:replace="structure provider:groupserver.TopicResults">
+            The baby's blood type? Human, mostly.</p>
+        </div>
+        <div id="posts" tal:condition="view/view_posts">
+          <h2 tal:condition="not:view/only_posts_shown">Posts</h2>          
+          <p tal:replace="structure provider:groupserver.PostResults">
+            The baby's blood type? Human, mostly.</p>
+        </div>
+        <div id="files" tal:condition="view/view_files">
+          <h2 tal:condition="not:view/only_files_shown">Files</h2>          
+          <p tal:replace="structure provider:groupserver.FileResults">
+            The baby's blood type? Human, mostly.</p>
+        </div>
+        <div id="profiles" tal:condition="view/view_profiles">
+          <h2 tal:condition="not:view/only_profiles_shown">Profiles</h2>          
+          <p tal:replace="structure provider:groupserver.ProfileResults">
+            The baby's blood type? Human, mostly.</p>
+        </div>
+        <fieldset>          
           <input type="text" class="text" name="searchText"
             id="searchText" title="Text to search for"
             tal:attributes="value request/searchText | nothing"/>
           <input type="submit" class="button" value="Search"/>
+        </fieldset> 
       </form>
-    </body>
-  </html>
-</tal:block>
-
+    </tal:block>
+  </body>
+</html>
