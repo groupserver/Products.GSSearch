@@ -37,7 +37,7 @@ class IGSSearchResults(Interface):
         description=u"Number of items to show in the results",
         required=False,
         min=1,
-        default=20,
+        default=6,
     )
     
     startIndex = Int(

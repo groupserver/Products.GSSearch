@@ -47,7 +47,7 @@
         
         <div id="topics" tal:condition="view/view_topics">
           <h2 tal:condition="not:view/only_topics_shown">Topics</h2>
-          <ul>
+          <ul class="navigation">
             <li tal:condition="not:view/only_topics_shown">
               <a href="#" title="View topics"
                 tal:attributes="href view/only_topics_link">Show 
@@ -60,7 +60,7 @@
           <p tal:replace="structure provider:groupserver.TopicResults">
             The baby's blood type? Human, mostly.</p>
         </div>
-        <div id="posts" tal:condition="view/view_posts">
+        <!--div id="posts" tal:condition="view/view_posts">
           <h2 tal:condition="not:view/only_posts_shown">Posts</h2>          
           <p tal:replace="structure provider:groupserver.PostResults">
             The baby's blood type? Human, mostly.</p>
@@ -74,7 +74,7 @@
           <h2 tal:condition="not:view/only_profiles_shown">Profiles</h2>          
           <p tal:replace="structure provider:groupserver.ProfileResults">
             The baby's blood type? Human, mostly.</p>
-        </div>
+        </div-->
         <fieldset>          
           <input type="text" class="text" name="searchText"
             id="searchText" title="Text to search for"
