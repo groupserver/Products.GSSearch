@@ -36,6 +36,12 @@ class GSSearchView(BrowserView):
     def get_title(self):
         retval = ''
         
+        if self.searchText:
+            s = ', '.join(self.searchText.split())
+            s = '%s in' % s
+        else:
+            s = 'all'
+        
         in_ = []
         if self.view_topics():
             in_.append('topics')
@@ -55,16 +61,19 @@ class GSSearchView(BrowserView):
         if self.groupId:
             grp = ': %s' % self.groupInfo.get_name()
             
-        r = r'Search for %s in %s%s: %s'
-        retval = r % (self.searchText, inStr, grp, 
-                      self.siteInfo.get_name())
+        r = r'Search for %s %s%s: %s'
+        retval = r % (s, inStr, grp, self.siteInfo.get_name())
         
         return retval
 
     def search_description(self):
         retval = ''
-        st = self.searchText
-        s = ', '.join(st.split())
+
+        if self.searchText:
+            s = ', '.join(self.searchText.split())
+            s = '<q>%s</q> in' % s
+        else:
+            s = 'all'
         
         in_ = []
         if self.view_topics():
@@ -85,7 +94,7 @@ class GSSearchView(BrowserView):
         if self.groupId:
             grp = ' accross the group %s' % self.groupInfo.get_name()
             
-        r = u'Search for <q>%s</q> in %s%s.' % (s, inStr, grp)
+        r = u'Search for %s %s%s.' % (s, inStr, grp)
         return r
 
     def __get_boolean(self, var, default=True):
