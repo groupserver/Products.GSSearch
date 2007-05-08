@@ -69,7 +69,7 @@ class GSTopicResultsContentProvider(object):
               raise interfaces.UpdateNotCalled
 
           pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-          r = pageTemplate(topics=self.topics)
+          r = pageTemplate(topics=self.topics, view=self)
          
           return r
           

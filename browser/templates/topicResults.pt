@@ -1,4 +1,4 @@
-<tal:block tal:define="topics options/topics">
+<tal:block tal:define="topics options/topics; view options/view">
   <ol>
     <tal:block tal:repeat="topic topics">
       <li id="abc123" tal:attributes="id topic/topic_id">
@@ -16,13 +16,38 @@
             last post on
             <span class="date" tal:content="topic/last_post_date"/>
         </span>
-        <span class="keywords">
-          <ul>
-            <tal:block tal:repeat="keyword topic/keywords">
-              <li tal:content="keyword/word"></li>
-            </tal:block>
-          </ul>
-        </span>
+        <ul class="keywords">
+          <tal:block tal:repeat="keyword topic/keywords">
+            <li tal:content="keyword/word"></li>
+          </tal:block>
+        </ul>
+        <div class="refine"
+          tal:define="buttonId string:refineOptionsButton${topic/topic_id};
+            optionsId string:refineOptions${topic/topic_id}">
+          <div class="showrefine">
+            <a href="#" id="abc123"
+              tal:attributes="id buttonId;
+                href string:javascript:showHideInline('${optionsId}','${buttonId}')"
+              title="Refine the results">&#9654;</a>
+          </div>
+          <div class="refineOptions" id="abc123" style="display:none;"
+            tal:attributes="id optionsId">
+            <div>
+              <ul>
+                <li>
+                  <a tal:attributes="href python:view.view.get_search_url(searchText=map(lambda w:w['word'], topic['keywords']))"
+                    href="#">Search for topics related to
+                    <cite tal:content="topic/subject">this topic</cite></a>
+                </li>
+                <li>
+                  <a tal:attributes="href python:view.view.get_search_url(groupId=topic['group_id'])"
+                    href="#">Only search the group
+                    <cite class="group" tal:content="topic/group_name">A Group Name</cite></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </li>
     </tal:block>
   </ol>

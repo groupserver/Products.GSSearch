@@ -1,19 +1,30 @@
 import sys, re, datetime, time
 import DateTime, Globals
 
+from zope.interface import implements
 from Products.Five import BrowserView
 from Products.GSContent.interfaces import IGSSiteInfo
 
+from interfaces import IGSSearchResults
+
 class GSSearchView(BrowserView):
+
+    implements( IGSSearchResults )
+    
     def __init__(self, context, request):
         self.context = context
         self.request = request
         self.siteInfo = IGSSiteInfo( context )
         
+        # I need to fix these up below
+        
         self.searchText = self.request.get('searchText', '')
         self.groupId = self.request.get('groupId', '')
-
-        self.startIndex = self.request.get('startIndex', 0)
+        self.startIndex = int(self.request.get('startIndex', 0))
+        self.viewTopics = self.__get_boolean('viewTopics', True)
+        self.viewPosts = self.__get_boolean('viewPosts', False)
+        self.viewFiles = self.__get_boolean('viewFiles', True)
+        self.viewProfiles = self.__get_boolean('viewProfiles', True)
 
     def get_title(self):
         retval = ''
@@ -65,58 +76,79 @@ class GSSearchView(BrowserView):
         except ValueError:
             val = default
         return val
-    
+        
+    def get_search_url(self, searchText=None, groupId=None, 
+        viewTopics=None, viewPosts=None, viewFiles=None, viewProfiles=None):
+        """Get the URL for a search
+        
+        Returns the URL for the current search, or a modification of the
+        current search based on the values of the arguments.
+        """
+        if isinstance(searchText, list):
+            searchText = ' '.join(searchText)
+        searchTextQuery = self.get_query(r'searchText=%s', 
+                                         self.searchText, searchText)
+        groupIdQuery = self.get_query(r'groupId=%s', 
+                                      self.groupId, groupId)
+        viewTopicsQuery = self.get_query(r'viewTopics=%s',
+          self.viewTopics, viewTopics, valType=int)
+        viewPostsQuery = self.get_query(r'viewPosts=%s', 
+          self.viewPosts, viewPosts, valType=int)
+        viewFilesQuery = self.get_query(r'viewFiles=%s', 
+          self.viewFiles, viewFiles, valType=int)
+        viewProfilesQuery = self.get_query(r'viewProfiles=%s', 
+          self.viewProfiles, viewProfiles, valType=int)
+
+        queries = '&'.join([searchTextQuery, groupIdQuery, viewTopicsQuery,
+                            viewPostsQuery, viewFilesQuery, viewProfilesQuery])
+        retval = '%s?%s' % (self.request.URL, queries)
+        return retval
+        
+    def get_query(self, rstr, defaultVal, val=None, valType=str):
+        retval = ''
+        if val != None:
+            retval = rstr % valType(val)
+        else:
+            retval = rstr % valType(defaultVal)
+        return retval
+
     def view_topics(self):
-        return self.__get_boolean('viewTopics', True)
+        return self.viewTopics
 
     def only_topics_shown(self):
-        topics = self.__get_boolean('viewTopics', True)
-        posts = self.__get_boolean('viewPosts', False)
-        files = self.__get_boolean('viewFiles', True)
-        profiles = self.__get_boolean('viewProfiles', True)
-        return topics and not(posts or files or profiles)
+        return self.viewTopics and \
+          not(self.viewPosts or self.viewFiles or self.viewProfiles)
 
     def only_topics_link(self):
-        group = self.groupId and 'groupId=%s&' % self.groupId or ''
-        s = r'%s?searchText=%s%s&viewTopics=1&viewFiles=0&viewProfiles=0'
-        retval = s % (self.request.URL, self.searchText, group)
+        retval = self.get_search_url(viewTopics=True, viewPosts=False,
+          viewFiles=False, viewProfiles=False)
         return retval
 
     def view_posts(self):
-        return self.__get_boolean('viewPosts', False)
+        return self.viewPosts
 
     def only_posts_shown(self):
-        topics = self.__get_boolean('viewTopics', True)
-        posts = self.__get_boolean('viewPosts', False)
-        files = self.__get_boolean('viewFiles', True)
-        profiles = self.__get_boolean('viewProfiles', True)
-        return posts and not(topics or files or profiles)
+        return self.viewPosts and \
+          not(self.viewTopics or self.viewFiles or self.viewProfiles)
 
     def only_posts_link(self):
-        group = self.groupId and 'groupId=%s&' % self.groupId or ''
-        s = r'%s?searchText=%s%s&viewTopics=0&viewFiles=0&viewProfiles=1'
-        retval = s % (self.request.URL, self.searchText, group)
+        retval = self.get_search_url(viewTopics=False, viewPosts=True, 
+          viewFiles=False, viewProfiles=False)
         return retval
 
     def view_files(self):
-        return self.__get_boolean('viewFiles', True)
+        return self.viewFiles
     
     def only_files_shown(self):
-        topics = self.__get_boolean('viewTopics', True)
-        posts = self.__get_boolean('viewPosts', False)
-        files = self.__get_boolean('viewFiles', True)
-        profiles = self.__get_boolean('viewProfiles', True)
-        return files and not(topics or posts or profiles)
+        return self.viewFiles and \
+          not(self.viewTopics or self.viewPosts or self.viewProfiles)
 
     def view_profiles(self):
-        return self.__get_boolean('viewProfiles', True)
+        return self.viewProfiles
 
     def only_profiles_shown(self):
-        topics = self.__get_boolean('viewTopics', True)
-        posts = self.__get_boolean('viewPosts', False)
-        files = self.__get_boolean('viewFiles', True)
-        profiles = self.__get_boolean('viewProfiles', True)
-        return profiles and not(topics or posts or files)
+        return self.viewProfiles and \
+          not(self.viewTopics or self.viewPosts or self.viewFiles)
             
     def process_form(self):
         form = self.context.REQUEST.form

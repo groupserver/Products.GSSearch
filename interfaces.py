@@ -47,6 +47,34 @@ class IGSSearchResults(Interface):
         min=0,
         default=0,
     )
+    
+    viewTopics = Bool(
+        title=u"View Topics",
+        description=u"Whether the topic-results should be viewed",
+        required=False,
+        default=True
+    )
+
+    viewPosts = Bool(
+        title=u"View Posts",
+        description=u"Whether the post-results should be viewed",
+        required=False,
+        default=False
+    )
+    
+    viewFiles = Bool(
+        title=u"View Files",
+        description=u"Whether the file-results should be viewed",
+        required=False,
+        default=True
+    )
+    
+    viewProfiles = Bool(
+        title=u"View Profiles",
+        description=u"Whether the profile-results should be viewed",
+        required=False,
+        default=True
+    )
 
 class IGSTopicResultsContentProvider(IContentProvider, IGSSearchResults):
     """The GroupServer Topic Results Content Provider"""

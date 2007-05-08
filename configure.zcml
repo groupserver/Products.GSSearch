@@ -22,6 +22,10 @@
     template="browser/templates/search.pt" 
     permission="zope2.View" />
     
+  <five:implements 
+    class=".view.GSSearchView"
+    interface=".interfaces.IGSSearchResults" />
+    
   <interface 
     interface=".interfaces.IGSSearchFolder"
     type="zope.app.content.interfaces.IContentType" />
@@ -41,6 +45,10 @@
   <interface 
     interface=".interfaces.IGSProfileResultsContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
+
+  <browser:resource name="search.css"
+    file="browser/stylesheets/search.css"
+    permission="zope2.View" />
     
 </configure>
 
