@@ -4,6 +4,7 @@ import DateTime, Globals
 from zope.interface import implements
 from Products.Five import BrowserView
 from Products.GSContent.interfaces import IGSSiteInfo
+from Products.GSContent.groupInfo import GSGroupInfo
 
 from interfaces import IGSSearchResults
 
@@ -19,7 +20,13 @@ class GSSearchView(BrowserView):
         # I need to fix these up below
         
         self.searchText = self.request.get('searchText', '')
+        
         self.groupId = self.request.get('groupId', '')
+        if self.groupId:
+            self.groupInfo = GSGroupInfo(context, self.groupId)
+        else:
+            self.groupInfo = GSGroupInfo(context)
+            
         self.startIndex = int(self.request.get('startIndex', 0))
         self.viewTopics = self.__get_boolean('viewTopics', True)
         self.viewPosts = self.__get_boolean('viewPosts', False)
@@ -46,7 +53,7 @@ class GSSearchView(BrowserView):
             inStr = in_[0]
         grp = ''
         if self.groupId:
-            grp = ' :%s' % self.groupId
+            grp = ': %s' % self.groupInfo.get_name()
             
         r = r'Search for %s in %s%s: %s'
         retval = r % (self.searchText, inStr, grp, 
@@ -76,7 +83,7 @@ class GSSearchView(BrowserView):
             inStr = in_[0]
         grp = ''
         if self.groupId:
-            grp = ' accross the group %s' % self.groupId
+            grp = ' accross the group %s' % self.groupInfo.get_name()
             
         r = u'Search for <q>%s</q> in %s%s.' % (s, inStr, grp)
         return r
