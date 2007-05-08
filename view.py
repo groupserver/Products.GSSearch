@@ -54,6 +54,33 @@ class GSSearchView(BrowserView):
         
         return retval
 
+    def search_description(self):
+        retval = ''
+        st = self.searchText
+        s = ', '.join(st.split())
+        
+        in_ = []
+        if self.view_topics():
+            in_.append('topics')
+        if self.view_posts():
+            in_.append('posts')
+        if self.view_files():
+            in_.append('files')
+        if self.view_profiles():
+            in_.append('profiles')
+        
+        if len(in_) > 1:
+            inStr = ', '.join(in_[:-1])
+            inStr = '%s and %s' % (inStr, in_[-1])
+        else:
+            inStr = in_[0]
+        grp = ''
+        if self.groupId:
+            grp = ' accross the group %s' % self.groupId
+            
+        r = u'Search for <q>%s</q> in %s%s.' % (s, inStr, grp)
+        return r
+
     def __get_boolean(self, var, default=True):
         """Get a Boolean value from the form
         

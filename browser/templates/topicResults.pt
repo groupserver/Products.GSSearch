@@ -34,15 +34,15 @@
             tal:attributes="id optionsId">
             <div>
               <ul>
-                <li>
-                  <a tal:attributes="href python:view.view.get_search_url(searchText=map(lambda w:w['word'], topic['keywords']))"
-                    href="#">Search for topics related to
-                    <cite tal:content="topic/subject">this topic</cite></a>
-                </li>
                 <li tal:condition="python:topic['group_id'] != view.view.groupId">
                   <a tal:attributes="href python:view.view.get_search_url(groupId=topic['group_id'])"
                     href="#">Only search the group
                     <cite class="group" tal:content="topic/group_name">A Group Name</cite></a>
+                </li>
+                <li>
+                  <a tal:attributes="href python:view.view.get_search_url(searchText=map(lambda w:w['word'], topic['keywords']))"
+                    href="#">Search for topics related to
+                    <cite tal:content="topic/subject">this topic</cite></a>
                 </li>
               </ul>
             </div>

@@ -40,7 +40,11 @@
         action="." tal:attributes="action request/URL"
         tal:define="searchText python:view.searchText;
         groupIds python:[view.groupId]">
-          
+        
+        <p tal:content="structure view/search_description">
+          The baby's blood type? Human, mostly.
+        </p>
+        
         <div id="topics" tal:condition="view/view_topics">
           <h2 tal:condition="not:view/only_topics_shown">Topics</h2>
           <ul>
