@@ -39,7 +39,7 @@
                     href="#">Search for topics related to
                     <cite tal:content="topic/subject">this topic</cite></a>
                 </li>
-                <li>
+                <li tal:condition="python:topic['group_id'] != view.view.groupId">
                   <a tal:attributes="href python:view.view.get_search_url(groupId=topic['group_id'])"
                     href="#">Only search the group
                     <cite class="group" tal:content="topic/group_name">A Group Name</cite></a>

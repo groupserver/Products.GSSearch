@@ -1,5 +1,16 @@
+.keywords {
+  margin: 0.5em 0px 0.5em 0px;
+}
 .keywords li {
   list-style: none;
   display: inline;
   margin-right: 10px;
 }
+
+.refine {
+  margin: 0px 0px 1em 0px;
+}
+.showrefine a {
+  display: block;
+}
+
