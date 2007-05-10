@@ -1,6 +1,6 @@
-<tal:block tal:define="topics options/topics; view options/view">
+<tal:block tal:define="view options/view">
   <ol>
-    <tal:block tal:repeat="topic topics">
+    <tal:block tal:repeat="topic view/get_results">
       <li id="abc123" tal:attributes="id topic/topic_id">
         <a class="topic" href="#"
           tal:attributes="href string:/r/topic/${topic/last_post_id}"

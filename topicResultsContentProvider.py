@@ -67,14 +67,14 @@ class GSTopicResultsContentProvider(object):
           
           self.totalNumTopics = self.messageQuery.count_topics()
           self.wordCounts = self.messageQuery.word_counts()
-          self.add_keywords_to_topics()
+          self.add_words_to_topics()
           
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
 
           pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-          r = pageTemplate(topics=self.topics, view=self)
+          r = pageTemplate(view=self)
          
           return r
           
@@ -163,21 +163,25 @@ class GSTopicResultsContentProvider(object):
           
           return retval
       
-      def get_keywords_for_topic(self, topicId):
+      def get_words_for_topic(self, topicId):
           words = self.messageQuery.topic_word_count(topicId)
-          twc = float(sum([w['count'] for w in words]))
+          return words
+
+      def get_keywords_for_topic(self, topic):
+          twc = float(sum([w['count'] for w in topic['words']]))
           wc = self.wordCounts
           words = [{'word':  w['word'],
                     'tfidf': (w['count']/twc)*\
                               math.log10(self.totalNumTopics/\
                                          float(wc.get('word', 1)))}
-                    for w in words if ((len(w['word']) > 3) and (w['word'] not in STOP_WORDS))]
-                    # --=mpj17=-- The trailing if-statement simulates the
-                    #   removal of stop-words, but it also improves 
-                    #   performance of the list comprehension.
-                    
+                    for w in topic['words']
+                    if ((len(w['word']) > 3) and 
+                         (w['word'] not in STOP_WORDS))]
           words.sort(self.keywords_sort)
-          return words
+
+          retval = words[:self.keywordLimit]          
+          assert len(retval) <= self.keywordLimit
+          return retval
           
       def keywords_sort(self, a, b):
           if a['tfidf'] < b['tfidf']:
@@ -187,11 +191,19 @@ class GSTopicResultsContentProvider(object):
           else:
               retval = -1
           return retval
-
-      def add_keywords_to_topics(self):
+      
+      def add_words_to_topics(self):
           for topic in self.topics:
-              keywords = self.get_keywords_for_topic(topic['topic_id'])
-              topic['keywords'] = keywords[:self.keywordLimit]
+              topic['words'] = self.get_words_for_topic(topic['topic_id'])
+      
+      def get_results(self):
+          if not self.__updated:
+              raise interfaces.UpdateNotCalled
+              
+          for topic in self.topics:
+              retval = topic
+              retval['keywords'] = self.get_keywords_for_topic(retval)
+              yield retval
               
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
