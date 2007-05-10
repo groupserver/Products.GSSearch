@@ -104,10 +104,11 @@ class IGSPostResultsContentProvider(IContentProvider, IGSSearchResults):
 class IGSFileResultsContentProvider(IContentProvider, IGSSearchResults):
       """The GroupServer File Results Content Provider"""
       
-      foo = Text(
-          title=u"I am a fish", 
-          required=False, 
-          default=u"bar")
+      pageTemplateFileName = Text(title=u"Page Template File Name",
+        description=u"""The name of the ZPT file that is used to render the
+                         results.""",
+        required=False,
+        default=u"browser/templates/fileResults.pt")
 
 
 class IGSProfileResultsContentProvider(IContentProvider, IGSSearchResults):

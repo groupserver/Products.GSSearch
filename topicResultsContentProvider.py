@@ -17,6 +17,11 @@ from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
 from Products.GSContent.view import GSSiteInfo
 
+# --=mpj17=-- I wonder if we can do something cleaver with viewlets and
+#    the "yeild" statement, similar to how search is implemented in
+#    von Weitershausen, P, "Web Component Development with Zope 3",
+#      Springer, Berlin, 2007, pp369--371
+
 class GSTopicResultsContentProvider(object):
       """GroupServer Topic Search-Results Content Provider
       """

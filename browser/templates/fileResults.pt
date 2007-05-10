@@ -1,0 +1,9 @@
+<ol tal:define="view options/view">
+  <tal:block tal:repeat="result view/get_results">
+     <li>
+      <a href="#"
+        tal:attributes="href result/url"
+        tal:content="result/title">I am a fish.</a>
+      <span class="date" tal:content="result/date">Whenever</span></li>
+  </tal:block>
+</ol>
