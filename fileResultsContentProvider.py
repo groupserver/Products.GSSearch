@@ -38,7 +38,10 @@ class GSFileResultsContentProvider(object):
           
       def update(self):
           self.__updated = True
-          self.results = self.search_site()
+
+          searchKeywords = self.searchText.split()
+          self.results = self.search_site(searchKeywords)
+          
           
       def render(self):
           if not self.__updated:
@@ -53,11 +56,13 @@ class GSFileResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
       
-      def search_site(self):
+      def search_site(self, searchKeywords):
           # Mostly taken from SiteSearch/lscripts/search_site.py
-          query = ''
+                    
           results = self.catalog.searchResults(meta_type='XML Template',
-            sort_order='decending', indexable_content=query)
+            sort_order='decending', 
+            indexable_content=' or '.join(searchKeywords),
+            id='content_en')
           retval = []
           for result in results[:self.limit]:
               # Because the catalogue returns a week reference, getting
@@ -75,9 +80,7 @@ class GSFileResultsContentProvider(object):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
           for result in self.results:
-              url = result.absolute_url()
-              url = url.strip('content_en')
-              url = url.strip('index.xml')
+              url = result.absolute_url().strip('content_en')
               retval =  {
                 'title': result.title_or_id(),
                 'date': result.bobobase_modification_time, 
