@@ -11,7 +11,7 @@ import DocumentTemplate
 import Products.XWFMailingListManager.view
 
 import Products.GSContent, Products.XWFCore.XWFUtils
-
+from Products.GSContent.view import GSSiteInfo
 from interfaces import IGSFileResultsContentProvider
 
 class GSFileResultsContentProvider(object):
@@ -30,6 +30,8 @@ class GSFileResultsContentProvider(object):
           self.context = context
           self.request = request
           self.view = view
+
+          self.siteInfo = GSSiteInfo(self.context)
           
           assert hasattr(self.context, 'Catalog'), 'Catalog cannot ' \
             "be found"
@@ -40,8 +42,7 @@ class GSFileResultsContentProvider(object):
           self.__updated = True
 
           searchKeywords = self.searchText.split()
-          self.results = self.search_site(searchKeywords)
-          
+          self.results = self.search_files(searchKeywords)
           
       def render(self):
           if not self.__updated:
@@ -49,33 +50,74 @@ class GSFileResultsContentProvider(object):
 
           pageTemplate = PageTemplateFile(self.pageTemplateFileName)
           r = pageTemplate(view=self)
-         
+          
           return r
           
       #########################################
       # Non standard methods below this point #
       #########################################
-      
-      def search_site(self, searchKeywords):
-          # Mostly taken from SiteSearch/lscripts/search_site.py
-                    
-          results = self.catalog.searchResults(meta_type='XML Template',
-            sort_order='decending', 
-            indexable_content=' or '.join(searchKeywords),
-            id='content_en')
+
+      def search_files(self, searchKeywords, 
+                       searchFileLibrary=True, searchWebPages=True):
           retval = []
-          for result in results[:self.limit]:
-              # Because the catalogue returns a week reference, getting
-              #  the object may not always work
+          site_root = self.context.site_root()
+
+          if searchFileLibrary:
+              assert hasattr(site_root, 'FileLibrary2'), \
+                'Cannot search: file library not found'
+              fileLibrary = site_root.FileLibrary2
+              fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
+              retval += self.search_files_in_path(searchKeywords,
+                                                  fileLibraryPath, 
+                                                  'XWF File 2')
+          if searchWebPages:
+              sitePath = self.siteInfo.get_path()
+              retval += self.search_files_in_path(searchKeywords, sitePath, 
+                                                  'XML Template')
+          return retval
+              
+      def search_files_in_path(self, searchKeywords, path, metaType=''):
+          retval = []
+          searchExpr = ' or '.join(searchKeywords)
+
+          queries = [{'title': searchExpr}, 
+                     {'indexable_content': searchExpr},
+                     {'tags': searchExpr}]
+          for q in queries:
+              q['path'] = path
+
+          groupIds = ['team']
+          catalog = self.context.Catalog
+          results = []
+          for group in groupIds:
+              for query in queries:
+                result = catalog(query, meta_type=metaType)
+                results += result
+          results.sort(self.sort_file_results)
+
+          for result in results:
               try:
                   obj = result.getObject()
                   obj.title
-                  retval.append(obj)
+                  if obj not in retval:
+                      retval.append(obj)
               except:
                   pass
-          assert len(retval) <= self.limit, 'Too many results'
+          retval = retval[:self.limit]
+          assert len(retval) <= self.limit, 'Too many results'        
+          print retval
           return retval
-
+          
+          
+      def sort_file_results(self, a, b):
+          if a.modification_time < b.modification_time:
+              retval = -1
+          elif a.modification_time == b.modification_time:
+              retval = 0
+          else:
+              retval = 1
+          return retval
+          
       def get_results(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
@@ -83,7 +125,7 @@ class GSFileResultsContentProvider(object):
               url = result.absolute_url().strip('content_en')
 
               owner = result.getOwner()
-              if (('Manager' in owner.roles) 
+              if (owner and ('Manager' in owner.roles)
                   or not hasattr(owner, 'getProperty')):
                   ownerName = 'the administrator'
               else:
