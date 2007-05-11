@@ -81,10 +81,23 @@ class GSFileResultsContentProvider(object):
               raise interfaces.UpdateNotCalled
           for result in self.results:
               url = result.absolute_url().strip('content_en')
+
+              owner = result.getOwner()
+              if (('Manager' in owner.roles) 
+                  or not hasattr(owner, 'getProperty')):
+                  ownerName = 'the administrator'
+              else:
+                  ownerName = owner.getProperty('preferredName', 
+                    'an unknown user')
+
+              date = result.bobobase_modification_time
+                            
               retval =  {
+                'icon': '/++resource++fileIcons/text-xml.png',
                 'title': result.title_or_id(),
-                'date': result.bobobase_modification_time, 
+                'date': date,
                 'url': url,
+                'user': ownerName
               }
               assert retval
               yield retval

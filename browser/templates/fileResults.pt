@@ -1,9 +1,12 @@
 <ol tal:define="view options/view">
   <tal:block tal:repeat="result view/get_results">
-     <li>
-      <a href="#"
-        tal:attributes="href result/url"
-        tal:content="result/title">I am a fish.</a>
+     <li><a title="I am a fish"
+        tal:attributes="title string:View ${result/title}; href result/url;"
+        href="#"><img tal:attributes="src result/icon"/>
+        <span class="fileName" tal:content="result/title">Fish</span></a>
+      Last edited by 
+      <span class="name" tal:content="result/user">The User</span>
+      at
       <span class="date" tal:content="result/date">Whenever</span></li>
   </tal:block>
 </ol>
