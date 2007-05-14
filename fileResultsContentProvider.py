@@ -87,7 +87,7 @@ class GSFileResultsContentProvider(object):
               siteFiles = self.search_files_in_path(searchKeywords, 
                 path=sitePath, metaType='XML Template')
 
-          r = postedFiles + siteFiles
+          r = [o for o in postedFiles + siteFiles if o]
           r.sort(self.sort_file_results)
           r = [obj.getObject() for obj in r]
           s = []
