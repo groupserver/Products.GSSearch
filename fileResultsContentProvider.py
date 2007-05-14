@@ -91,7 +91,7 @@ class GSFileResultsContentProvider(object):
           r.sort(self.sort_file_results)
           s = []
           for obj in r:
-              if item not in s:
+              if obj not in s:
                   try:
                       s.append(obj.getObject())
                   except:
