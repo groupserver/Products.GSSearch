@@ -71,7 +71,7 @@ class GSFileResultsContentProvider(object):
       def search_files(self, searchKeywords, groupIds,
                        searchFileLibrary=True, searchWebPages=True):
 
-          retval = Set()
+          retval = []
           site_root = self.context.site_root()
 
           if searchFileLibrary:
@@ -85,16 +85,20 @@ class GSFileResultsContentProvider(object):
           if searchWebPages:
               sitePath = self.siteInfo.get_path()
               siteFiles = self.search_files_in_path(searchKeywords, 
-                groupIds, sitePath, 'XML Template')
-                
+                path=sitePath, metaType='XML Template')
+
           r = postedFiles + siteFiles
           r.sort(self.sort_file_results)
-          r = list(Set(r))
-          retval = [obj.getObject() for obj in r[:self.limit]]
+          r = [obj.getObject() for obj in r]
+          s = []
+          for item in r:
+              if item not in s:
+                  s.append(item)
+          retval = s[:self.limit]
           return retval
               
-      def search_files_in_path(self, searchKeywords, groupIds, 
-        path, metaType=''):
+      def search_files_in_path(self, searchKeywords, groupIds=[], 
+        path='', metaType=''):
           retval = []
           
           searchExpr = ' or '.join(searchKeywords)
@@ -106,19 +110,22 @@ class GSFileResultsContentProvider(object):
 
           catalog = self.context.Catalog
           results = []
-          for group in groupIds:
+          if groupIds:
               for query in queries:
-                results += catalog(query, meta_type=metaType)
-
+                results += catalog(query, meta_type=metaType, 
+                  group_ids=groupIds)
+          else:
+              for query in queries:
+                  results += catalog(query, meta_type=metaType)
           return results
           
       def sort_file_results(self, a, b):
           if a.modification_time < b.modification_time:
-              retval = -1
+              retval = 1
           elif a.modification_time == b.modification_time:
               retval = 0
           else:
-              retval = 1
+              retval = -1
           return retval
           
       def get_results(self):
