@@ -72,6 +72,8 @@ class GSFileResultsContentProvider(object):
                        searchFileLibrary=True, searchWebPages=True):
 
           retval = []
+          postedFiles = []
+          siteFiles = []
           site_root = self.context.site_root()
 
           if searchFileLibrary:
