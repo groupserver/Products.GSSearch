@@ -1,4 +1,5 @@
 import sys, re, datetime, time, types, string
+from sets import Set
 import Products.Five, DateTime, Globals
 import zope.schema
 import zope.app.pagetemplate.viewpagetemplatefile
@@ -13,6 +14,7 @@ import Products.XWFMailingListManager.view
 import Products.GSContent, Products.XWFCore.XWFUtils
 from Products.GSContent.view import GSSiteInfo
 from interfaces import IGSFileResultsContentProvider
+import visible_groups
 
 class GSFileResultsContentProvider(object):
       """GroupServer File Search-Results Content Provider
@@ -42,7 +44,16 @@ class GSFileResultsContentProvider(object):
           self.__updated = True
 
           searchKeywords = self.searchText.split()
-          self.results = self.search_files(searchKeywords)
+
+          self.groupIds = [gId for gId in self.groupIds if gId]
+          if self.groupIds:
+              groupIds = visible_groups.visible_groups(self.groupIds, 
+                self.context)
+          else:
+             groupIds = visible_groups.get_all_visible_groups(self.context)
+          
+          self.results = self.search_files(searchKeywords, groupIds,
+            self.searchPostedFiles, self.searchSiteFiles)
           
       def render(self):
           if not self.__updated:
@@ -57,9 +68,10 @@ class GSFileResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
 
-      def search_files(self, searchKeywords, 
+      def search_files(self, searchKeywords, groupIds,
                        searchFileLibrary=True, searchWebPages=True):
-          retval = []
+
+          retval = Set()
           site_root = self.context.site_root()
 
           if searchFileLibrary:
@@ -67,47 +79,38 @@ class GSFileResultsContentProvider(object):
                 'Cannot search: file library not found'
               fileLibrary = site_root.FileLibrary2
               fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
-              retval += self.search_files_in_path(searchKeywords,
-                                                  fileLibraryPath, 
-                                                  'XWF File 2')
+              postedFiles = self.search_files_in_path(searchKeywords, 
+                groupIds, fileLibraryPath, 'XWF File 2')
+              
           if searchWebPages:
               sitePath = self.siteInfo.get_path()
-              retval += self.search_files_in_path(searchKeywords, sitePath, 
-                                                  'XML Template')
+              siteFiles = self.search_files_in_path(searchKeywords, 
+                groupIds, sitePath, 'XML Template')
+                
+          r = postedFiles + siteFiles
+          r.sort(self.sort_file_results)
+          r = list(Set(r))
+          retval = [obj.getObject() for obj in r[:self.limit]]
           return retval
               
-      def search_files_in_path(self, searchKeywords, path, metaType=''):
+      def search_files_in_path(self, searchKeywords, groupIds, 
+        path, metaType=''):
           retval = []
+          
           searchExpr = ' or '.join(searchKeywords)
-
           queries = [{'title': searchExpr}, 
                      {'indexable_content': searchExpr},
                      {'tags': searchExpr}]
           for q in queries:
               q['path'] = path
 
-          groupIds = ['team']
           catalog = self.context.Catalog
           results = []
           for group in groupIds:
               for query in queries:
-                result = catalog(query, meta_type=metaType)
-                results += result
-          results.sort(self.sort_file_results)
+                results += catalog(query, meta_type=metaType)
 
-          for result in results:
-              try:
-                  obj = result.getObject()
-                  obj.title
-                  if obj not in retval:
-                      retval.append(obj)
-              except:
-                  pass
-          retval = retval[:self.limit]
-          assert len(retval) <= self.limit, 'Too many results'        
-          print retval
-          return retval
-          
+          return results
           
       def sort_file_results(self, a, b):
           if a.modification_time < b.modification_time:

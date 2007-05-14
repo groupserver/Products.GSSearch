@@ -1,4 +1,5 @@
 import sys, re, datetime, time, types, string, math
+from sets import Set
 import Products.Five, DateTime, Globals
 import zope.schema
 import zope.app.pagetemplate.viewpagetemplatefile
@@ -16,6 +17,7 @@ import Products.GSContent, Products.XWFCore.XWFUtils
 from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
 from Products.GSContent.view import GSSiteInfo
+import visible_groups
 
 # --=mpj17=-- I wonder if we can do something cleaver with viewlets and
 #    the "yeild" statement, similar to how search is implemented in
@@ -47,12 +49,13 @@ class GSTopicResultsContentProvider(object):
           self.siteInfo = GSSiteInfo(self.context)
 
           searchKeywords = self.searchText.split()
-          visibleGroupIds = self.get_visible_group_ids()
+          
+          self.groupIds = [gId for gId in self.groupIds if gId]
           if self.groupIds:
-              groupIds = [gId for gId in self.groupIds 
-                          if gId in visibleGroupIds]
+              groupIds = visible_groups.visible_groups(self.groupIds,
+                self.context)
           else:
-             groupIds = visibleGroupIds
+             groupIds = visible_groups.get_all_visible_groups(self.context)
           
           subjectTopics = self.subject_search(searchKeywords, groupIds)
           keywordTopics = self.keyword_search(searchKeywords, groupIds)
@@ -141,23 +144,12 @@ class GSTopicResultsContentProvider(object):
           return retval
 
       def remove_duplicate_topics(self, topics):
-          ts = topics
-          
-          topicsSeen = []
-          topicIDsSeen = []
-          i = 1
-          for topic in ts:
-              if topic['topic_id'] not in topicIDsSeen:
-                  topicsSeen.append(topic)
-                  topicIDsSeen.append(topic['topic_id'])
-          return topicsSeen
+          ts = Set([topic['topic_id'] for topic in topics])
+          retval = [topic for topic in topics if topic['topic_id'] in ts]
+          return retval
           
       def remove_non_existant_groups(self, topics):
-          groupsObj = self.get_groups_object()
-          folders = ['Folder', 'Folder (Ordered)']
-          groupIds = [group.getId() 
-                      for group in groupsObj.objectValues(folders)]
-          
+          groupIds = visible_groups.get_all_visible_groups(self.context)
           retval = [topic for topic in topics 
                     if (topic['group_id'] in groupIds)]
           

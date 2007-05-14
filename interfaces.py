@@ -94,22 +94,33 @@ class IGSTopicResultsContentProvider(IContentProvider, IGSSearchResults):
     )
       
 class IGSPostResultsContentProvider(IContentProvider, IGSSearchResults):
-      """The GroupServer Post Results Content Provider"""
-      
-      foo = Text(
-          title=u"I am a fish", 
-          required=False, 
-          default=u"bar")
+    """The GroupServer Post Results Content Provider"""
+    
+    foo = Text(
+        title=u"I am a fish", 
+        required=False, 
+        default=u"bar")
 
 class IGSFileResultsContentProvider(IContentProvider, IGSSearchResults):
-      """The GroupServer File Results Content Provider"""
+    """The GroupServer File Results Content Provider"""
+    
+    pageTemplateFileName = Text(title=u"Page Template File Name",
+      description=u"""The name of the ZPT file that is used to render the
+                        results.""",
+      required=False,
+      default=u"browser/templates/fileResults.pt")
       
-      pageTemplateFileName = Text(title=u"Page Template File Name",
-        description=u"""The name of the ZPT file that is used to render the
-                         results.""",
-        required=False,
-        default=u"browser/templates/fileResults.pt")
+    searchPostedFiles = Bool(title=u'Search Posted Files',
+      description=u'''If True, the files that the users have posted to
+        their groups are searched.''',
+      required=False,
+      default=True)
 
+    searchSiteFiles = Bool(title=u'Search Site Files',
+      description=u'''If True, the files in the Web site, outside those
+        posted to groups, are searched.''',
+      required=False,
+      default=True)
 
 class IGSProfileResultsContentProvider(IContentProvider, IGSSearchResults):
       """The GroupServer Profile Results Content Provider"""
