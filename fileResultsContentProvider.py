@@ -89,11 +89,13 @@ class GSFileResultsContentProvider(object):
 
           r = [o for o in postedFiles + siteFiles if o]
           r.sort(self.sort_file_results)
-          r = [obj.getObject() for obj in r]
           s = []
-          for item in r:
+          for obj in r:
               if item not in s:
-                  s.append(item)
+                  try:
+                      s.append(obj.getObject())
+                  except:
+                      pass
           retval = s[:self.limit]
           return retval
               
