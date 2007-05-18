@@ -83,18 +83,16 @@ class GSFileResultsContentProvider(object):
               fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
               postedFiles = self.search_files_in_path(searchKeywords, 
                 groupIds, fileLibraryPath, 'XWF File 2')
-                
+              postedFiles = [o for o in postedFiles if o]
+              
           if searchWebPages:
               sitePath = self.siteInfo.get_path()
               siteFiles = self.search_files_in_path(searchKeywords, 
                 path=sitePath, metaType='XML Template')
-
+              siteFiles = [o for o in siteFiles if o]
+              
           #r = [o for o in postedFiles + siteFiles if o]
-          q = [o for o in postedFiles if o]
-          q.sort(self.sort_file_results)
-          r = [o for o in siteFiles if o]
-          r.sort(self.sort_file_results)
-          r = r + q
+          r = postedFiles + siteFiles
           r.sort(self.sort_file_results)
           s = []
           for o in r:
