@@ -84,6 +84,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))
+        statement.distinct = True
         
         r = statement.execute()
         

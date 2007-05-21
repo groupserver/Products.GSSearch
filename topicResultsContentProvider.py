@@ -56,9 +56,11 @@ class GSTopicResultsContentProvider(object):
                 self.context)
           else:
              groupIds = visible_groups.get_all_visible_groups(self.context)
-          
+                    
           subjectTopics = self.subject_search(searchKeywords, groupIds)
           keywordTopics = self.keyword_search(searchKeywords, groupIds)
+          for topic in keywordTopics:
+              print topic['topic_id']
           allTopics = subjectTopics + keywordTopics
 
           self.topics = self.remove_non_existant_groups(allTopics)
@@ -144,8 +146,13 @@ class GSTopicResultsContentProvider(object):
           return retval
 
       def remove_duplicate_topics(self, topics):
-          ts = Set([topic['topic_id'] for topic in topics])
-          retval = [topic for topic in topics if topic['topic_id'] in ts]
+          retval = []
+          tIds = []
+          for topic in topics:
+              tId = topic['topic_id']
+              if tId not in tIds:
+                  tIds.append(tId)
+                  retval.append(topic)
           return retval
           
       def remove_non_existant_groups(self, topics):
