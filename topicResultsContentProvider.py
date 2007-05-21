@@ -57,14 +57,16 @@ class GSTopicResultsContentProvider(object):
           else:
              groupIds = visible_groups.get_all_visible_groups(self.context)
                     
+          t0 = time.time()
+
           subjectTopics = self.subject_search(searchKeywords, groupIds)
           keywordTopics = self.keyword_search(searchKeywords, groupIds)
-          for topic in keywordTopics:
-              print topic['topic_id']
-          allTopics = subjectTopics + keywordTopics
-
-          self.topics = self.remove_non_existant_groups(allTopics)
+          
+          self.topics = subjectTopics + keywordTopics
+          assert len(self.topics) <= (self.limit * 2)
+          
           self.topics = self.remove_duplicate_topics(self.topics)
+          self.topics = self.remove_non_existant_groups(self.topics)
           self.topics.sort(self.date_sort)
           self.topics = self.topics[:self.limit]
           
@@ -73,7 +75,7 @@ class GSTopicResultsContentProvider(object):
           self.totalNumTopics = self.messageQuery.count_topics()
           self.wordCounts = self.messageQuery.word_counts()
           self.add_words_to_topics()
-          
+                   
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
@@ -119,10 +121,13 @@ class GSTopicResultsContentProvider(object):
             siteId, groupIds, limit=self.limit, offset=self.startIndex)
           return topics
       
-      def keyword_search(self, keyword, groupIds):
-          siteId = self.siteInfo.get_id()
-          topics = self.messageQuery.topic_search_keyword(keyword,
-            siteId, groupIds, limit=self.limit, offset=self.startIndex)
+      def keyword_search(self, keywords, groupIds):
+          if keywords:
+              siteId = self.siteInfo.get_id()
+              topics = self.messageQuery.topic_search_keyword(keywords,
+                siteId, groupIds, limit=self.limit, offset=self.startIndex)
+          else:
+              topics = []
           return topics
           
       def add_group_names_to_topics(self, topics):
