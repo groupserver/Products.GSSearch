@@ -192,11 +192,25 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         return retval
 
     def topics_word_count(self, topicIds):
-        """Get a count for all the words in a list of topics"""
+        """Get a count for all the words in a list of topics
+        
+        DESCRIPTION
+          Returns the count of the topics specified by the list "topicIds".
+          However, for the sake of speed, words with a count of 1 are not
+          returned.
+          
+        RETURNS
+          A list of dictionaries. Each dictionary contains three values:
+            * "topic_id" The ID of the topic,
+            * "word" A word in the topic, and
+            * "count" The count of "word" in the topic (always greater than
+              one).
+        """
         countTable = self.topic_word_countTable
         statement = countTable.select()
         inStatement = countTable.c.topic_id.in_(*topicIds)
         statement.append_whereclause(inStatement)
+        statement.append_whereclause(countTable.c.count > 1)
         r = statement.execute()
         retval = []
         if r.rowcount:

@@ -200,7 +200,7 @@ class GSTopicResultsContentProvider(object):
               words = [topicWord for topicWord in topicWords 
                        if(topicWord['topic_id']==tid)]
               topic['words'] = words          
-          
+         
       def get_results(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
