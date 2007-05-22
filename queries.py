@@ -219,3 +219,14 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                        'count': x['count']} for x in r]
         return retval
 
+    def post_ids_from_file_ids(self, fileIds):
+        statement = self.fileTable.select()
+        inStatement = self.fileTable.c.file_id.in_(*fileIds)
+        statement.append_whereclause(inStatement)
+        r = statement.execute()
+        retval = {}
+        if r.rowcount:
+            for x in r:
+                retval[x['file_id']] = x['post_id']
+        return retval
+

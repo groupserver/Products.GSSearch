@@ -16,6 +16,7 @@ from Products.GSContent.view import GSSiteInfo
 from interfaces import IGSFileResultsContentProvider
 from fileSearchResult import GSFileSearchResult
 import visible_groups
+from queries import MessageQuery
 
 class GSFileResultsContentProvider(object):
       """GroupServer File Search-Results Content Provider
@@ -33,7 +34,11 @@ class GSFileResultsContentProvider(object):
           self.context = context
           self.request = request
           self.view = view
-
+          
+          self.da = self.context.zsqlalchemy 
+          assert self.da, 'No data-adaptor found'
+          self.messageQuery = MessageQuery(self.context, self.da)
+          
           self.siteInfo = GSSiteInfo(self.context)
           
           assert hasattr(self.context, 'Catalog'), 'Catalog cannot ' \
@@ -54,6 +59,9 @@ class GSFileResultsContentProvider(object):
              groupIds = visible_groups.get_all_visible_groups(self.context)
           
           self.results = self.search_files(searchKeywords, groupIds)
+
+          fIds = [r['id'] for r in self.results]
+          self.filePostMap = self.get_post_ids_from_file_ids(fIds)
           
       def render(self):
           if not self.__updated:
@@ -90,6 +98,7 @@ class GSFileResultsContentProvider(object):
               if o['id'] not in fileIds:
                   fileIds.append(o['id'])
                   s.append(o)
+          
           retval = s[:self.limit]
           return retval
               
@@ -114,7 +123,11 @@ class GSFileResultsContentProvider(object):
               for query in queries:
                   results += catalog(query, meta_type=metaType)
           return results
-          
+      
+      def get_post_ids_from_file_ids(self, fileIds):
+          retval = self.messageQuery.post_ids_from_file_ids(fileIds)
+          return retval
+      
       def sort_file_results(self, a, b):
           ta = a['modification_time']
           tb = b['modification_time']
@@ -139,7 +152,12 @@ class GSFileResultsContentProvider(object):
                 'title': r.get_title(),
                 'date': r.get_date(),
                 'url': r.get_url(),
-                'user': r.get_owner_name(),
+                'owner_name': r.get_owner_name(),
+                'owner_id': r.get_owner_id(),
+                'group_name': r.get_group_info().get_name(),
+                'group_url': r.get_group_info().get_url(),
+                'post_id': self.filePostMap[r.get_id()],
+                'topic_name': r.get_topic_name(),
               }
               assert retval
               yield retval

@@ -1,6 +1,7 @@
 from zope.interface import implements
 from interfaces import IGSFileSearchResult
 from Products.XWFCore.XWFUtils import get_user, get_user_realnames
+from Products.GSContent.groupInfo import GSGroupInfo
 
 class GSFileSearchResult(object):
     implements(IGSFileSearchResult)
@@ -9,7 +10,14 @@ class GSFileSearchResult(object):
         self.view = view
         self.context = context
         self.result = result
-                
+    
+        gId = self.result['group_ids'][0]
+        self.groupInfo = GSGroupInfo(context, gId)
+    
+    def get_id(self):
+        retval = self.result['id']
+        return retval
+    
     def get_icon(self):
         mimeType = self.result['content_type']
         fileName = mimeType.replace('/','-')
@@ -28,7 +36,23 @@ class GSFileSearchResult(object):
     def get_title(self):
         retval = self.result['title']
         return retval
-
+        
+    def get_group_info(self):
+        retval = self.groupInfo
+        return retval
+    
+    def get_tags(self):
+        retval = self.result['tags']
+        return retval
+    
+    def get_topic_name(self):
+        retval = self.result['topic']
+        return retval
+        
+    def get_owner_id(self):
+        retval = self.result['dc_creator']
+        return retval
+        
     def get_owner_name(self):
         userId = self.result['dc_creator']
         user = self.__get_user(userId)
@@ -37,8 +61,7 @@ class GSFileSearchResult(object):
         else:
             name = userId
         return name
-    
-    
+        
     def __get_user(self, userId):
         author_cache = getattr(self.view, '__author_object_cache', {})
         user = author_cache.get(userId, None)
@@ -48,5 +71,4 @@ class GSFileSearchResult(object):
             self.view.__author_object_cache = author_cache
             
         return user
-
 

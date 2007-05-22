@@ -5,8 +5,19 @@
         href="#"><img tal:attributes="src result/icon"/>
         <span class="fileName" tal:content="result/title">Fish</span></a>
       Posted by 
-      <span class="name" tal:content="result/user">The User</span>
+      <a class="name" href="#"
+        tal:attributes="href string:/contacts/${result/owner_id}"
+        tal:content="result/owner_name">The User</a>
       at
-      <span class="date" tal:content="result/date">Whenever</span></li>
+      <span class="date" tal:content="result/date">Whenever</span>
+      in the topic
+      <a href="#"
+        tal:attributes="href string:/r/topic/${result/post_id}"
+        tal:content="result/topic_name">topic</a>
+      in the group
+      <a href="#"
+        tal:attributes="href result/group_url"
+        tal:content="result/group_name">group</a>
+    </li>
   </tal:block>
 </ol>
