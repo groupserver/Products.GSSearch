@@ -130,9 +130,25 @@ class GSFileResultsContentProvider(object):
           return results
           
       def sort_file_results(self, a, b):
-          if a.modification_time < b.modification_time:
+          if a.has_key('modification_time') and a['modification_time']:
+              ta = a['modification_time']
+          elif a.has_key('bobobase_modification_time') \
+            and a['bobobase_modification_time']:
+              ta = a['bobobase_modification_time']
+          else:
+              ta = 0
+
+          if b.has_key('modification_time') and b['modification_time']:
+              tb = b['modification_time']
+          elif b.has_key('bobobase_modification_time') \
+            and b['bobobase_modification_time']:
+              tb = b['bobobase_modification_time']
+          else:
+              tb = 0              
+
+          if ta < tb:
               retval = 1
-          elif a.modification_time == b.modification_time:
+          elif ta == tb:
               retval = 0
           else:
               retval = -1
