@@ -130,3 +130,7 @@ class IGSProfileResultsContentProvider(IContentProvider, IGSSearchResults):
           required=False, 
           default=u"bar")
 
+class IGSFileSearchResult(Interface):
+    "I am a fish"
+
+

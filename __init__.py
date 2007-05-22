@@ -1,4 +1,4 @@
 import topicResultsContentProvider, postResultsContentProvider
 import fileResultsContentProvider, profileResultsContentProvider
-import queries, visible_groups
+import queries, visible_groups, fileSearchResult
 

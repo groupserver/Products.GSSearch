@@ -14,6 +14,7 @@ import Products.XWFMailingListManager.view
 import Products.GSContent, Products.XWFCore.XWFUtils
 from Products.GSContent.view import GSSiteInfo
 from interfaces import IGSFileResultsContentProvider
+from fileSearchResult import GSFileSearchResult
 import visible_groups
 
 class GSFileResultsContentProvider(object):
@@ -52,8 +53,7 @@ class GSFileResultsContentProvider(object):
           else:
              groupIds = visible_groups.get_all_visible_groups(self.context)
           
-          self.results = self.search_files(searchKeywords, groupIds,
-            self.searchPostedFiles, self.searchSiteFiles)
+          self.results = self.search_files(searchKeywords, groupIds)
           
       def render(self):
           if not self.__updated:
@@ -68,42 +68,28 @@ class GSFileResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
 
-      def search_files(self, searchKeywords, groupIds,
-                       searchFileLibrary=True, searchWebPages=True):
+      def search_files(self, searchKeywords, groupIds):
 
           retval = []
           postedFiles = []
           siteFiles = []
           site_root = self.context.site_root()
 
-          if searchFileLibrary:
-              assert hasattr(site_root, 'FileLibrary2'), \
-                'Cannot search: file library not found'
-              fileLibrary = site_root.FileLibrary2
-              fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
-              postedFiles = self.search_files_in_path(searchKeywords, 
-                groupIds, fileLibraryPath, 'XWF File 2')
-              postedFiles = [o for o in postedFiles if o]
+          assert hasattr(site_root, 'FileLibrary2'), \
+            'Cannot search: file library not found'
+          fileLibrary = site_root.FileLibrary2
+          fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
+          postedFiles = self.search_files_in_path(searchKeywords, 
+            groupIds, fileLibraryPath, 'XWF File 2')
+          postedFiles = [o for o in postedFiles if o]
               
-          if searchWebPages:
-              sitePath = self.siteInfo.get_path()
-              siteFiles = self.search_files_in_path(searchKeywords, 
-                path=sitePath, metaType='XML Template')
-              siteFiles = [o for o in siteFiles if o]
-              
-          #r = [o for o in postedFiles + siteFiles if o]
-          r = postedFiles + siteFiles
-          r.sort(self.sort_file_results)
+          postedFiles.sort(self.sort_file_results)
+          fileIds = []
           s = []
-          for o in r:
-              try:
-                  obj = o.getObject()
-              except:
-                  continue
-              else:
-                  if obj not in s:
-                      s.append(obj)
-                      
+          for o in postedFiles:
+              if o['id'] not in fileIds:
+                  fileIds.append(o['id'])
+                  s.append(o)
           retval = s[:self.limit]
           return retval
               
@@ -130,21 +116,8 @@ class GSFileResultsContentProvider(object):
           return results
           
       def sort_file_results(self, a, b):
-          if a.has_key('modification_time') and a['modification_time']:
-              ta = a['modification_time']
-          elif a.has_key('bobobase_modification_time') \
-            and a['bobobase_modification_time']:
-              ta = a['bobobase_modification_time']
-          else:
-              ta = 0
-
-          if b.has_key('modification_time') and b['modification_time']:
-              tb = b['modification_time']
-          elif b.has_key('bobobase_modification_time') \
-            and b['bobobase_modification_time']:
-              tb = b['bobobase_modification_time']
-          else:
-              tb = 0              
+          ta = a['modification_time']
+          tb = b['modification_time']
 
           if ta < tb:
               retval = 1
@@ -157,29 +130,20 @@ class GSFileResultsContentProvider(object):
       def get_results(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
+              
           for result in self.results:
-              url = result.absolute_url().strip('content_en')
-
-              owner = result.getOwner()
-              if (owner and ('Manager' in owner.roles)
-                  or not hasattr(owner, 'getProperty')):
-                  ownerName = 'the administrator'
-              else:
-                  ownerName = owner.getProperty('preferredName', 
-                    'an unknown user')
-
-              date = result.bobobase_modification_time
-                            
+              r = GSFileSearchResult(self.view, self.context, result)
+              
               retval =  {
-                'icon': '/++resource++fileIcons/text-xml.png',
-                'title': result.title_or_id(),
-                'date': date,
-                'url': url,
-                'user': ownerName
+                'icon': r.get_icon(),
+                'title': r.get_title(),
+                'date': r.get_date(),
+                'url': r.get_url(),
+                'user': r.get_owner_name(),
               }
               assert retval
               yield retval
-
+          
 zope.component.provideAdapter(GSFileResultsContentProvider,
                               provides=zope.contentprovider.interfaces.IContentProvider,
                               name="groupserver.FileResults")
