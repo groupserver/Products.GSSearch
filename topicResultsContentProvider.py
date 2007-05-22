@@ -166,10 +166,6 @@ class GSTopicResultsContentProvider(object):
                     if (topic['group_id'] in groupIds)]
           
           return retval
-      
-      def get_words_for_topic(self, topicId):
-          words = self.messageQuery.topic_word_count(topicId)
-          return words
 
       def get_keywords_for_topic(self, topic):
           twc = float(sum([w['count'] for w in topic['words']]))
@@ -197,9 +193,14 @@ class GSTopicResultsContentProvider(object):
           return retval
       
       def add_words_to_topics(self):
+          topicIds = [topic['topic_id'] for topic in self.topics]
+          topicWords = self.messageQuery.topics_word_count(topicIds)
           for topic in self.topics:
-              topic['words'] = self.get_words_for_topic(topic['topic_id'])
-      
+              tid = topic['topic_id']
+              words = [topicWord for topicWord in topicWords 
+                       if(topicWord['topic_id']==tid)]
+              topic['words'] = words          
+          
       def get_results(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled

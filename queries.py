@@ -190,12 +190,13 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             val = [{'count': x['count']} for x in r]
             retval = val[0]['count']
         return retval
-        
-    def topic_word_count(self, topicId):
-        """Get a count for the words in a topic"""
+
+    def topics_word_count(self, topicIds):
+        """Get a count for all the words in a list of topics"""
         countTable = self.topic_word_countTable
         statement = countTable.select()
-        statement.append_whereclause(countTable.c.topic_id == topicId)
+        inStatement = countTable.c.topic_id.in_(*topicIds)
+        statement.append_whereclause(inStatement)
         r = statement.execute()
         retval = []
         if r.rowcount:
