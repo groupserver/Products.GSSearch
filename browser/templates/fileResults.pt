@@ -8,17 +8,21 @@
       <a class="name" href="#"
         tal:attributes="href string:/contacts/${result/owner_id}"
         tal:content="result/owner_name">The User</a>
-      Date:
-      <span class="date" tal:content="result/date">Whenever</span>
       <span  tal:condition="result/post_id">
         Topic:
         <a href="#"
           tal:attributes="href string:/r/topic/${result/post_id}"
           tal:content="result/topic_name">topic</a>
-        Group
-        <a href="#"
-          tal:attributes="href result/group_url"
-          tal:content="result/group_name">group</a>
+        <span class="groupInfo" tal:condition="python:result['group_id'] != view.view.groupId">
+          Group
+          <a href="#" class="group"
+            tal:attributes="href result/group_url"
+            tal:content="result/group_name">group</a>
+        </span>
+      </span>
+      <span class="dateInfo">
+        Date:
+        <span class="date" tal:content="result/date">Whenever</span>
       </span>
       <ul tal:condition="result/tags" class="keywords">
         <tal:block tal:repeat="tag result/tags">

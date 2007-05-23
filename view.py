@@ -62,7 +62,7 @@ class GSSearchView(BrowserView):
         if self.groupId:
             grp = ': %s' % self.groupInfo.get_name()
             
-        r = r'Search for %s %s%s: %s'
+        r = r'Results for %s %s%s: %s'
         retval = r % (s, inStr, grp, self.siteInfo.get_name())
         
         return retval
@@ -83,8 +83,8 @@ class GSSearchView(BrowserView):
             in_.append('posts')
         if self.view_files():
             in_.append('files')
-        if self.view_profiles():
-            in_.append('profiles')
+        #if self.view_profiles():
+        #    in_.append('profiles')
         
         if len(in_) > 1:
             inStr = ', '.join(in_[:-1])
@@ -93,9 +93,11 @@ class GSSearchView(BrowserView):
             inStr = in_[0]
         grp = ''
         if self.groupId:
-            grp = ' accross the group %s' % self.groupInfo.get_name()
+            link = '<a class="group" href="%s">%s</a>' % \
+              (self.groupInfo.get_url(), self.groupInfo.get_name())
+            grp = ' in the group %s' % link
             
-        r = u'Search for %s %s%s.' % (s, inStr, grp)
+        r = u'Results for %s %s%s.' % (s, inStr, grp)
         return r
 
     def __get_boolean(self, var, default=True):
@@ -159,6 +161,10 @@ class GSSearchView(BrowserView):
             retval = rstr % valType(defaultVal)
         return retval
 
+    def all_site_search_link(self):
+        retval = self.get_search_url(groupId='')
+        return retval
+        
     def view_topics(self):
         return self.viewTopics
 
@@ -189,6 +195,11 @@ class GSSearchView(BrowserView):
     def only_files_shown(self):
         return self.viewFiles and \
           not(self.viewTopics or self.viewPosts or self.viewProfiles)
+
+    def only_files_link(self):
+        retval = self.get_search_url(viewTopics=False, viewPosts=False,
+          viewFiles=True, viewProfiles=False)
+        return retval
 
     def view_profiles(self):
         return self.viewProfiles

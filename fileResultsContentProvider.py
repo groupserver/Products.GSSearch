@@ -117,8 +117,10 @@ class GSFileResultsContentProvider(object):
           results = []
           if groupIds:
               for query in queries:
-                results += catalog(query, meta_type=metaType, 
-                  group_ids=groupIds)
+                  r = catalog(query, meta_type=metaType, group_ids=groupIds)
+                  print '%s %d' % (query, len(r))
+                  results += r
+                  
           else:
               for query in queries:
                   results += catalog(query, meta_type=metaType)

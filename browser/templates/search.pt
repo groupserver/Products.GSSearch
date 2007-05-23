@@ -45,6 +45,12 @@
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.
         </p>
+        <p tal:condition="view/groupId">
+          <a href="#" tal:attributes="href view/all_site_search_link">Search
+           all of <span class="site" 
+                    tal:content="python:view.siteInfo.get_name()">this 
+                    site</span>.</a>
+        </p>
         
         <div id="topics" tal:condition="view/view_topics">
           <h2 tal:condition="not:view/only_topics_shown">Topics</h2>
@@ -54,11 +60,20 @@
                 tal:attributes="href view/only_topics_link">Show 
                 only topics</a>
             </li>
-            <li><a href="#"
-              tal:attributes="href view/only_posts_link">Show only 
-              posts</a></li>
           </ul>
           <p tal:replace="structure provider:groupserver.TopicResults">
+            The baby's blood type? Human, mostly.</p>
+        </div>
+        <div id="files" tal:condition="view/view_files">
+          <h2 tal:condition="not:view/only_files_shown">Posted Files</h2>          
+          <ul class="navigation">
+            <li tal:condition="not:view/only_files_shown">
+              <a href="#" title="View topics"
+                tal:attributes="href view/only_files_link">Show 
+                only files</a>
+            </li>
+          </ul>
+          <p tal:replace="structure provider:groupserver.FileResults">
             The baby's blood type? Human, mostly.</p>
         </div>
         <!--div id="posts" tal:condition="view/view_posts">
@@ -66,11 +81,6 @@
           <p tal:replace="structure provider:groupserver.PostResults">
             The baby's blood type? Human, mostly.</p>
         </div-->
-        <div id="files" tal:condition="view/view_files">
-          <h2 tal:condition="not:view/only_files_shown">Posted Files</h2>          
-          <p tal:replace="structure provider:groupserver.FileResults">
-            The baby's blood type? Human, mostly.</p>
-        </div>
         <!--  div id="profiles" tal:condition="view/view_profiles">
           <h2 tal:condition="not:view/only_profiles_shown">Profiles</h2>          
           <p tal:replace="structure provider:groupserver.ProfileResults">
