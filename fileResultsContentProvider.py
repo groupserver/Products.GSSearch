@@ -150,10 +150,12 @@ class GSFileResultsContentProvider(object):
               retval =  {
                 'icon': r.get_icon(),
                 'title': r.get_title(),
+                'tags': r.get_tags(),
                 'date': r.get_date(),
                 'url': r.get_url(),
                 'owner_name': r.get_owner_name(),
                 'owner_id': r.get_owner_id(),
+                'group_id': r.get_group_info().get_id(),
                 'group_name': r.get_group_info().get_name(),
                 'group_url': r.get_group_info().get_url(),
                 'post_id': self.filePostMap.get(r.get_id(), ''),

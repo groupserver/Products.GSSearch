@@ -32,6 +32,7 @@ class GSSearchView(BrowserView):
         self.viewPosts = self.__get_boolean('viewPosts', False)
         self.viewFiles = self.__get_boolean('viewFiles', True)
         self.viewProfiles = self.__get_boolean('viewProfiles', True)
+        self.limit = int(self.request.get('limit', 6))
 
     def get_title(self):
         retval = ''

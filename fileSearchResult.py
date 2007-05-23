@@ -42,7 +42,8 @@ class GSFileSearchResult(object):
         return retval
     
     def get_tags(self):
-        retval = self.result['tags']
+        tags = u','.join(self.result['tags']).split(u',')
+        retval = [t for t in tags if t]
         return retval
     
     def get_topic_name(self):

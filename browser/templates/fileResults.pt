@@ -4,22 +4,54 @@
         tal:attributes="title string:View ${result/title}; href result/url;"
         href="#"><img tal:attributes="src result/icon"/>
         <span class="fileName" tal:content="result/title">Fish</span></a>
-      Posted by 
+      Author: 
       <a class="name" href="#"
         tal:attributes="href string:/contacts/${result/owner_id}"
         tal:content="result/owner_name">The User</a>
-      at
+      Date:
       <span class="date" tal:content="result/date">Whenever</span>
       <span  tal:condition="result/post_id">
-        in the topic
+        Topic:
         <a href="#"
           tal:attributes="href string:/r/topic/${result/post_id}"
           tal:content="result/topic_name">topic</a>
-        in the group
+        Group
         <a href="#"
           tal:attributes="href result/group_url"
           tal:content="result/group_name">group</a>
       </span>
+      <ul tal:condition="result/tags" class="keywords">
+        <tal:block tal:repeat="tag result/tags">
+          <li tal:content="tag">Tag</li>
+        </tal:block>
+      </ul>
+      <div class="refine"
+        tal:define="buttonId string:refineFileOptionsButton${repeat/result/number};
+          optionsId string:refineFileOptions${repeat/result/number}">
+        <div class="showrefine">
+          <a href="#" id="abc123"
+            tal:attributes="id buttonId;
+              href string:javascript:showHideInline('${optionsId}','${buttonId}')"
+            title="Refine the results">&#9654;</a>
+        </div>
+        <div class="refineOptions" id="abc123" style="display:none;"
+          tal:attributes="id optionsId">
+          <div>
+            <ul>
+              <li tal:condition="python:result['group_id'] != view.view.groupId">
+                <a tal:attributes="href python:view.view.get_search_url(groupId=result['group_id'])"
+                  href="#">Only search the group
+                  <cite class="group" tal:content="result/group_name">A Group Name</cite></a>
+              </li>
+              <!--li>
+                <a tal:attributes="href python:view.view.get_search_url(searchText=map(lambda w:w['word'], topic['keywords']))"
+                  href="#">Search for topics related to
+                  <cite tal:content="topic/subject">this topic</cite></a>
+              </li-->
+            </ul>
+          </div>
+        </div>
+      </div>
     </li>
   </tal:block>
 </ol>
