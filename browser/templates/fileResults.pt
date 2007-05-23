@@ -10,14 +10,16 @@
         tal:content="result/owner_name">The User</a>
       at
       <span class="date" tal:content="result/date">Whenever</span>
-      in the topic
-      <a href="#"
-        tal:attributes="href string:/r/topic/${result/post_id}"
-        tal:content="result/topic_name">topic</a>
-      in the group
-      <a href="#"
-        tal:attributes="href result/group_url"
-        tal:content="result/group_name">group</a>
+      <span  tal:condition="result/post_id">
+        in the topic
+        <a href="#"
+          tal:attributes="href string:/r/topic/${result/post_id}"
+          tal:content="result/topic_name">topic</a>
+        in the group
+        <a href="#"
+          tal:attributes="href result/group_url"
+          tal:content="result/group_name">group</a>
+      </span>
     </li>
   </tal:block>
 </ol>

@@ -143,7 +143,7 @@ class GSFileResultsContentProvider(object):
       def get_results(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
-              
+
           for result in self.results:
               r = GSFileSearchResult(self.view, self.context, result)
               
@@ -156,7 +156,7 @@ class GSFileResultsContentProvider(object):
                 'owner_id': r.get_owner_id(),
                 'group_name': r.get_group_info().get_name(),
                 'group_url': r.get_group_info().get_url(),
-                'post_id': self.filePostMap[r.get_id()],
+                'post_id': self.filePostMap.get(r.get_id(), ''),
                 'topic_name': r.get_topic_name(),
               }
               assert retval
