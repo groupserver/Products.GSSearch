@@ -40,7 +40,7 @@ class GSFileResultsContentProvider(object):
           self.messageQuery = MessageQuery(self.context, self.da)
           
           self.siteInfo = GSSiteInfo(self.context)
-          
+         
           assert hasattr(self.context, 'Catalog'), 'Catalog cannot ' \
             "be found"
           self.catalog = self.context.Catalog
@@ -59,6 +59,10 @@ class GSFileResultsContentProvider(object):
              groupIds = visible_groups.get_all_visible_groups(self.context)
           
           self.results = self.search_files(searchKeywords, groupIds)
+          start = self.filesStartIndex
+          end = self.filesStartIndex + self.filesLimit
+          self.resultsCount = len(self.results)
+          self.results = self.results[start : end]
 
           fIds = [r['id'] for r in self.results]
           self.filePostMap = self.get_post_ids_from_file_ids(fIds)
@@ -93,13 +97,12 @@ class GSFileResultsContentProvider(object):
               
           postedFiles.sort(self.sort_file_results)
           fileIds = []
-          s = []
+          retval = []
           for o in postedFiles:
               if o['id'] not in fileIds:
                   fileIds.append(o['id'])
-                  s.append(o)
-          
-          retval = s[:self.limit]
+                  retval.append(o)
+
           return retval
               
       def search_files_in_path(self, searchKeywords, groupIds=[], 
@@ -141,7 +144,7 @@ class GSFileResultsContentProvider(object):
           else:
               retval = -1
           return retval
-          
+      
       def get_results(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
@@ -162,9 +165,19 @@ class GSFileResultsContentProvider(object):
                 'group_url': r.get_group_info().get_url(),
                 'post_id': self.filePostMap.get(r.get_id(), ''),
                 'topic_name': r.get_topic_name(),
+                'show_group': self.view.groupId != r.get_group_info().get_id(),
               }
               assert retval
               yield retval
+            
+      def show_next_link(self):
+          retval = (self.filesStartIndex + self.filesLimit) < self.resultsCount 
+          return retval
+      
+      def get_next_link(self):
+          fs = self.filesStartIndex
+          fl = self.filesLimit
+          return self.view.get_search_url(filesStartIndex=fs+fl)
           
 zope.component.provideAdapter(GSFileResultsContentProvider,
                               provides=zope.contentprovider.interfaces.IContentProvider,

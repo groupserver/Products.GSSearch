@@ -121,6 +121,16 @@ class IGSFileResultsContentProvider(IContentProvider, IGSSearchResults):
         posted to groups, are searched.''',
       required=False,
       default=True)
+      
+    filesLimit = Int(title=u'Files Limit',
+      description=u'Number of files to show in the results',
+      required=False,
+      default=6)
+      
+    filesStartIndex = Int(title=u'Files Start Index',
+      description=u'Starting index for the results',
+      required=False,
+      default=0)
 
 class IGSProfileResultsContentProvider(IContentProvider, IGSSearchResults):
       """The GroupServer Profile Results Content Provider"""

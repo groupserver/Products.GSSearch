@@ -5,8 +5,7 @@
         <a class="topic" href="#"
           tal:attributes="href string:/r/topic/${topic/last_post_id}"
           tal:content="topic/subject"/>
-        <span class="groupInfo" 
-          tal:condition="python:topic['group_id'] != view.view.groupId">
+        <span class="groupInfo" tal:condition="topic/show_group">
           Group:
           <a class="group" href="#" 
             tal:attributes="href string:/groups/group/${topic/group_id};"
@@ -38,7 +37,7 @@
             tal:attributes="id optionsId">
             <div>
               <ul>
-                <li tal:condition="python:topic['group_id'] != view.view.groupId">
+                <li tal:condition="topic/show_group">
                   <a tal:attributes="href python:view.view.get_search_url(groupId=topic['group_id'])"
                     href="#">Only search the group
                     <cite class="group" tal:content="topic/group_name">A Group Name</cite></a>

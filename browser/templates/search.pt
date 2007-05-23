@@ -41,7 +41,8 @@
         tal:define="searchText python:view.searchText;
         groupIds python:[view.groupId];
         limit python:view.limit;
-        startIndex python:view.startIndex">
+        filesStartIndex python:view.filesStartIndex;
+        filesLimit python:view.filesLimit">
         
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.

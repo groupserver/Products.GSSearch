@@ -68,6 +68,7 @@ class GSTopicResultsContentProvider(object):
           self.topics = self.remove_duplicate_topics(self.topics)
           self.topics = self.remove_non_existant_groups(self.topics)
           self.topics.sort(self.date_sort)
+          self.topicCount = len(self.topics)
           self.topics = self.topics[:self.limit]
           
           self.topics = self.add_group_names_to_topics(self.topics)
@@ -111,7 +112,7 @@ class GSTopicResultsContentProvider(object):
           groupsObj = getattr(site, 'groups')
           
           return groupsObj
-
+          
       def subject_search(self, keywords, groupIds):
           assert hasattr(self, 'messageQuery')
           assert self.messageQuery
@@ -208,8 +209,9 @@ class GSTopicResultsContentProvider(object):
           for topic in self.topics:
               retval = topic
               retval['keywords'] = self.get_keywords_for_topic(retval)
+              retval['show_group'] = (self.view.groupId != retval['group_id'])
               yield retval
-              
+
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
     name="groupserver.TopicResults")
