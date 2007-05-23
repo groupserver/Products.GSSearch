@@ -43,11 +43,10 @@
                   href="#">Only search the group
                   <cite class="group" tal:content="result/group_name">A Group Name</cite></a>
               </li>
-              <!--li>
-                <a tal:attributes="href python:view.view.get_search_url(searchText=map(lambda w:w['word'], topic['keywords']))"
-                  href="#">Search for topics related to
-                  <cite tal:content="topic/subject">this topic</cite></a>
-              </li-->
+              <li tal:condition="result/tags">
+                <a tal:attributes="href python:view.view.get_search_url(searchText=' '.join(result['tags']))"
+                  href="#">Search for documents related to this file</a>
+              </li>
             </ul>
           </div>
         </div>
