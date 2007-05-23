@@ -28,6 +28,8 @@ class GSSearchView(BrowserView):
             self.groupInfo = GSGroupInfo(context)
             
         self.startIndex = int(self.request.get('startIndex', 0))
+        print 'startIndex %d' % self.startIndex
+        
         self.viewTopics = self.__get_boolean('viewTopics', True)
         self.viewPosts = self.__get_boolean('viewPosts', False)
         self.viewFiles = self.__get_boolean('viewFiles', True)
@@ -125,7 +127,7 @@ class GSSearchView(BrowserView):
         
     def get_search_url(self, searchText=None, groupId=None, 
         viewTopics=None, viewPosts=None, viewFiles=None, viewProfiles=None,
-        limit=None):
+        startIndex=None, limit=None):
         """Get the URL for a search
         
         Returns the URL for the current search, or a modification of the
@@ -135,8 +137,10 @@ class GSSearchView(BrowserView):
             searchText = ' '.join(searchText)
         searchTextQuery = self.get_query(r'searchText=%s', 
                                          self.searchText, searchText)
+                                         
         groupIdQuery = self.get_query(r'groupId=%s', 
                                       self.groupId, groupId)
+                                      
         viewTopicsQuery = self.get_query(r'viewTopics=%s',
           self.viewTopics, viewTopics, valType=int)
         viewPostsQuery = self.get_query(r'viewPosts=%s', 
@@ -145,11 +149,14 @@ class GSSearchView(BrowserView):
           self.viewFiles, viewFiles, valType=int)
         viewProfilesQuery = self.get_query(r'viewProfiles=%s', 
           self.viewProfiles, viewProfiles, valType=int)
+          
+        start = self.get_query(r'startIndex=%s', self.startIndex, 
+          startIndex, valType=int)
         limit = self.get_query(r'limit=%s', self.limit, limit, valType=int)
 
         queries = '&'.join([searchTextQuery, groupIdQuery, viewTopicsQuery,
                             viewPostsQuery, viewFilesQuery, 
-                            viewProfilesQuery, limit])
+                            viewProfilesQuery, start, limit])
         retval = '%s?%s' % (self.request.URL, queries)
         return retval
         
@@ -165,6 +172,14 @@ class GSSearchView(BrowserView):
         retval = self.get_search_url(groupId='')
         return retval
         
+    def more_link(self):
+        retval = self.get_search_url(limit=self.limit*2)
+        return retval
+        
+    def next_link(self):
+        retval = self.get_search_url(startIndex=self.startIndex+self.limit)
+        return retval
+    
     def view_topics(self):
         return self.viewTopics
 

@@ -40,7 +40,8 @@
         action="." tal:attributes="action request/URL"
         tal:define="searchText python:view.searchText;
         groupIds python:[view.groupId];
-        limit python:view.limit">
+        limit python:view.limit;
+        startIndex python:view.startIndex">
         
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.
@@ -63,7 +64,15 @@
           </ul>
           <p tal:replace="structure provider:groupserver.TopicResults">
             The baby's blood type? Human, mostly.</p>
+          <p>
+            <a href="#" class="more"
+              tal:attributes="href view/more_link">More</a>
+            <a href="#" class="next"
+              tal:attributes="href view/next_link">Next</a>
+          </p>
         </div>
+        
+        
         <div id="files" tal:condition="view/view_files">
           <h2 tal:condition="not:view/only_files_shown">Posted Files</h2>          
           <ul class="navigation">

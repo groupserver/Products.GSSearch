@@ -45,7 +45,7 @@
                 </li>
                 <li>
                   <a tal:attributes="href python:view.view.get_search_url(searchText=map(lambda w:w['word'], topic['keywords']))"
-                    href="#">Search for topics related to
+                    href="#">Search for documents related to
                     <cite tal:content="topic/subject">this topic</cite></a>
                 </li>
               </ul>
