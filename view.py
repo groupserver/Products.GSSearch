@@ -36,7 +36,6 @@ class GSSearchView(BrowserView):
         self.limit = int(self.request.get('limit', 6))
 
         self.filesStartIndex = int(self.request.get('filesStartIndex', 0))
-        print 'self.filesStartIndex %d' % self.filesStartIndex 
         self.filesLimit = int(self.request.get('filesLimit', 6))
 
     def get_title(self):

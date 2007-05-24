@@ -17,12 +17,7 @@ import Products.GSContent, Products.XWFCore.XWFUtils
 from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
 from Products.GSContent.view import GSSiteInfo
-import visible_groups
-
-# --=mpj17=-- I wonder if we can do something cleaver with viewlets and
-#    the "yeild" statement, similar to how search is implemented in
-#    von Weitershausen, P, "Web Component Development with Zope 3",
-#      Springer, Berlin, 2007, pp369--371
+from Products.GSContent.groupsInfo import GSGroupsInfo
 
 class GSTopicResultsContentProvider(object):
       """GroupServer Topic Search-Results Content Provider
@@ -46,18 +41,17 @@ class GSTopicResultsContentProvider(object):
           self.da = self.context.zsqlalchemy 
           assert self.da, 'No data-adaptor found'
           self.messageQuery = MessageQuery(self.context, self.da)
+          # Both of the following should be aquired from adapters.
           self.siteInfo = GSSiteInfo(self.context)
+          self.groups = GSGroupsInfo(self.context)
 
           searchKeywords = self.searchText.split()
           
           self.groupIds = [gId for gId in self.groupIds if gId]
           if self.groupIds:
-              groupIds = visible_groups.visible_groups(self.groupIds,
-                self.context)
+              groupIds = self.groups.filter_visible_group_ids(self.groupIds)
           else:
-             groupIds = visible_groups.get_all_visible_groups(self.context)
-                    
-          t0 = time.time()
+             groupIds = self.groups.get_visible_group_ids()
 
           subjectTopics = self.subject_search(searchKeywords, groupIds)
           keywordTopics = self.keyword_search(searchKeywords, groupIds)
@@ -89,29 +83,6 @@ class GSTopicResultsContentProvider(object):
       #########################################
       # Non standard methods below this point #
       #########################################
-      
-      def get_visible_group_ids(self):
-          groupsObj = self.get_groups_object()
-          allGroups = groupsObj.objectValues(['Folder', 'Folder (Ordered)'])
-          
-          visibleGroups = []
-          for group in allGroups:
-              try:
-                  group.messages.getId()
-              except:
-                  continue
-              else:
-                  visibleGroups.append(group)
-          retval = [g.getId() for g in visibleGroups]
-          return retval
-
-      def get_groups_object(self):
-          site_root = self.context.site_root()
-          siteId = self.siteInfo.get_id()
-          site = getattr(getattr(site_root, 'Content'), siteId)
-          groupsObj = getattr(site, 'groups')
-          
-          return groupsObj
           
       def subject_search(self, keywords, groupIds):
           assert hasattr(self, 'messageQuery')
@@ -133,7 +104,7 @@ class GSTopicResultsContentProvider(object):
           
       def add_group_names_to_topics(self, topics):
           ts = topics
-          groupsObj = self.get_groups_object()
+          groupsObj = self.groups.groupsObj
           for topic in ts:
               if hasattr(groupsObj, topic['group_id']):
                   group = getattr(groupsObj, topic['group_id'])
@@ -162,7 +133,7 @@ class GSTopicResultsContentProvider(object):
           return retval
           
       def remove_non_existant_groups(self, topics):
-          groupIds = visible_groups.get_all_visible_groups(self.context)
+          groupIds = self.groups.get_visible_group_ids()
           retval = [topic for topic in topics 
                     if (topic['group_id'] in groupIds)]
           

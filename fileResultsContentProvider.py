@@ -13,9 +13,9 @@ import Products.XWFMailingListManager.view
 
 import Products.GSContent, Products.XWFCore.XWFUtils
 from Products.GSContent.view import GSSiteInfo
+from Products.GSContent.groupsInfo import GSGroupsInfo
 from interfaces import IGSFileResultsContentProvider
 from fileSearchResult import GSFileSearchResult
-import visible_groups
 from queries import MessageQuery
 
 class GSFileResultsContentProvider(object):
@@ -34,31 +34,35 @@ class GSFileResultsContentProvider(object):
           self.context = context
           self.request = request
           self.view = view
-          
+                    
+      def update(self):
+          self.__updated = True
+
           self.da = self.context.zsqlalchemy 
           assert self.da, 'No data-adaptor found'
           self.messageQuery = MessageQuery(self.context, self.da)
           
           self.siteInfo = GSSiteInfo(self.context)
+          # Both of the following should be aquired from adapters.
+          self.siteInfo = GSSiteInfo(self.context)
+          self.groups = GSGroupsInfo(self.context)
          
+          searchKeywords = self.searchText.split()
+
           assert hasattr(self.context, 'Catalog'), 'Catalog cannot ' \
             "be found"
           self.catalog = self.context.Catalog
           self.results = []
           
-      def update(self):
-          self.__updated = True
-
-          searchKeywords = self.searchText.split()
-
           self.groupIds = [gId for gId in self.groupIds if gId]
           if self.groupIds:
-              groupIds = visible_groups.visible_groups(self.groupIds, 
-                self.context)
+              groupIds = self.groups.filter_visible_group_ids(self.groupIds)
           else:
-             groupIds = visible_groups.get_all_visible_groups(self.context)
+             groupIds = self.groups.get_visible_group_ids()
           
           self.results = self.search_files(searchKeywords, groupIds)
+          self.results = self.remove_non_existant_groups(self.results)
+          
           start = self.filesStartIndex
           end = self.filesStartIndex + self.filesLimit
           self.resultsCount = len(self.results)
@@ -121,7 +125,6 @@ class GSFileResultsContentProvider(object):
           if groupIds:
               for query in queries:
                   r = catalog(query, meta_type=metaType, group_ids=groupIds)
-                  print '%s %d' % (query, len(r))
                   results += r
                   
           else:
@@ -144,7 +147,16 @@ class GSFileResultsContentProvider(object):
           else:
               retval = -1
           return retval
-      
+
+      def remove_non_existant_groups(self, files):
+          # The reason that we do this is security: Bruce S. cannot
+          #   add a group-id to the search-query and find out Alice and
+          #   Bob's shared secret.
+          groupIds = self.groups.get_visible_group_ids()
+          retval = [f for f in files 
+                    if (f['group_ids'][0] in groupIds)]   
+          return retval
+          
       def get_results(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
