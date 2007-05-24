@@ -16,8 +16,7 @@ import Products.XWFMailingListManager.view
 import Products.GSContent, Products.XWFCore.XWFUtils
 from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
-from Products.GSContent.view import GSSiteInfo
-from Products.GSContent.groupsInfo import GSGroupsInfo
+from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
 
 class GSTopicResultsContentProvider(object):
       """GroupServer Topic Search-Results Content Provider
@@ -42,8 +41,8 @@ class GSTopicResultsContentProvider(object):
           assert self.da, 'No data-adaptor found'
           self.messageQuery = MessageQuery(self.context, self.da)
           # Both of the following should be aquired from adapters.
-          self.siteInfo = GSSiteInfo(self.context)
-          self.groups = GSGroupsInfo(self.context)
+          self.siteInfo = IGSSiteInfo(self.context)
+          self.groups = IGSGroupsInfo(self.context)
 
           searchKeywords = self.searchText.split()
           

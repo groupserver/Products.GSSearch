@@ -12,8 +12,7 @@ import DocumentTemplate
 import Products.XWFMailingListManager.view
 
 import Products.GSContent, Products.XWFCore.XWFUtils
-from Products.GSContent.view import GSSiteInfo
-from Products.GSContent.groupsInfo import GSGroupsInfo
+from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
 from interfaces import IGSFileResultsContentProvider
 from fileSearchResult import GSFileSearchResult
 from queries import MessageQuery
@@ -42,10 +41,9 @@ class GSFileResultsContentProvider(object):
           assert self.da, 'No data-adaptor found'
           self.messageQuery = MessageQuery(self.context, self.da)
           
-          self.siteInfo = GSSiteInfo(self.context)
           # Both of the following should be aquired from adapters.
-          self.siteInfo = GSSiteInfo(self.context)
-          self.groups = GSGroupsInfo(self.context)
+          self.siteInfo = IGSSiteInfo(self.context)
+          self.groups = IGSGroupsInfo(self.context)
          
           searchKeywords = self.searchText.split()
 
