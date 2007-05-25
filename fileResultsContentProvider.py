@@ -152,7 +152,7 @@ class GSFileResultsContentProvider(object):
           #   Bob's shared secret.
           groupIds = self.groups.get_visible_group_ids()
           retval = [f for f in files 
-                    if (f['group_ids'][0] in groupIds)]   
+            if (f['group_ids'] and (f['group_ids'][0] in groupIds))]   
           return retval
           
       def get_results(self):

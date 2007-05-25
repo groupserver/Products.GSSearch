@@ -1,7 +1,7 @@
+from zope.component import createObject
 from zope.interface import implements
 from interfaces import IGSFileSearchResult
 from Products.XWFCore.XWFUtils import get_user, get_user_realnames
-from Products.GSContent.groupInfo import GSGroupInfo
 
 class GSFileSearchResult(object):
     implements(IGSFileSearchResult)
@@ -12,7 +12,8 @@ class GSFileSearchResult(object):
         self.result = result
     
         gId = self.result['group_ids'][0]
-        self.groupInfo = GSGroupInfo(context, gId)
+        assert gId
+        self.groupInfo = createObject('groupserver.GroupInfo', context, gId)
     
     def get_id(self):
         retval = self.result['id']

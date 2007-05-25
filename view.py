@@ -1,10 +1,10 @@
 import sys, re, datetime, time
 import DateTime, Globals
 
+from zope.component import createObject
 from zope.interface import implements
 from Products.Five import BrowserView
 from Products.GSContent.interfaces import IGSSiteInfo
-from Products.GSContent.groupInfo import GSGroupInfo
 
 from interfaces import IGSSearchResults
 
@@ -23,9 +23,10 @@ class GSSearchView(BrowserView):
         
         self.groupId = self.request.get('groupId', '')
         if self.groupId:
-            self.groupInfo = GSGroupInfo(context, self.groupId)
+            self.groupInfo = createObject('groupserver.GroupInfo', context, 
+               self.groupId)
         else:
-            self.groupInfo = GSGroupInfo(context)
+            self.groupInfo = None
             
         self.startIndex = int(self.request.get('startIndex', 0))
         
@@ -63,7 +64,7 @@ class GSSearchView(BrowserView):
         else:
             inStr = in_[0]
         grp = ''
-        if self.groupId:
+        if self.groupInfo:
             grp = ': %s' % self.groupInfo.get_name()
             
         r = r'Results for %s %s%s: %s'
@@ -96,7 +97,7 @@ class GSSearchView(BrowserView):
         else:
             inStr = in_[0]
         grp = ''
-        if self.groupId:
+        if self.groupInfo:
             link = '<a class="group" href="%s">%s</a>' % \
               (self.groupInfo.get_url(), self.groupInfo.get_name())
             grp = ' in the group %s' % link

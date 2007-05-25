@@ -51,7 +51,7 @@ class GSTopicResultsContentProvider(object):
               groupIds = self.groups.filter_visible_group_ids(self.groupIds)
           else:
              groupIds = self.groups.get_visible_group_ids()
-
+          
           subjectTopics = self.subject_search(searchKeywords, groupIds)
           keywordTopics = self.keyword_search(searchKeywords, groupIds)
           
