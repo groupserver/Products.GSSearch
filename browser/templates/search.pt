@@ -86,11 +86,18 @@
           <p tal:replace="structure provider:groupserver.FileResults">
             The baby's blood type? Human, mostly.</p>
         </div>
-        <!--div id="posts" tal:condition="view/view_posts">
+        <div id="posts" tal:condition="view/view_posts">
           <h2 tal:condition="not:view/only_posts_shown">Posts</h2>          
+          <ul class="navigation">
+            <li tal:condition="not:view/only_posts_shown">
+              <a href="#" title="View Posts"
+                tal:attributes="href view/only_posts_link">Show 
+                only posts</a>
+            </li>
+          </ul>
           <p tal:replace="structure provider:groupserver.PostResults">
             The baby's blood type? Human, mostly.</p>
-        </div-->
+        </div>
         <!--  div id="profiles" tal:condition="view/view_profiles">
           <h2 tal:condition="not:view/only_profiles_shown">Profiles</h2>          
           <p tal:replace="structure provider:groupserver.ProfileResults">

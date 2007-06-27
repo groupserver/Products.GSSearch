@@ -2,6 +2,7 @@ import sys, re, datetime, time, types, string, math
 from sets import Set
 import Products.Five, DateTime, Globals
 import zope.schema
+from zope.component import createObject
 import zope.app.pagetemplate.viewpagetemplatefile
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import zope.interface, zope.component, zope.publisher.interfaces
@@ -40,17 +41,18 @@ class GSTopicResultsContentProvider(object):
           self.da = self.context.zsqlalchemy 
           assert self.da, 'No data-adaptor found'
           self.messageQuery = MessageQuery(self.context, self.da)
-          # Both of the following should be aquired from adapters.
-          self.siteInfo = IGSSiteInfo(self.context)
-          self.groups = IGSGroupsInfo(self.context)
+          self.siteInfo = createObject('groupserver.SiteInfo', 
+            self.context)
+          self.groupsInfo = createObject('groupserver.GroupsInfo', 
+            self.context)
 
           searchKeywords = self.searchText.split()
           
           self.groupIds = [gId for gId in self.groupIds if gId]
           if self.groupIds:
-              groupIds = self.groups.filter_visible_group_ids(self.groupIds)
+              groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
           else:
-             groupIds = self.groups.get_visible_group_ids()
+             groupIds = self.groupsInfo.get_visible_group_ids()
           
           subjectTopics = self.subject_search(searchKeywords, groupIds)
           keywordTopics = self.keyword_search(searchKeywords, groupIds)
@@ -103,7 +105,7 @@ class GSTopicResultsContentProvider(object):
           
       def add_group_names_to_topics(self, topics):
           ts = topics
-          groupsObj = self.groups.groupsObj
+          groupsObj = self.groupsInfo.groupsObj
           for topic in ts:
               if hasattr(groupsObj, topic['group_id']):
                   group = getattr(groupsObj, topic['group_id'])
@@ -132,7 +134,7 @@ class GSTopicResultsContentProvider(object):
           return retval
           
       def remove_non_existant_groups(self, topics):
-          groupIds = self.groups.get_visible_group_ids()
+          groupIds = self.groupsInfo.get_visible_group_ids()
           retval = [topic for topic in topics 
                     if (topic['group_id'] in groupIds)]
           
