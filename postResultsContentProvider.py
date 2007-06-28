@@ -24,7 +24,6 @@ class GSPostResultsContentProvider(object):
           zope.publisher.interfaces.browser.IDefaultBrowserLayer,
           zope.interface.Interface)
       
-      
       def __init__(self, context, request, view):
           self.__parent = view
           self.__updated = False
@@ -44,7 +43,8 @@ class GSPostResultsContentProvider(object):
           self.groupsInfo = createObject('groupserver.GroupsInfo', 
             self.context)
 
-          searchKeywords = self.searchText.split()
+          self.searchTokens = createObject('groupserver.SearchTextTokens',
+            self.searchText)
           
           self.groupIds = [gId for gId in self.groupIds if gId]
           if self.groupIds:
@@ -52,7 +52,7 @@ class GSPostResultsContentProvider(object):
           else:
              groupIds = self.groupsInfo.get_visible_group_ids()
 
-          self.posts = self.posts_search(searchKeywords, groupIds)
+          self.posts = self.posts_search(self.searchTokens.phrases, groupIds)
 
           
       def render(self):
@@ -69,7 +69,6 @@ class GSPostResultsContentProvider(object):
       def posts_search(self, keywords, groupIds):
           assert hasattr(self, 'messageQuery')
           assert self.messageQuery
-
           siteId = self.siteInfo.get_id()
           posts = self.messageQuery.post_search_keyword(keywords, 
             siteId, groupIds, limit=self.limit, offset=self.startIndex)
@@ -115,24 +114,56 @@ class GSPostResultsContentProvider(object):
               }
               yield retval
 
-      def get_summary(self, text, nLines=3, lineLength=40):
+      def get_summary(self, text, nLines=1, lineLength=40):
+
           lines = text.split('\n')
           nonBlankLines = [l.strip() for l in lines if l and l.strip()]
           noQuoteLines = [l for l in nonBlankLines if l[0] != '>']
-          multipleWordLines = [l for l in noQuoteLines if len(l.split())>1]
+          multipleWordLines = [l for l in noQuoteLines 
+            if len(l.split())>1]
           firstLine = multipleWordLines[0].lower()
           if 'wrote' in firstLine:
               noWroteLines = multipleWordLines[1:]
           else:
               noWroteLines = multipleWordLines
-          firstLines = noWroteLines[:nLines] 
-          truncatedLines = []
-          for l in firstLines:
-              if (len(l) > lineLength):
-                  truncatedLines.append('%s&#8230;' % l[:lineLength])
-              else:
-                  truncatedLines.append(l)
-          summary = '\n'.join(truncatedLines)
+
+          matchingLines = []          
+          if self.searchText:
+              matchingLines = [l for l in noWroteLines 
+                               if reduce(lambda a, b: a or b, 
+                                         map(lambda w: w in l.lower(),
+                                             self.searchTokens.phrases))]
+          if matchingLines:                               
+              firstLines = matchingLines[:nLines]
+              matchingSnippets = []
+              for line in firstLines:
+                  for w in self.searchTokens.phrases:
+                      l = line.lower()
+                      if w in l:
+                          subLineLength = lineLength/2
+                          start = l.index(w)
+                          if start < subLineLength:
+                              start = 0
+                              end = lineLength
+                          else:
+                              start -= subLineLength
+                              end = l.index(w) + subLineLength
+                          s = line[start:end].strip()
+                          if start != 0:
+                              s = '&#8230;%s' % s
+                          if end < len(l):
+                              s = '%s&#8230;' % s
+                          matchingSnippets.append(s )
+              summary = '\n'.join(matchingSnippets)
+          else:
+              firstLines = noWroteLines[:nLines] 
+              truncatedLines = []
+              for l in firstLines:
+                  if (len(l) > lineLength):
+                      truncatedLines.append('%s&#8230;' % l[:lineLength])
+                  else:
+                      truncatedLines.append(l)
+              summary = '\n'.join(truncatedLines)
           return summary
 
       # --=mpj17=-- The following few methods have been copied from 

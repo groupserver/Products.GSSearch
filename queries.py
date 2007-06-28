@@ -240,17 +240,16 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         bodyCol = self.postTable.c.body
         subjectCol = self.postTable.c.subject
-        
+
         if (len(keywords) == 1):
-            regexp = '.*%s.*' % keywords[0].lower()
-            statement.append_whereclause(subjectCol.op('~*')(regexp))
-            statement.append_whereclause(bodyCol.op('~*')(regexp))
+            regexp = keywords[0].lower()
+            conds = (subjectCol.op('~*')(regexp), bodyCol.op('~*')(regexp))
+            statement.append_whereclause(sa.or_(*conds))
         elif (len(keywords) > 1):
             # For each keyword, construct a regular expression match, and 
             #   "or" them all together
-            regexp = r'.*%s.*'
-            subjectConds = [subjectCol.op('~*')(regexp % k ) for k in keywords]
-            bodyConds = [bodyCol.op('~*')(regexp % k ) for k in keywords]
+            subjectConds = [subjectCol.op('~*')(k ) for k in keywords]
+            bodyConds = [bodyCol.op('~*')(k ) for k in keywords]
             conds = subjectConds + bodyConds
             statement.append_whereclause(sa.or_(*conds))
             
@@ -262,17 +261,14 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement.order_by(sa.desc(self.postTable.c.date))
         
         r = statement.execute()
-        
-        retval = []
-        if r.rowcount:
-            for x in r:
-                retval = {
-                  'post_id': x['post_id'],
-                  'user_id': x['user_id'],
-                  'group_id': x['group_id'],
-                  'subject': x['subject'],
-                  'date':    x['date'],
-                  'body':    x['body'],
-                  }
-                yield retval
+        for x in r:
+            retval = {
+              'post_id': x['post_id'],
+              'user_id': x['user_id'],
+              'group_id': x['group_id'],
+              'subject': x['subject'],
+              'date':    x['date'],
+              'body':    x['body'],
+              }
+            yield retval
 

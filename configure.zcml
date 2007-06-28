@@ -49,6 +49,14 @@
   <browser:resource name="search.css"
     file="browser/stylesheets/search.css"
     permission="zope2.View" />
+
+  <utility factory=".searchTextTokens.GSSearchTextTokensFactory"
+    name="groupserver.SearchTextTokens"
+    permission="zope.Public"/>
     
+  <five:implements 
+    class=".searchTextTokens.SearchTextTokens"
+    interface=".interfaces.IGSSearchTextTokens" />
+      
 </configure>
 

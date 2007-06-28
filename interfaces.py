@@ -146,3 +146,32 @@ class IGSFileSearchResult(Interface):
     "I am a fish"
 
 
+class IGSSearchTextTokens(Interface):
+    """Splits the search text into tokens, both by phrase and by
+    keywords
+    """
+    
+    searchText = TextLine(title=u'Search Text',
+      description=u'Text that is searched for',
+      required=False,
+      default=u'')
+      
+    phraseDelimiter = TextLine(title=u'Phrase Delimiter',
+      description=u'The string that is used to delimit phrases',
+      required=False,
+      default=u'"')
+      
+    keywords = List(title=u'Keywords',
+      description=u'The list of keywords in the search text, ignoring '
+        u'phrasing. The text is broken into keywords based on whitespace, '
+        u'with "phraseDelimiter" characters stripped.',
+      value_type=TextLine(title=u'Keyword'),
+      required=True)
+          
+    phrases = List(title=u'Phrases',
+      description=u'The list of keywords in the search text, broken '
+        u'up by phrases. The text that is not in a phrase is split '
+        u'on whitespace.',
+      value_type=TextLine(title=u'Phrase'),
+      required=True)
+
