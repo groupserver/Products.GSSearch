@@ -165,86 +165,8 @@ class GSPostResultsContentProvider(object):
                       truncatedLines.append(l)
               summary = '\n'.join(truncatedLines)
           return summary
-
-      # --=mpj17=-- The following few methods have been copied from 
-      #     the post view in XWFMailingList. It really should be in
-      #     a seperate class
-      def user_authored(self):
-          """Did the user write the email message?
-          
-          ARGUMENTS
-              None.
-          
-          RETURNS
-              A boolean that is "True" if the current user authored the
-              email message, "False" otherwise.
-              
-          SIDE EFFECTS
-              None.
-              
-          """
-          user = self.request.AUTHENTICATED_USER
-          retval = False
-          if user.getId():
-              retval = user.getId() == self.authorId
-              
-          assert retval in (True, False)
-          return retval
-
-      def get_author(self):
-          """ Get the user object associated with the author.
-          
-          RETURNS
-             The user object if the author has an account, otherwise None.
-          
-          """
-          author_cache = getattr(self.view, '__author_object_cache', {})
-          user = author_cache.get(self.authorId, None)
-          if not user:
-              user = get_user(self.context, self.authorId)
-              author_cache[self.authorId] = user
-              self.view.__author_object_cache = author_cache
-              
-          return user
-
-      def author_exists(self):
-          """ Does the author exist?
-          
-          """
-          return self.get_author() and True or False
-      
-      def get_author_image(self):
-          """Get the URL for the image of the post's author.
-          
-          RETURNS
-             A string, representing the URL, if the author has an image,
-             "None" otherwise.
-             
-          SIDE EFFECTS
-             None.
-          
-          """
-          user = self.get_author()
-          retval = None
-          if user:
-              retval = user.get_image()
-              
-          return retval
-           
-      def get_author_realnames(self):
-          """Get the names of the post's author.
-          
-          RETURNS
-              The name of the post's author. 
-          
-          SIDE EFFECTS
-             None.
-          
-          """
-          retval = get_user_realnames( self.get_author(), self.authorId )
-          
-          return retval
           
 zope.component.provideAdapter(GSPostResultsContentProvider,
-                              provides=zope.contentprovider.interfaces.IContentProvider,
-                              name="groupserver.PostResults")
+  provides=zope.contentprovider.interfaces.IContentProvider,
+  name="groupserver.PostResults")
+
