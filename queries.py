@@ -232,7 +232,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
     def post_search_keyword(self, keywords, site_id, group_ids=[], 
         limit=12, offset=0):
-
+        
         statement = self.postTable.select()
         sc = Products.XWFMailingListManager.queries.MessageQuery
         aswc = sc.__add_std_where_clauses
@@ -252,10 +252,16 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             bodyConds = [bodyCol.op('~*')(k ) for k in keywords]
             conds = subjectConds + bodyConds
             statement.append_whereclause(sa.or_(*conds))
-            
         else: # (len(keywords) == 0)
             # We do not need to do anything if there are no keywords
             pass
+        
+        topics = self.topic_search_keyword(keywords, site_id, group_ids,
+           limit, offset)
+        conds = [(self.postTable.c.topic_id == t['topic_id']) 
+                 for t in topics]
+        statement.append_whereclause(sa.or_(*conds))
+        
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.postTable.c.date))
