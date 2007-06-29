@@ -46,26 +46,21 @@ class GSTopicResultsContentProvider(object):
           self.groupsInfo = createObject('groupserver.GroupsInfo', 
             self.context)
 
-          searchKeywords = self.searchText.split()
+          self.searchTokens = createObject('groupserver.SearchTextTokens',
+            self.searchText)          
           
           self.groupIds = [gId for gId in self.groupIds if gId]
           if self.groupIds:
               groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
           else:
              groupIds = self.groupsInfo.get_visible_group_ids()
-          
-          subjectTopics = self.subject_search(searchKeywords, groupIds)
-          keywordTopics = self.keyword_search(searchKeywords, groupIds)
-          
-          self.topics = subjectTopics + keywordTopics
+
+          self.topics = self.messageQuery.topic_search_keyword_subject(
+            self.searchTokens.keywords, self.siteInfo.get_id(), 
+            groupIds, limit=self.limit, offset=self.startIndex)
           assert len(self.topics) <= (self.limit * 2)
           
-          self.topics = self.remove_duplicate_topics(self.topics)
           self.topics = self.remove_non_existant_groups(self.topics)
-          self.topics.sort(self.date_sort)
-          self.topicCount = len(self.topics)
-          self.topics = self.topics[:self.limit]
-          
           self.topics = self.add_group_names_to_topics(self.topics)
           
           self.totalNumTopics = self.messageQuery.count_topics()
@@ -85,24 +80,6 @@ class GSTopicResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
           
-      def subject_search(self, keywords, groupIds):
-          assert hasattr(self, 'messageQuery')
-          assert self.messageQuery
-
-          siteId = self.siteInfo.get_id()
-          topics = self.messageQuery.topic_search_subect(keywords, 
-            siteId, groupIds, limit=self.limit, offset=self.startIndex)
-          return topics
-      
-      def keyword_search(self, keywords, groupIds):
-          if keywords:
-              siteId = self.siteInfo.get_id()
-              topics = self.messageQuery.topic_search_keyword(keywords,
-                siteId, groupIds, limit=self.limit, offset=self.startIndex)
-          else:
-              topics = []
-          return topics
-          
       def add_group_names_to_topics(self, topics):
           ts = topics
           groupsObj = self.groupsInfo.groupsObj
@@ -111,28 +88,7 @@ class GSTopicResultsContentProvider(object):
                   group = getattr(groupsObj, topic['group_id'])
                   topic['group_name'] = group.title_or_id()
           return ts
-                
-      def date_sort(self, a, b):
-          retval = 0
-          if a['last_post_date'] < b['last_post_date']:
-              retval = 1
-          elif a['last_post_date'] == b['last_post_date']:
-              retval = 0
-          else:
-              retval = -1
 
-          return retval
-
-      def remove_duplicate_topics(self, topics):
-          retval = []
-          tIds = []
-          for topic in topics:
-              tId = topic['topic_id']
-              if tId not in tIds:
-                  tIds.append(tId)
-                  retval.append(topic)
-          return retval
-          
       def remove_non_existant_groups(self, topics):
           groupIds = self.groupsInfo.get_visible_group_ids()
           retval = [topic for topic in topics 

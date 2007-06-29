@@ -74,8 +74,11 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         aswc(self, statement, self.topicTable, site_id, group_ids)
 
         if (len(keywords) == 1):
-            statement.append_whereclause(countTable.c.word == keywords[0].lower())
+            regexep = keywords[0].lower()
+            #statement.append_whereclause(countTable.c.word.op('~*')(regexep))
+            statement.append_whereclause(countTable.c.word == regexep)
         elif(len(keywords) > 1):
+            #conds = [(countTable.c.word.op('~*')(k.lower())) for k in keywords]
             conds = [(countTable.c.word == k.lower()) for k in keywords]
             statement.append_whereclause(sa.or_(*conds))
         else: # (len(keywords) == 0)
@@ -101,8 +104,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         return retval
 
-    def topic_search_keyword_subject(self, searchText, site_id, group_ids=[],
-        limit=12, offset=0):
+    def topic_search_keyword_subject(self, keywords, site_id, 
+        group_ids=[], limit=12, offset=0):
         """Search for the search text in the content and subject-lines of
         topics"""
         
@@ -117,10 +120,23 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
         aswc(self, statement, self.topicTable, site_id, group_ids)
 
-        regexp = '.*%s.*' % searchText.lower()
-        subjCol = self.topicTable.c.original_subject
-        statement.append_whereclause(sa.or_(subjCol.op('~*')(regexp),
-          self.topic_word_countTable.c.word == searchText.lower()))
+        subjectCol = self.topicTable.c.original_subject
+        wordCol = self.topic_word_countTable.c.word
+        if (len(keywords) == 1):
+            regexp = keywords[0].lower()
+            conds = (subjectCol.op('~*')(regexp), wordCol == regexp)
+            statement.append_whereclause(sa.or_(*conds))
+        elif (len(keywords) > 1):
+            # For each keyword, construct a regular expression match, and 
+            #   "or" them all together
+            subjectConds = [subjectCol.op('~*')(k ) for k in keywords]
+            wordConds = [(wordCol == k) for k in keywords]
+            conds = subjectConds + wordConds
+            statement.append_whereclause(sa.or_(*conds))
+        else: # (len(keywords) == 0)
+            # We do not need to do anything if there are no keywords
+            pass
+
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))        
@@ -256,8 +272,9 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             # We do not need to do anything if there are no keywords
             pass
         
-        topics = self.topic_search_keyword(keywords, site_id, group_ids,
-           limit, offset)
+        topics = self.topic_search_keyword_subject(keywords, site_id,
+           group_ids, limit, offset)
+        # --=mpj17=-- Need to search the subject-line of the topics.
         conds = [(self.postTable.c.topic_id == t['topic_id']) 
                  for t in topics]
         statement.append_whereclause(sa.or_(*conds))

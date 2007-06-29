@@ -62,6 +62,11 @@
                 tal:attributes="href view/only_topics_link">Show 
                 only topics</a>
             </li>
+            <li tal:condition="not:view/only_posts_shown">
+              <a href="#" title="View Posts"
+                tal:attributes="href view/only_posts_link">Show 
+                only posts</a>
+            </li>
           </ul>
           <p tal:replace="structure provider:groupserver.TopicResults">
             The baby's blood type? Human, mostly.</p>
@@ -103,11 +108,19 @@
           <p tal:replace="structure provider:groupserver.ProfileResults">
             The baby's blood type? Human, mostly.</p>
         </div-->
-        <fieldset>          
+        <fieldset>
           <input type="text" class="text" name="searchText"
             id="searchText" title="Text to search for"
             tal:attributes="value request/searchText | nothing"/>
           <input type="submit" class="button" value="Search"/>
+          <input type="hidden" name="viewTopics" value="#"
+            tal:attributes="value python:'%d' % view.view_topics()"/>
+          <input type="hidden" name="viewPosts" value="#"
+            tal:attributes="value python: '%d' % view.view_posts()"/>
+          <input type="hidden" name="viewFiles" value="#"
+            tal:attributes="value python: '%d' % view.view_files()"/>
+          <input type="hidden" name="viewProfiles" value="#"
+            tal:attributes="value python: '%d' % view.view_profiles()"/>
         </fieldset> 
       </form>
     </tal:block>
