@@ -32,6 +32,13 @@ class IGSSearchResults(Interface):
         unique=True,
     )
 
+
+    authorId = TextLine(
+      title=u'Author ID',
+      description=u'Unique Identifier of an author',
+      required=False
+    )
+
     limit = Int(
         title=u"Limit",
         description=u"Number of items to show in the results",
@@ -102,6 +109,13 @@ class IGSPostResultsContentProvider(IContentProvider, IGSSearchResults):
                        results.""",
       required=False,
       default=u"browser/templates/postResultsFull.pt")
+      
+    authorIds = List(
+      title=u'Author Ids',
+      description=u'Author IDs',
+      value_type=TextLine(title=u'Author ID'),
+      required=False
+    )
 
 class IGSFileResultsContentProvider(IContentProvider, IGSSearchResults):
     """The GroupServer File Results Content Provider"""

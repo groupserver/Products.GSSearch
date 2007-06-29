@@ -247,7 +247,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         return retval
 
     def post_search_keyword(self, keywords, site_id, group_ids=[], 
-        limit=12, offset=0):
+        author_ids=[], limit=12, offset=0):
         
         statement = self.postTable.select()
         sc = Products.XWFMailingListManager.queries.MessageQuery
@@ -257,6 +257,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         bodyCol = self.postTable.c.body
         subjectCol = self.postTable.c.subject
 
+        keywords = [k for k in keywords if k]
         if (len(keywords) == 1):
             regexp = keywords[0].lower()
             conds = (subjectCol.op('~*')(regexp), bodyCol.op('~*')(regexp))
@@ -271,6 +272,20 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         else: # (len(keywords) == 0)
             # We do not need to do anything if there are no keywords
             pass
+
+        author_ids = [a for a in author_ids if a]
+        authorCol = self.postTable.c.user_id
+        if (len(author_ids) == 1):
+            statement.append_whereclause(authorCol == author_ids[0])
+        elif (len(author_ids) > 1):
+            # For each author, construct a regular expression match, and 
+            #   "or" them all together
+            conds = [authorCol == a for a in author_ids]
+            statement.append_whereclause(sa.or_(*conds))
+        else: # (len(authorId) == 0)
+            # We do not need to do anything if there are no authors
+            pass
+
         
         topics = self.topic_search_keyword_subject(keywords, site_id,
            group_ids, limit, offset)

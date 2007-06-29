@@ -52,7 +52,8 @@ class GSPostResultsContentProvider(object):
           else:
              groupIds = self.groupsInfo.get_visible_group_ids()
 
-          self.posts = self.posts_search(self.searchTokens.phrases, groupIds)
+          self.posts = self.posts_search(self.searchTokens.phrases, 
+            groupIds, self.authorIds)
 
           
       def render(self):
@@ -66,12 +67,13 @@ class GSPostResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
 
-      def posts_search(self, keywords, groupIds):
+      def posts_search(self, keywords, groupIds, authorIds):
           assert hasattr(self, 'messageQuery')
           assert self.messageQuery
           siteId = self.siteInfo.get_id()
           posts = self.messageQuery.post_search_keyword(keywords, 
-            siteId, groupIds, limit=self.limit, offset=self.startIndex)
+            siteId, groupIds, authorIds,
+            limit=self.limit, offset=self.startIndex)
           return posts
 
       def get_results(self):
@@ -92,6 +94,8 @@ class GSPostResultsContentProvider(object):
                 'id': authorInfo.get_id(),
                 'name': authorInfo.get_realnames(),
                 'url': authorInfo.get_url(),
+                'only': self.view.only_author(authorInfo.get_id()),
+                'onlyURL': self.view.only_author_link(authorInfo.get_id())
               }
               
               groupInfo = createObject('groupserver.GroupInfo', 
@@ -100,7 +104,9 @@ class GSPostResultsContentProvider(object):
               groupD = {
                 'id': groupInfo.get_id(),
                 'name': groupInfo.get_name(),
-                'url': groupInfo.get_url()
+                'url': groupInfo.get_url(),
+                'only': self.view.only_group(groupInfo.get_id()),
+                'onlyURL': self.view.only_group_link(groupInfo.get_id())
               }
               
               retval = {
@@ -165,7 +171,7 @@ class GSPostResultsContentProvider(object):
                       truncatedLines.append(l)
               summary = '\n'.join(truncatedLines)
           return summary
-          
+              
 zope.component.provideAdapter(GSPostResultsContentProvider,
   provides=zope.contentprovider.interfaces.IContentProvider,
   name="groupserver.PostResults")

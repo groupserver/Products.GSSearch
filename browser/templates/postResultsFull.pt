@@ -37,6 +37,34 @@
         tal:content="structure result/postSummary">
           This is the body of the document.
       </pre><!--email-summary-->
+      <div class="disclosureWidget" id="#"
+        tal:define="widgetId string:refinement-${result/postId}"
+        tal:attributes="id widgetId">
+        <p>
+          <a class="disclosureButton"
+            tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
+            href="#">Refine</a>
+        </p>
+        <div class="disclosureShowHide" style="display:none;">
+          <div>
+            <ul>
+              <li tal:condition="not:result/group/only">
+                <a title="Show only posts from the same group as this post"
+                  tal:attributes="href result/group/onlyURL"
+                  href="#">Show only posts from 
+                  <span class="group" 
+                    tal:content="result/group/name">this group</span></a>
+              </li>
+              <li tal:condition="not:result/author/only">
+                <a tal:attributes="href result/author/onlyURL"
+                  href="#">Show only posts by 
+                <span class="name" 
+                  tal:content="result/author/name">this author</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div><!--email-details-->
   </tal:block>
 </tal:block>

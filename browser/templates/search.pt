@@ -20,12 +20,12 @@
     <meta name="date" content="2007-04-26"/>
         
     <tal:block metal:fill-slot="javascript">
-      <script type="text/javascript"
+      <script type="text/javascript" 
         src="/++resource++prototype/prototype.js">&#160;</script>
-      <script type="text/javascript"
+      <script type="text/javascript" 
         src="/++resource++scriptaculous/scriptaculous.js">&#160;</script>
       <script type="text/javascript"
-        src="/++resource++post.js">&#160;</script>
+        src="/++resource++disclosureButton/disclosure_toggle.js">&#160;</script>
     </tal:block>
     
     <tal:block metal:fill-slot="style">
@@ -40,6 +40,7 @@
         action="." tal:attributes="action request/URL"
         tal:define="searchText python:view.searchText;
         groupIds python:[view.groupId];
+        authorIds python:[view.authorId];
         limit python:view.limit;
         filesStartIndex python:view.filesStartIndex;
         filesLimit python:view.filesLimit">
@@ -99,6 +100,16 @@
                 tal:attributes="href view/only_posts_link">Show 
                 only posts</a>
             </li>
+            <li tal:condition="view/only_posts_shown">
+              <a href="#" title="View Topics"
+                tal:attributes="href view/only_topics_link">Show 
+                only topics</a>
+            </li>
+            <li tal:condition="view/only_author">
+              <a href="#" title="View All Authors"
+                tal:attributes="href view/all_authors_link">Show 
+                all authors</a>
+            </li>
           </ul>
           <p tal:replace="structure provider:groupserver.PostResults">
             The baby's blood type? Human, mostly.</p>
@@ -121,6 +132,10 @@
             tal:attributes="value python: '%d' % view.view_files()"/>
           <input type="hidden" name="viewProfiles" value="#"
             tal:attributes="value python: '%d' % view.view_profiles()"/>
+          <input type="hidden" name="groupIds" value="#"
+            tal:attributes="value groupIds"/> 
+          <input type="hidden" name="authorId" value="#"
+            tal:attributes="value view/authorId"/>
         </fieldset> 
       </form>
     </tal:block>

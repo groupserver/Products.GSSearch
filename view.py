@@ -27,7 +27,14 @@ class GSSearchView(BrowserView):
                self.groupId)
         else:
             self.groupInfo = None
-            
+           
+        self.authorId = self.request.get('authorId', '')
+        if self.authorId:
+            self.authorInfo = createObject('groupserver.AuthorInfo', 
+                                           self.context, self.authorId)
+        else:
+            self.authorInfo = None
+           
         self.startIndex = int(self.request.get('startIndex', 0))
         
         self.viewTopics = self.__get_boolean('viewTopics', True)
@@ -100,9 +107,15 @@ class GSSearchView(BrowserView):
         if self.groupInfo:
             link = '<a class="group" href="%s">%s</a>' % \
               (self.groupInfo.get_url(), self.groupInfo.get_name())
-            grp = ' in the group %s' % link
+            grp = u', in the group %s' % link
             
-        r = u'Results for %s %s%s.' % (s, inStr, grp)
+        auth = ''
+        if self.authorInfo:
+            link= '<a class="name" href="%s">%s</a>' % \
+              (self.authorInfo.get_url(), self.authorInfo.get_realnames())
+            auth = u', by %s' % link
+            
+        r = u'Results for %s %s%s%s.' % (s, inStr, grp, auth)
         return r
 
     def __get_boolean(self, var, default=True):
@@ -128,7 +141,7 @@ class GSSearchView(BrowserView):
             val = default
         return val
         
-    def get_search_url(self, searchText=None, groupId=None, 
+    def get_search_url(self, searchText=None, groupId=None, authorId=None,
         viewTopics=None, viewPosts=None, viewFiles=None, viewProfiles=None,
         filesStartIndex=None, filesLimit=None):
         """Get the URL for a search
@@ -143,7 +156,10 @@ class GSSearchView(BrowserView):
                                          
         groupIdQuery = self.get_query(r'groupId=%s', 
                                       self.groupId, groupId)
-                                      
+        
+        authorIdQuery = self.get_query(r'authorId=%s', 
+                                       self.authorId, authorId)
+        
         viewTopicsQuery = self.get_query(r'viewTopics=%s',
           self.viewTopics, viewTopics, valType=int)
         viewPostsQuery = self.get_query(r'viewPosts=%s', 
@@ -158,8 +174,8 @@ class GSSearchView(BrowserView):
         fl = self.get_query(r'filesLimit=%s', self.filesLimit, filesLimit, 
           valType=int)
 
-        queries = '&'.join([searchTextQuery, groupIdQuery, viewTopicsQuery,
-                            viewPostsQuery, viewFilesQuery, 
+        queries = '&'.join([searchTextQuery, groupIdQuery, authorIdQuery,
+                            viewTopicsQuery, viewPostsQuery, viewFilesQuery, 
                             viewProfilesQuery, fs, fl])
         retval = '%s?%s' % (self.request.URL, queries)
         return retval
@@ -193,7 +209,7 @@ class GSSearchView(BrowserView):
 
     def only_topics_link(self):
         retval = self.get_search_url(viewTopics=True, viewPosts=False,
-          viewFiles=False, viewProfiles=False)
+          viewFiles=False, viewProfiles=False, authorId='')
         return retval
 
     def view_posts(self):
@@ -226,7 +242,22 @@ class GSSearchView(BrowserView):
     def only_profiles_shown(self):
         return self.viewProfiles and \
           not(self.viewTopics or self.viewPosts or self.viewFiles)
-            
+    
+    def only_group(self, groupId):
+        return groupId == self.groupId
+    
+    def only_group_link(self, groupId):
+        return self.get_search_url(groupId=groupId)
+    
+    def only_author(self, authorId=None):
+        return bool(self.authorId)
+        
+    def only_author_link(self, authorId):
+        return self.get_search_url(authorId=authorId)
+
+    def all_authors_link(self):
+        return self.get_search_url(authorId='')
+    
     def process_form(self):
         form = self.context.REQUEST.form
         result = {}
