@@ -287,7 +287,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             pass
 
         
-        topics = self.topic_search_keyword_subject(keywords, site_id,
+        topics = self.topic_search_keyword(keywords, site_id,
            group_ids, limit, offset)
         # --=mpj17=-- Need to search the subject-line of the topics.
         conds = [(self.postTable.c.topic_id == t['topic_id']) 
