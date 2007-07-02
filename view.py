@@ -73,9 +73,12 @@ class GSSearchView(BrowserView):
         grp = ''
         if self.groupInfo:
             grp = ': %s' % self.groupInfo.get_name()
-            
-        r = r'Results for %s %s%s: %s'
-        retval = r % (s, inStr, grp, self.siteInfo.get_name())
+        auth = ''
+        if self.authorInfo:
+            auth = u', by %s' % self.authorInfo.get_realnames()
+
+        r = r'Results for %s %s%s%s: %s'
+        retval = r % (s, inStr, auth, grp, self.siteInfo.get_name())
         
         return retval
 
