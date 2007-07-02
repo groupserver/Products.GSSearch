@@ -81,44 +81,46 @@ class GSPostResultsContentProvider(object):
               raise interfaces.UpdateNotCalled
 
           author_cache = getattr(self.view, '__author_object_cache', {})
-              
+          
+          visibleGroupIds = self.groupsInfo.get_visible_group_ids()
+          
           for post in self.posts:
-              authorInfo = author_cache.get(post['user_id'], None)
-              if not authorInfo:
-                  authorInfo = createObject('groupserver.AuthorInfo', 
-                    self.context, post['user_id'])
-                  author_cache[post['user_id']] = authorInfo
+              if post['group_id'] in visibleGroupIds:
+                  authorInfo = author_cache.get(post['user_id'], None)
+                  if not authorInfo:
+                      authorInfo = createObject('groupserver.AuthorInfo', 
+                        self.context, post['user_id'])
+                      author_cache[post['user_id']] = authorInfo
+                  authorId = authorInfo.get_id()
+                  authorD = {
+                    'exists': authorInfo.exists(),
+                    'id': authorId,
+                    'name': authorInfo.get_realnames(),
+                    'url': authorInfo.get_url(),
+                    'only': self.view.only_author(authorId),
+                    'onlyURL': self.view.only_author_link(authorId)
+                  }
                   
-              authorD = {
-                'exists': authorInfo.exists(),
-                'id': authorInfo.get_id(),
-                'name': authorInfo.get_realnames(),
-                'url': authorInfo.get_url(),
-                'only': self.view.only_author(authorInfo.get_id()),
-                'onlyURL': self.view.only_author_link(authorInfo.get_id())
-              }
-              
-              groupInfo = createObject('groupserver.GroupInfo', 
-                self.context, post['group_id'])
-
-              groupD = {
-                'id': groupInfo.get_id(),
-                'name': groupInfo.get_name(),
-                'url': groupInfo.get_url(),
-                'only': self.view.only_group(groupInfo.get_id()),
-                'onlyURL': self.view.only_group_link(groupInfo.get_id())
-              }
-              
-              retval = {
-                'postId': post['post_id'],
-                'topicName': post['subject'],
-                'author': authorD,
-                'group': groupD,
-                'date': post['date'],
-                'timezone': 'foo',
-                'postSummary': self.get_summary(post['body']),
-              }
-              yield retval
+                  groupInfo = createObject('groupserver.GroupInfo', 
+                    self.context, post['group_id'])
+                  groupD = {
+                    'id': groupInfo.get_id(),
+                    'name': groupInfo.get_name(),
+                    'url': groupInfo.get_url(),
+                    'only': self.view.only_group(groupInfo.get_id()),
+                    'onlyURL': self.view.only_group_link(groupInfo.get_id())
+                  }
+                      
+                  retval = {
+                    'postId': post['post_id'],
+                    'topicName': post['subject'],
+                    'author': authorD,
+                    'group': groupD,
+                    'date': post['date'],
+                    'timezone': 'foo',
+                    'postSummary': self.get_summary(post['body']),
+                  }
+                  yield retval
 
       def get_summary(self, text, nLines=1, lineLength=40):
 
