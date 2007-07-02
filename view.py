@@ -252,6 +252,9 @@ class GSSearchView(BrowserView):
     def only_group_link(self, groupId):
         return self.get_search_url(groupId=groupId)
     
+    def all_groups_link(self):
+        return self.get_search_url(groupId='')
+
     def only_author(self, authorId=None):
         return bool(self.authorId)
         

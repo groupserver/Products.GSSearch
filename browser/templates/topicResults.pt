@@ -24,26 +24,25 @@
             <li tal:content="keyword/word"></li>
           </tal:block>
         </ul>
-        <div class="refine"
-          tal:define="buttonId string:refineOptionsButton${topic/topic_id};
-            optionsId string:refineOptions${topic/topic_id}">
-          <div class="showrefine">
-            <a href="#" id="abc123"
-              tal:attributes="id buttonId;
-                href string:javascript:showHideInline('${optionsId}','${buttonId}')"
-              title="Refine the results">&#9654;</a>
-          </div>
-          <div class="refineOptions" id="abc123" style="display:none;"
-            tal:attributes="id optionsId">
+        <div class="disclosureWidget" id="#"
+          tal:define="widgetId string:refinement-${topic/last_post_id}"
+          tal:attributes="id widgetId">
+          <p>
+            <a class="disclosureButton"
+              tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
+              href="#">Refine</a>
+          </p>
+          <div class="disclosureShowHide" style="display:none;">
             <div>
               <ul>
                 <li tal:condition="topic/show_group">
-                  <a tal:attributes="href python:view.view.get_search_url(groupId=topic['group_id'])"
+                  <a tal:attributes="href python:view.get_group_link(topic['group_id'])"
                     href="#">Only search the group
-                    <cite class="group" tal:content="topic/group_name">A Group Name</cite></a>
+                    <cite class="group" 
+                      tal:content="topic/group_name">A Group Name</cite></a>
                 </li>
-                <li>
-                  <a tal:attributes="href python:view.view.get_search_url(searchText=map(lambda w:w['word'], topic['keywords']))"
+                <li tal:define="kws python:map(lambda w:w['word'], topic['keywords'])">
+                  <a tal:attributes="href python:view.get_keyword_search_link(kws)"
                     href="#">Search for documents related to
                     <cite tal:content="topic/subject">this topic</cite></a>
                 </li>

@@ -139,6 +139,12 @@ class GSTopicResultsContentProvider(object):
               retval['keywords'] = self.get_keywords_for_topic(retval)
               retval['show_group'] = (self.view.groupId != retval['group_id'])
               yield retval
+              
+      def get_group_link(self, groupId):
+          return self.view.only_group_link(groupId)
+
+      def get_keyword_search_link(self, keywords):
+          return self.view.get_search_url(searchText=keywords)
 
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
