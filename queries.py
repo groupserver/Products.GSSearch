@@ -108,15 +108,26 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         group_ids=[], limit=12, offset=0):
         """Search for the search text in the content and subject-lines of
         topics"""
-        
-        cols = [self.topicTable.c.topic_id.distinct(), 
-          self.topicTable.c.group_id, self.topicTable.c.site_id,
-          self.topicTable.c.original_subject,
-          self.topicTable.c.first_post_id, self.topicTable.c.last_post_id,
-          self.topicTable.c.last_post_date, self.topicTable.c.num_posts]
-        statement = sa.select(cols, 
-          self.topicTable.c.topic_id == self.topic_word_countTable.c.topic_id)
 
+        keywords = [k for k in keywords if k]
+        
+        if keywords:
+            cols = [self.topicTable.c.topic_id.distinct(), 
+              self.topicTable.c.group_id, self.topicTable.c.site_id,
+              self.topicTable.c.original_subject,
+              self.topicTable.c.first_post_id, self.topicTable.c.last_post_id,
+              self.topicTable.c.last_post_date, self.topicTable.c.num_posts]
+            statement = sa.select(cols, 
+              self.topicTable.c.topic_id == self.topic_word_countTable.c.topic_id)
+        else:
+            cols = [self.topicTable.c.topic_id.distinct(),
+              self.topicTable.c.group_id, self.topicTable.c.site_id,
+              self.topicTable.c.original_subject,
+              self.topicTable.c.first_post_id, self.topicTable.c.last_post_id,
+              self.topicTable.c.last_post_date, self.topicTable.c.num_posts]
+            statement = sa.select(cols)
+        assert statement
+        
         aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
         aswc(self, statement, self.topicTable, site_id, group_ids)
 
