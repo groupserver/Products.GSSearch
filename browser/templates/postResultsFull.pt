@@ -5,7 +5,7 @@
       id string:post-${result/postId};">
       <p class="email-metadata">
         <a class="topic" tal:condition="result/topicName"
-          tal:attributes="href string:/r/topic/${result/postId};"
+          tal:attributes="href string:/r/topic/${result/postId}#post-${result/postId};"
           tal:content="result/topicName">A Topic</a>
         <span class="recipient">
           <strong>To:</strong>
@@ -38,6 +38,7 @@
           This is the body of the document.
       </pre><!--email-summary-->
       <div class="disclosureWidget" id="#"
+        tal:condition="python:not(result['group']['only'] and result['author']['only'])"
         tal:define="widgetId string:refinement-${result/postId}"
         tal:attributes="id widgetId">
         <p>

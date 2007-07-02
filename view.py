@@ -122,7 +122,7 @@ class GSSearchView(BrowserView):
         """Get a Boolean value from the form
         
         Getting a Boolean value from an HTML form is a stupidly
-        difficult task. To save sanity, this method performs the
+        difficult task. To preserve sanity, this method performs the
         leg-work.
         
         ARGUMENTS

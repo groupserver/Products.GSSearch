@@ -35,6 +35,31 @@
     
   </head>
   <body>
+    <tal:block metal:fill-slot="contextnavigation">
+      <div id="contextnav" class="xhtml2-nl">
+        <p class="label">Search</p>
+        <ul>
+          <li>
+            <a href="#"
+              tal:define="current view/only_topics_shown"
+              tal:attributes="href view/only_topics_link;
+                class python:current and 'current' or 'not-current'">Topics</a>
+          </li>
+          <li>
+            <a href="#"
+              tal:define="current view/only_posts_shown" 
+              tal:attributes="href view/only_posts_link;
+                class python:current and 'current' or 'not-current'">Posts</a>
+          </li>
+          <li>
+            <a href="#"
+              tal:define="current view/only_files_shown" 
+              tal:attributes="href view/only_files_link;
+                class python:current and 'current' or 'not-current'">Files</a>
+          </li>
+        </ul>
+      </div>
+    </tal:block>  
     <tal:block metal:fill-slot="body">
       <form enctype="multipart/form-data" method="get"
         action="." tal:attributes="action request/URL"
@@ -48,27 +73,21 @@
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.
         </p>
-        <p tal:condition="view/groupId">
-          <a href="#" tal:attributes="href view/all_site_search_link">Search
-           all of <span class="site" 
-                    tal:content="python:view.siteInfo.get_name()">this 
-                    site</span>.</a>
-        </p>
+        <ul class="navigation">
+          <li tal:condition="view/groupId">
+            <a href="#" 
+              tal:attributes="href view/all_site_search_link">Search
+              all groups.</a>
+          </li>
+          <li tal:condition="view/only_author">
+            <a href="#" title="View All Authors"
+               tal:attributes="href view/all_authors_link">Show 
+               all authors</a>
+          </li>
+        </ul>
         
         <div id="topics" tal:condition="view/view_topics">
           <h2 tal:condition="not:view/only_topics_shown">Topics</h2>
-          <ul class="navigation">
-            <li tal:condition="not:view/only_topics_shown">
-              <a href="#" title="View topics"
-                tal:attributes="href view/only_topics_link">Show 
-                only topics</a>
-            </li>
-            <li tal:condition="not:view/only_posts_shown">
-              <a href="#" title="View Posts"
-                tal:attributes="href view/only_posts_link">Show 
-                only posts</a>
-            </li>
-          </ul>
           <p tal:replace="structure provider:groupserver.TopicResults">
             The baby's blood type? Human, mostly.</p>
           <p>
@@ -82,35 +101,11 @@
         
         <div id="files" tal:condition="view/view_files">
           <h2 tal:condition="not:view/only_files_shown">Posted Files</h2>          
-          <ul class="navigation">
-            <li tal:condition="not:view/only_files_shown">
-              <a href="#" title="View topics"
-                tal:attributes="href view/only_files_link">Show 
-                only files</a>
-            </li>
-          </ul>
           <p tal:replace="structure provider:groupserver.FileResults">
             The baby's blood type? Human, mostly.</p>
         </div>
         <div id="posts" tal:condition="view/view_posts">
           <h2 tal:condition="not:view/only_posts_shown">Posts</h2>          
-          <ul class="navigation">
-            <li tal:condition="not:view/only_posts_shown">
-              <a href="#" title="View Posts"
-                tal:attributes="href view/only_posts_link">Show 
-                only posts</a>
-            </li>
-            <li tal:condition="view/only_posts_shown">
-              <a href="#" title="View Topics"
-                tal:attributes="href view/only_topics_link">Show 
-                only topics</a>
-            </li>
-            <li tal:condition="view/only_author">
-              <a href="#" title="View All Authors"
-                tal:attributes="href view/all_authors_link">Show 
-                all authors</a>
-            </li>
-          </ul>
           <p tal:replace="structure provider:groupserver.PostResults">
             The baby's blood type? Human, mostly.</p>
         </div>
