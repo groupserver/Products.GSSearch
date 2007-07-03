@@ -31,6 +31,8 @@ class GSPostResultsContentProvider(object):
           self.request = request
           self.view = view
           
+          self.posts = []
+          
       def update(self):
           self.__updated = True
 
@@ -54,6 +56,9 @@ class GSPostResultsContentProvider(object):
 
           self.posts = self.posts_search(self.searchTokens.phrases, 
             groupIds, self.authorIds)
+            
+          self.postCount = self.post_count(self.searchTokens.phrases, 
+            groupIds, self.authorIds)
 
           
       def render(self):
@@ -75,6 +80,42 @@ class GSPostResultsContentProvider(object):
             siteId, groupIds, authorIds,
             limit=self.limit, offset=self.startIndex)
           return posts
+          
+      def post_count(self, keywords, groupIds, authorIds):
+          assert hasattr(self, 'messageQuery')
+          assert self.messageQuery
+          siteId = self.siteInfo.get_id()
+          postCount = self.messageQuery.count_post_search_keyword(keywords, 
+            siteId, groupIds, authorIds)
+          return postCount
+
+      def show_previous(self):
+          retval = (self.startIndex > 0)
+          return retval
+          
+      def previous_link(self):
+          retval = self.view.get_search_url(startIndex=self.previous_chunk())
+          return retval
+          
+      def previous_chunk(self):
+          retval = self.startIndex - self.limit
+          if retval < 0:
+              retval = 0
+          assert retval >= 0
+          return retval
+          
+      def show_next(self):
+          assert self.posts
+          retval = (self.postCount >= (self.startIndex + self.limit))
+          return retval
+          
+      def next_link(self):
+          retval = self.view.get_search_url(startIndex=self.next_chunk())
+          return retval
+
+      def next_chunk(self):
+          retval = self.startIndex + self.limit
+          return retval
 
       def get_results(self):
           if not self.__updated:

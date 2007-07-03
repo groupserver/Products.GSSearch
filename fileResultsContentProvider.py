@@ -61,8 +61,8 @@ class GSFileResultsContentProvider(object):
           self.results = self.search_files(searchKeywords, groupIds)
           self.results = self.remove_non_existant_groups(self.results)
           
-          start = self.filesStartIndex
-          end = self.filesStartIndex + self.filesLimit
+          start = self.startIndex
+          end = self.startIndex + self.limit
           self.resultsCount = len(self.results)
           self.results = self.results[start : end]
 
@@ -181,13 +181,13 @@ class GSFileResultsContentProvider(object):
               yield retval
             
       def show_next_link(self):
-          retval = (self.filesStartIndex + self.filesLimit) < self.resultsCount 
+          retval = (self.startIndex + self.limit) < self.resultsCount 
           return retval
       
       def get_next_link(self):
-          fs = self.filesStartIndex
-          fl = self.filesLimit
-          return self.view.get_search_url(filesStartIndex=fs+fl)
+          fs = self.startIndex
+          fl = self.limit
+          return self.view.get_search_url(startIndex=fs+fl)
           
 zope.component.provideAdapter(GSFileResultsContentProvider,
                               provides=zope.contentprovider.interfaces.IContentProvider,

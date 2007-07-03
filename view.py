@@ -36,15 +36,12 @@ class GSSearchView(BrowserView):
             self.authorInfo = None
            
         self.startIndex = int(self.request.get('startIndex', 0))
+        self.limit = int(self.request.get('limit', 6))
         
         self.viewTopics = self.__get_boolean('viewTopics', True)
         self.viewPosts = self.__get_boolean('viewPosts', False)
         self.viewFiles = self.__get_boolean('viewFiles', True)
         self.viewProfiles = self.__get_boolean('viewProfiles', True)
-        self.limit = int(self.request.get('limit', 6))
-
-        self.filesStartIndex = int(self.request.get('filesStartIndex', 0))
-        self.filesLimit = int(self.request.get('filesLimit', 6))
 
     def get_title(self):
         retval = ''
@@ -146,7 +143,7 @@ class GSSearchView(BrowserView):
         
     def get_search_url(self, searchText=None, groupId=None, authorId=None,
         viewTopics=None, viewPosts=None, viewFiles=None, viewProfiles=None,
-        filesStartIndex=None, filesLimit=None):
+        startIndex=None, limit=None):
         """Get the URL for a search
         
         Returns the URL for the current search, or a modification of the
@@ -172,14 +169,14 @@ class GSSearchView(BrowserView):
         viewProfilesQuery = self.get_query(r'viewProfiles=%s', 
           self.viewProfiles, viewProfiles, valType=int)
           
-        fs = self.get_query(r'filesStartIndex=%s', self.filesStartIndex, 
-          filesStartIndex, valType=int)
-        fl = self.get_query(r'filesLimit=%s', self.filesLimit, filesLimit, 
+        si = self.get_query(r'startIndex=%s', self.startIndex, 
+          startIndex, valType=int)
+        li = self.get_query(r'limit=%s', self.limit, limit, 
           valType=int)
 
         queries = '&'.join([searchTextQuery, groupIdQuery, authorIdQuery,
                             viewTopicsQuery, viewPostsQuery, viewFilesQuery, 
-                            viewProfilesQuery, fs, fl])
+                            viewProfilesQuery, si, li])
         retval = '%s?%s' % (self.request.URL, queries)
         return retval
         

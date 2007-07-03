@@ -67,8 +67,7 @@
         groupIds python:[view.groupId];
         authorIds python:[view.authorId];
         limit python:view.limit;
-        filesStartIndex python:view.filesStartIndex;
-        filesLimit python:view.filesLimit">
+        startIndex python:view.startIndex;">
         
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.
@@ -90,14 +89,7 @@
           <h2 tal:condition="not:view/only_topics_shown">Topics</h2>
           <p tal:replace="structure provider:groupserver.TopicResults">
             The baby's blood type? Human, mostly.</p>
-          <p>
-            <a href="#" class="more"
-              tal:attributes="href view/more_link">More</a>
-            <a href="#" class="next"
-              tal:attributes="href view/next_link">Next</a>
-          </p>
         </div>
-        
         
         <div id="files" tal:condition="view/view_files">
           <h2 tal:condition="not:view/only_files_shown">Posted Files</h2>          
@@ -131,6 +123,10 @@
             tal:attributes="value groupIds"/> 
           <input type="hidden" name="authorId" value="#"
             tal:attributes="value view/authorId"/>
+          <input type="hidden" name="startIndex" value="#"
+            tal:attributes="value view/startIndex"/>
+          <input type="hidden" name="limit" value="#"
+            tal:attributes="value view/limit"/>
         </fieldset> 
       </form>
     </tal:block>

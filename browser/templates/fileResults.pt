@@ -59,10 +59,5 @@
       </li>
     </tal:block>
   </ol>
-  <p>
-    <a href="#" tal:condition="python:view.show_next_link()"
-      tal:attributes="href python:view.get_next_link()">Next
-        <span tal:content="view/filesLimit"/> files</a>
-  </p>
 </div><!--fileResults-->
 
