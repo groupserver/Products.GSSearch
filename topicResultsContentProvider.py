@@ -58,14 +58,12 @@ class GSTopicResultsContentProvider(object):
           self.topics = self.messageQuery.topic_search_keyword_subject(
             self.searchTokens.keywords, self.siteInfo.get_id(), 
             groupIds, limit=self.limit, offset=self.startIndex)
-          assert len(self.topics) <= (self.limit * 2)
-          
-          self.topics = self.remove_non_existant_groups(self.topics)
-          self.topics = self.add_group_names_to_topics(self.topics)
+
+          self.topicCount = self.messageQuery.count_topic_search_keyword_subject(
+            self.searchTokens.keywords, self.siteInfo.get_id(), groupIds)
           
           self.totalNumTopics = self.messageQuery.count_topics()
           self.wordCounts = self.messageQuery.word_counts()
-          self.add_words_to_topics()
                    
       def render(self):
           if not self.__updated:
@@ -80,30 +78,43 @@ class GSTopicResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
           
-      def add_group_names_to_topics(self, topics):
-          ts = topics
-          groupsObj = self.groupsInfo.groupsObj
-          for topic in ts:
-              if hasattr(groupsObj, topic['group_id']):
-                  group = getattr(groupsObj, topic['group_id'])
-                  topic['group_name'] = group.title_or_id()
-          return ts
+      def get_results(self):
+          if not self.__updated:
+              raise interfaces.UpdateNotCalled
 
-      def remove_non_existant_groups(self, topics):
-          groupIds = self.groupsInfo.get_visible_group_ids()
-          retval = [topic for topic in topics 
-                    if (topic['group_id'] in groupIds)]
-          
-          return retval
+          visibleGroupIds = self.groupsInfo.get_visible_group_ids()
+              
+          for topic in self.topics:
+              if topic['group_id'] in visibleGroupIds:
+                retval = topic
+
+                groupInfo = createObject('groupserver.GroupInfo', 
+                  self.context, topic['group_id'])
+                groupD = {
+                  'id': groupInfo.get_id(),
+                  'name': groupInfo.get_name(),
+                  'url': groupInfo.get_url(),
+                  'only': self.view.only_group(groupInfo.get_id()),
+                  'onlyURL': self.view.only_group_link(groupInfo.get_id())
+                }
+                retval['group'] = groupD
+                
+                kwds = self.get_keywords_for_topic(topic)
+                retval['keywords'] = kwds
+                wds = [w['word'] for w in kwds]
+                retval['keywordSearch'] = self.get_keyword_search_link(wds)
+                
+                yield retval
 
       def get_keywords_for_topic(self, topic):
-          twc = float(sum([w['count'] for w in topic['words']]))
+          topicWords = self.words_for_topic(topic['topic_id'])
+          twc = float(sum([w['count'] for w in topicWords]))
           wc = self.wordCounts
           words = [{'word':  w['word'],
                     'tfidf': (w['count']/twc)*\
                               math.log10(self.totalNumTopics/\
                                          float(wc.get('word', 1)))}
-                    for w in topic['words']
+                    for w in topicWords
                     if ((len(w['word']) > 3) and 
                          (w['word'] not in STOP_WORDS))]
           words.sort(self.keywords_sort)
@@ -129,16 +140,37 @@ class GSTopicResultsContentProvider(object):
               words = [topicWord for topicWord in topicWords 
                        if(topicWord['topic_id']==tid)]
               topic['words'] = words          
-         
-      def get_results(self):
-          if not self.__updated:
-              raise interfaces.UpdateNotCalled
-              
-          for topic in self.topics:
-              retval = topic
-              retval['keywords'] = self.get_keywords_for_topic(retval)
-              retval['show_group'] = (self.view.groupId != retval['group_id'])
-              yield retval
+
+      def words_for_topic(self, topicId):
+          topicWords = self.messageQuery.topics_word_count([topicId])
+          return topicWords
+          
+      def show_previous(self):
+          retval = (self.startIndex > 0)
+          return retval
+          
+      def previous_link(self):
+          retval = self.view.get_search_url(startIndex=self.previous_chunk())
+          return retval
+          
+      def previous_chunk(self):
+          retval = self.startIndex - self.limit
+          if retval < 0:
+              retval = 0
+          assert retval >= 0
+          return retval
+          
+      def show_next(self):
+          retval = (self.topicCount >= (self.startIndex + self.limit))
+          return retval
+          
+      def next_link(self):
+          retval = self.view.get_search_url(startIndex=self.next_chunk())
+          return retval
+
+      def next_chunk(self):
+          retval = self.startIndex + self.limit
+          return retval
               
       def get_group_link(self, groupId):
           return self.view.only_group_link(groupId)

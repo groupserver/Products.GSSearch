@@ -1,15 +1,15 @@
 <tal:block tal:define="view options/view">
-  <ol>
+  <ul>
     <tal:block tal:repeat="topic view/get_results">
       <li id="abc123" tal:attributes="id topic/topic_id">
         <a class="topic" href="#"
           tal:attributes="href string:/r/topic/${topic/last_post_id}"
           tal:content="topic/subject"/>
-        <span class="groupInfo" tal:condition="topic/show_group">
+        <span class="groupInfo" tal:condition="not:topic/group/only">
           Group:
           <a class="group" href="#" 
-            tal:attributes="href string:/groups/group/${topic/group_id};"
-            tal:content="topic/group_name"/>
+            tal:attributes="href topic/group/url;"
+            tal:content="topic/group/name"/>
         </span>
         <span class="postCount">
           <span class="cardinal" tal:content="topic/num_posts"/>
@@ -35,14 +35,14 @@
           <div class="disclosureShowHide" style="display:none;">
             <div>
               <ul>
-                <li tal:condition="topic/show_group">
-                  <a tal:attributes="href python:view.get_group_link(topic['group_id'])"
+                <li tal:condition="not:topic/group/only">
+                  <a tal:attributes="href topic/group/onlyURL"
                     href="#">Only search the group
                     <cite class="group" 
-                      tal:content="topic/group_name">A Group Name</cite></a>
+                      tal:content="topic/group/name"/></a>
                 </li>
-                <li tal:define="kws python:map(lambda w:w['word'], topic['keywords'])">
-                  <a tal:attributes="href python:view.get_keyword_search_link(kws)"
+                <li>
+                  <a tal:attributes="href topic/keywordSearch"
                     href="#">Search for documents related to
                     <cite tal:content="topic/subject">this topic</cite></a>
                 </li>
@@ -52,5 +52,15 @@
         </div>
       </li>
     </tal:block>
-  </ol>
+  </ul>
+  <ul class="navigation">
+    <li class="previous"><a href="#" 
+      tal:omit-tag="not:view/show_previous"
+      tal:attributes="href view/previous_link">More recent 
+      <span class="n" tal:content="view/limit"/> topics</a></li>
+    <li class="next"><a href="#"
+      tal:omit-tag="not:view/show_next"
+      tal:attributes="href view/next_link">Older
+      <span class="n" tal:content="view/limit"/> topics</a></li>
+  </ul>
 </tal:block>

@@ -154,19 +154,59 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
         r = statement.execute()
         
-        retval = []
-        if r.rowcount:
-            retval = [ {'topic_id': x['topic_id'],
-                        'last_post_id': x['last_post_id'], 
-                        'first_post_id': x['first_post_id'], 
-                        'group_id': x['group_id'], 
-                        'site_id': x['site_id'], 
-                        'subject': unicode(x['original_subject'], 'utf-8'), 
-                        'last_post_date': x['last_post_date'], 
-                        'num_posts': x['num_posts']} for x in r ]
-        
-        return retval
+        for x in r:
+            retval = {'topic_id': x['topic_id'],
+                      'last_post_id': x['last_post_id'], 
+                      'first_post_id': x['first_post_id'], 
+                      'group_id': x['group_id'], 
+                      'site_id': x['site_id'], 
+                      'subject': unicode(x['original_subject'], 'utf-8'), 
+                      'last_post_date': x['last_post_date'], 
+                      'num_posts': x['num_posts']}
+            yield retval
     
+    def count_topic_search_keyword_subject(self, keywords, site_id, 
+        group_ids=[]):
+        """Search for the search text in the content and subject-lines of
+        topics"""
+
+        keywords = [k for k in keywords if k]
+        cols = [sa.func.count(self.topicTable.c.topic_id.distinct())]
+        
+        if keywords:
+            statement = sa.select(cols, 
+              self.topicTable.c.topic_id == self.topic_word_countTable.c.topic_id)
+        else:
+            statement = sa.select(cols)
+        assert statement
+        
+        aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
+        aswc(self, statement, self.topicTable, site_id, group_ids)
+
+        subjectCol = self.topicTable.c.original_subject
+        wordCol = self.topic_word_countTable.c.word
+        if (len(keywords) == 1):
+            regexp = keywords[0].lower()
+            conds = (subjectCol.op('~*')(regexp), wordCol == regexp)
+            statement.append_whereclause(sa.or_(*conds))
+        elif (len(keywords) > 1):
+            # For each keyword, construct a regular expression match, and 
+            #   "or" them all together
+            subjectConds = [subjectCol.op('~*')(k ) for k in keywords]
+            wordConds = [(wordCol == k) for k in keywords]
+            conds = subjectConds + wordConds
+            statement.append_whereclause(sa.or_(*conds))
+        else: # (len(keywords) == 0)
+            # We do not need to do anything if there are no keywords
+            pass
+
+        r = statement.execute()
+        retval = r.scalar()
+        if retval == None:
+            retval = 0
+        assert retval >= 0
+        return retval
+
     def count_topics(self):
         countTable = self.topicTable
         statement = sa.select([sa.func.count(countTable.c.topic_id)])
