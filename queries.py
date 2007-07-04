@@ -318,31 +318,28 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             # We do not need to do anything if there are no authors
             pass
 
-        keywords = [k for k in searchTokens.keywords if k]
-        if keywords:
-            # --=mpj17=-- Need to search the subject-line of the topics.
-            topics = self.topic_search_keyword(keywords, site_id,
-               group_ids, limit=None)
+        if searchTokens.keywords:
+            wct = self.topic_word_countTable
+            s2 = sa.select([wct.c.topic_id.distinct()], 
+                           wct.c.word.in_(*searchTokens.keywords))
             topicIdCol = self.postTable.c.topic_id
-            topicIds = [t['topic_id'] for t in topics]
-            statement.append_whereclause(topicIdCol.in_(*topicIds))
+            statement.append_whereclause(topicIdCol.in_(s2))
             
         bodyCol = self.postTable.c.body
         subjectCol = self.postTable.c.subject
 
-        phrases = searchTokens.phrases
-        if (len(phrases) == 1):
-            regexp = phrases[0].lower()
-            statement.append_whereclause(bodyCol.op('~*')(regexp))
-        elif (len(phrases) > 1):
+        if (len(searchTokens.phrases) == 1):
+            regexep = bodyCol.op('~*')(searchTokens.phrases[0])
+            statement.append_whereclause(regexep)
+        elif (len(searchTokens.phrases) > 1):
             # For each keyword, construct a regular expression match, and 
             #   "or" them all together
-            bodyConds = [bodyCol.op('~*')(p) for p in phrases]
+            bodyConds = [bodyCol.op('~*')(p) for p in searchTokens.phrases]
             statement.append_whereclause(sa.or_(*bodyConds))
         else: # (len(keywords) == 0)
             # We do not need to do anything if there are no keywords
             pass
-                    
+
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.postTable.c.date))
@@ -381,26 +378,23 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             # We do not need to do anything if there are no authors
             pass
 
-        keywords = [k for k in searchTokens.keywords if k]
-        if keywords:
-            topics = self.topic_search_keyword(keywords, site_id,
-               group_ids, limit=None)
-            # --=mpj17=-- Need to search the subject-line of the topics.
+        if searchTokens.keywords:
+            wct = self.topic_word_countTable
+            s2 = sa.select([wct.c.topic_id.distinct()], 
+                           wct.c.word.in_(*searchTokens.keywords))
             topicIdCol = self.postTable.c.topic_id
-            topicIds = [t['topic_id'] for t in topics]
-            statement.append_whereclause(topicIdCol.in_(*topicIds))
+            statement.append_whereclause(topicIdCol.in_(s2))
             
         bodyCol = self.postTable.c.body
         subjectCol = self.postTable.c.subject
 
-        phrases = searchTokens.phrases
-        if (len(phrases) == 1):
-            regexp = phrases[0].lower()
-            statement.append_whereclause(bodyCol.op('~*')(regexp))
-        elif (len(phrases) > 1):
+        if (len(searchTokens.phrases) == 1):
+            regexep = bodyCol.op('~*')(searchTokens.phrases[0])
+            statement.append_whereclause(regexep)
+        elif (len(searchTokens.phrases) > 1):
             # For each keyword, construct a regular expression match, and 
             #   "or" them all together
-            bodyConds = [bodyCol.op('~*')(p) for p in phrases]
+            bodyConds = [bodyCol.op('~*')(p) for p in searchTokens.phrases]
             statement.append_whereclause(sa.or_(*bodyConds))
         else: # (len(keywords) == 0)
             # We do not need to do anything if there are no keywords
