@@ -56,149 +56,58 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         return retval
 
-    def topic_search_keyword(self, keywords, site_id, group_ids=[],
-        limit=12, offset=0):
-        """Search for a particular keyword in the list of topics."""
-        
-        countTable = self.topic_word_countTable
-        
-        cols = [self.topicTable.c.topic_id, self.topicTable.c.group_id,
-          self.topicTable.c.site_id, self.topicTable.c.original_subject,
-          self.topicTable.c.first_post_id, self.topicTable.c.last_post_id,
-          self.topicTable.c.last_post_date, self.topicTable.c.num_posts]
-        statement = sa.select(cols, 
-          self.topicTable.c.topic_id == countTable.c.topic_id)
-
-        sc = Products.XWFMailingListManager.queries.MessageQuery
-        aswc = sc.__add_std_where_clauses
-        aswc(self, statement, self.topicTable, site_id, group_ids)
-
-        if (len(keywords) == 1):
-            regexep = keywords[0].lower()
-            #statement.append_whereclause(countTable.c.word.op('~*')(regexep))
-            statement.append_whereclause(countTable.c.word == regexep)
-        elif(len(keywords) > 1):
-            #conds = [(countTable.c.word.op('~*')(k.lower())) for k in keywords]
-            conds = [(countTable.c.word == k.lower()) for k in keywords]
-            statement.append_whereclause(sa.or_(*conds))
-        else: # (len(keywords) == 0)
-            # We do not need to do anything if there are no keywords.
-            pass
-        statement.limit = limit
-        statement.offset = offset
-        statement.order_by(sa.desc(self.topicTable.c.last_post_date))
-        statement.distinct = True
-        
-        r = statement.execute()
-        
-        retval = []
-        if r.rowcount:
-            retval = [ {'topic_id': x['topic_id'],
-                        'last_post_id': x['last_post_id'], 
-                        'first_post_id': x['first_post_id'], 
-                        'group_id': x['group_id'], 
-                        'site_id': x['site_id'], 
-                        'subject': unicode(x['original_subject'], 'utf-8'), 
-                        'last_post_date': x['last_post_date'], 
-                        'num_posts': x['num_posts']} for x in r ]
-        
-        return retval
-
-    def topic_search_keyword_subject(self, keywords, site_id, 
+    def topic_search_keyword(self, searchTokens, site_id, 
         group_ids=[], limit=12, offset=0):
         """Search for the search text in the content and subject-lines of
         topics"""
-
-        keywords = [k for k in keywords if k]
         
-        if keywords:
-            cols = [self.topicTable.c.topic_id.distinct(), 
-              self.topicTable.c.group_id, self.topicTable.c.site_id,
-              self.topicTable.c.original_subject,
-              self.topicTable.c.first_post_id, self.topicTable.c.last_post_id,
-              self.topicTable.c.last_post_date, self.topicTable.c.num_posts]
-            statement = sa.select(cols, 
-              self.topicTable.c.topic_id == self.topic_word_countTable.c.topic_id)
-        else:
-            cols = [self.topicTable.c.topic_id.distinct(),
-              self.topicTable.c.group_id, self.topicTable.c.site_id,
-              self.topicTable.c.original_subject,
-              self.topicTable.c.first_post_id, self.topicTable.c.last_post_id,
-              self.topicTable.c.last_post_date, self.topicTable.c.num_posts]
-            statement = sa.select(cols)
-        assert statement
+        statement = self.topicTable.select()
         
         aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
         aswc(self, statement, self.topicTable, site_id, group_ids)
 
-        subjectCol = self.topicTable.c.original_subject
-        wordCol = self.topic_word_countTable.c.word
-        if (len(keywords) == 1):
-            regexp = keywords[0].lower()
-            conds = (subjectCol.op('~*')(regexp), wordCol == regexp)
-            statement.append_whereclause(sa.or_(*conds))
-        elif (len(keywords) > 1):
-            # For each keyword, construct a regular expression match, and 
-            #   "or" them all together
-            subjectConds = [subjectCol.op('~*')(k ) for k in keywords]
-            wordConds = [(wordCol == k) for k in keywords]
-            conds = subjectConds + wordConds
-            statement.append_whereclause(sa.or_(*conds))
-        else: # (len(keywords) == 0)
-            # We do not need to do anything if there are no keywords
-            pass
+        if searchTokens.keywords:
+            wct = self.topic_word_countTable
+            s2 = sa.select([wct.c.topic_id.distinct()], 
+                           wct.c.word.in_(*searchTokens.keywords))
+            topicIdCol = self.topicTable.c.topic_id
+            statement.append_whereclause(topicIdCol.in_(s2))
 
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))        
 
         r = statement.execute()
-        
+        retval = []
         for x in r:
-            retval = {'topic_id': x['topic_id'],
-                      'last_post_id': x['last_post_id'], 
-                      'first_post_id': x['first_post_id'], 
-                      'group_id': x['group_id'], 
-                      'site_id': x['site_id'], 
-                      'subject': unicode(x['original_subject'], 'utf-8'), 
-                      'last_post_date': x['last_post_date'], 
-                      'num_posts': x['num_posts']}
-            yield retval
+            retval.append(
+                {'topic_id': x['topic_id'],
+                 'last_post_id': x['last_post_id'], 
+                 'first_post_id': x['first_post_id'], 
+                 'group_id': x['group_id'], 
+                 'site_id': x['site_id'], 
+                 'subject': unicode(x['original_subject'], 'utf-8'), 
+                 'last_post_date': x['last_post_date'], 
+                 'num_posts': x['num_posts']})
+        return retval
     
-    def count_topic_search_keyword_subject(self, keywords, site_id, 
+    def count_topic_search_keyword(self, searchTokens, site_id, 
         group_ids=[]):
         """Search for the search text in the content and subject-lines of
         topics"""
 
-        keywords = [k for k in keywords if k]
         cols = [sa.func.count(self.topicTable.c.topic_id.distinct())]
-        
-        if keywords:
-            statement = sa.select(cols, 
-              self.topicTable.c.topic_id == self.topic_word_countTable.c.topic_id)
-        else:
-            statement = sa.select(cols)
-        assert statement
+        statement = sa.select(cols)
         
         aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
         aswc(self, statement, self.topicTable, site_id, group_ids)
-
-        subjectCol = self.topicTable.c.original_subject
-        wordCol = self.topic_word_countTable.c.word
-        if (len(keywords) == 1):
-            regexp = keywords[0].lower()
-            conds = (subjectCol.op('~*')(regexp), wordCol == regexp)
-            statement.append_whereclause(sa.or_(*conds))
-        elif (len(keywords) > 1):
-            # For each keyword, construct a regular expression match, and 
-            #   "or" them all together
-            subjectConds = [subjectCol.op('~*')(k ) for k in keywords]
-            wordConds = [(wordCol == k) for k in keywords]
-            conds = subjectConds + wordConds
-            statement.append_whereclause(sa.or_(*conds))
-        else: # (len(keywords) == 0)
-            # We do not need to do anything if there are no keywords
-            pass
+        
+        if searchTokens.keywords:
+            wct = self.topic_word_countTable
+            s2 = sa.select([wct.c.topic_id.distinct()], 
+                           wct.c.word.in_(*searchTokens.keywords))
+            topicIdCol = self.topicTable.c.topic_id
+            statement.append_whereclause(topicIdCol.in_(s2))
 
         r = statement.execute()
         retval = r.scalar()

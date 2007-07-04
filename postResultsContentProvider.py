@@ -107,7 +107,6 @@ class GSPostResultsContentProvider(object):
 
           authorCache = getattr(self.view, '__author_object_cache', {})
           groupCache =  getattr(self.view, '__group_object_cache', {})
-          visibleGroupIds = self.groupsInfo.get_visible_group_ids()
           
           for post in self.posts:
               authorInfo = authorCache.get(post['user_id'], None)
