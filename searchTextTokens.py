@@ -65,7 +65,7 @@ class SearchTextTokens(object):
                 
                 for token in tokens:
                     token = token.strip()
-                    if (token[0] == token[-1] == self.phraseDelimiter):
+                    if token and (token[0] == token[-1] == self.phraseDelimiter):
                         token = token.strip(self.phraseDelimiter).strip()
                         retval.append(token.lower())
                     else:

@@ -20,7 +20,9 @@ class GSSearchView(BrowserView):
         # I need to fix these up below
         
         self.searchText = self.request.get('searchText', '')
-        
+        if isinstance(self.searchText, list):
+            self.searchText = ' '.join(self.searchText).strip()
+            
         self.groupId = self.request.get('groupId', '')
         if self.groupId:
             self.groupInfo = createObject('groupserver.GroupInfo', context, 
@@ -35,8 +37,15 @@ class GSSearchView(BrowserView):
         else:
             self.authorInfo = None
            
-        self.startIndex = int(self.request.get('startIndex', 0))
-        self.limit = int(self.request.get('limit', 6))
+        try:
+            self.startIndex = int(self.request.get('startIndex', 0))
+        except ValueError, e:
+            self.startIndex = 0
+
+        try:
+            self.limit = int(self.request.get('limit', 6))
+        except ValueError, e:
+            self.limit = 6
         
         self.viewTopics = self.__get_boolean('viewTopics', True)
         self.viewPosts = self.__get_boolean('viewPosts', False)
@@ -45,7 +54,7 @@ class GSSearchView(BrowserView):
 
     def get_title(self):
         retval = ''
-        
+
         if self.searchText:
             s = ', '.join(self.searchText.split())
             s = '%s in' % s
@@ -150,7 +159,7 @@ class GSSearchView(BrowserView):
         current search based on the values of the arguments.
         """
         if isinstance(searchText, list):
-            searchText = ' '.join(searchText)
+            searchText = ' '.join(searchText).strip()
         searchTextQuery = self.get_query(r'searchText=%s', 
                                          self.searchText, searchText)
                                          

@@ -96,6 +96,7 @@
           <p tal:replace="structure provider:groupserver.FileResults">
             The baby's blood type? Human, mostly.</p>
         </div>
+
         <div id="posts" tal:condition="view/view_posts">
           <h2 tal:condition="not:view/only_posts_shown">Posts</h2>          
           <p tal:replace="structure provider:groupserver.PostResults">
@@ -108,8 +109,8 @@
         </div-->
         <fieldset>
           <input type="text" class="text" name="searchText"
-            id="searchText" title="Text to search for"
-            tal:attributes="value request/searchText | nothing"/>
+            id="searchTextBottom" title="Text to search for"
+            tal:attributes="value view/searchText | nothing"/>
           <input type="submit" class="button" value="Search"/>
           <input type="hidden" name="viewTopics" value="#"
             tal:attributes="value python:'%d' % view.view_topics()"/>
@@ -123,10 +124,6 @@
             tal:attributes="value groupIds"/> 
           <input type="hidden" name="authorId" value="#"
             tal:attributes="value view/authorId"/>
-          <input type="hidden" name="startIndex" value="#"
-            tal:attributes="value view/startIndex"/>
-          <input type="hidden" name="limit" value="#"
-            tal:attributes="value view/limit"/>
         </fieldset> 
       </form>
     </tal:block>

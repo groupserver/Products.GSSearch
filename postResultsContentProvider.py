@@ -50,17 +50,18 @@ class GSPostResultsContentProvider(object):
           
           self.groupIds = [gId for gId in self.groupIds if gId]
           if self.groupIds:
-              groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
+              self.groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
           else:
-             groupIds = self.groupsInfo.get_visible_group_ids()
+             self.groupIds = self.groupsInfo.get_visible_group_ids()
 
-          self.posts = self.posts_search(self.searchTokens.phrases, 
-            groupIds, self.authorIds)
+          self.posts = self.messageQuery.post_search_keyword(
+            self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
+            self.authorIds, limit=self.limit, offset=self.startIndex)
             
-          self.postCount = self.post_count(self.searchTokens.phrases, 
-            groupIds, self.authorIds)
-
-          
+          self.postCount = self.messageQuery.count_post_search_keyword(
+            self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
+            self.authorIds)
+            
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
@@ -71,24 +72,7 @@ class GSPostResultsContentProvider(object):
       #########################################
       # Non standard methods below this point #
       #########################################
-
-      def posts_search(self, keywords, groupIds, authorIds):
-          assert hasattr(self, 'messageQuery')
-          assert self.messageQuery
-          siteId = self.siteInfo.get_id()
-          posts = self.messageQuery.post_search_keyword(keywords, 
-            siteId, groupIds, authorIds,
-            limit=self.limit, offset=self.startIndex)
-          return posts
           
-      def post_count(self, keywords, groupIds, authorIds):
-          assert hasattr(self, 'messageQuery')
-          assert self.messageQuery
-          siteId = self.siteInfo.get_id()
-          postCount = self.messageQuery.count_post_search_keyword(keywords, 
-            siteId, groupIds, authorIds)
-          return postCount
-
       def show_previous(self):
           retval = (self.startIndex > 0)
           return retval
@@ -121,47 +105,52 @@ class GSPostResultsContentProvider(object):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
 
-          author_cache = getattr(self.view, '__author_object_cache', {})
-          
+          authorCache = getattr(self.view, '__author_object_cache', {})
+          groupCache =  getattr(self.view, '__group_object_cache', {})
           visibleGroupIds = self.groupsInfo.get_visible_group_ids()
           
           for post in self.posts:
-              if post['group_id'] in visibleGroupIds:
-                  authorInfo = author_cache.get(post['user_id'], None)
-                  if not authorInfo:
-                      authorInfo = createObject('groupserver.AuthorInfo', 
-                        self.context, post['user_id'])
-                      author_cache[post['user_id']] = authorInfo
-                  authorId = authorInfo.get_id()
-                  authorD = {
-                    'exists': authorInfo.exists(),
-                    'id': authorId,
-                    'name': authorInfo.get_realnames(),
-                    'url': authorInfo.get_url(),
-                    'only': self.view.only_author(authorId),
-                    'onlyURL': self.view.only_author_link(authorId)
-                  }
-                  
+              authorInfo = authorCache.get(post['user_id'], None)
+              if not authorInfo:
+                  authorInfo = createObject('groupserver.AuthorInfo', 
+                    self.context, post['user_id'])
+                  authorCache[post['user_id']] = authorInfo
+              authorId = authorInfo.get_id()
+              authorD = {
+                'exists': authorInfo.exists(),
+                'id': authorId,
+                'name': authorInfo.get_realnames(),
+                'url': authorInfo.get_url(),
+                'only': self.view.only_author(authorId),
+                'onlyURL': self.view.only_author_link(authorId)
+              }
+              
+              assert post['group_id'] in visibleGroupIds, \
+                'Trying to show non-visible group %s' % post['group_id']
+              
+              groupInfo = groupCache.get(post['group_id'], None)
+              if not groupInfo:
                   groupInfo = createObject('groupserver.GroupInfo', 
                     self.context, post['group_id'])
-                  groupD = {
-                    'id': groupInfo.get_id(),
-                    'name': groupInfo.get_name(),
-                    'url': groupInfo.get_url(),
-                    'only': self.view.only_group(groupInfo.get_id()),
-                    'onlyURL': self.view.only_group_link(groupInfo.get_id())
-                  }
-                      
-                  retval = {
-                    'postId': post['post_id'],
-                    'topicName': post['subject'],
-                    'author': authorD,
-                    'group': groupD,
-                    'date': post['date'],
-                    'timezone': 'foo',
-                    'postSummary': self.get_summary(post['body']),
-                  }
-                  yield retval
+                  groupCache[post['group_id']] = groupInfo
+              groupD = {
+                'id': groupInfo.get_id(),
+                'name': groupInfo.get_name(),
+                'url': groupInfo.get_url(),
+                'only': self.view.only_group(groupInfo.get_id()),
+                'onlyURL': self.view.only_group_link(groupInfo.get_id())
+              }
+                  
+              retval = {
+                'postId': post['post_id'],
+                'topicName': post['subject'],
+                'author': authorD,
+                'group': groupD,
+                'date': post['date'],
+                'timezone': 'foo',
+                'postSummary': self.get_summary(post['body']),
+              }
+              yield retval
 
       def get_summary(self, text, nLines=1, lineLength=40):
 
@@ -170,7 +159,8 @@ class GSPostResultsContentProvider(object):
           noQuoteLines = [l for l in nonBlankLines if l[0] != '>']
           multipleWordLines = [l for l in noQuoteLines 
             if len(l.split())>1]
-          firstLine = multipleWordLines[0].lower()
+            
+          firstLine = multipleWordLines and multipleWordLines[0].lower() or ''
           if 'wrote' in firstLine:
               noWroteLines = multipleWordLines[1:]
           else:

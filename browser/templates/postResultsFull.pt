@@ -78,5 +78,8 @@
       tal:attributes="href view/next_link">Older
       <span class="n" tal:content="view/limit"/> posts</a></li>
   </ul>
+  <p class="postCount" style="display:none;">
+    <span class="n" tal:content="view/postCount"/> posts match.
+  </p>
 </tal:block>
 

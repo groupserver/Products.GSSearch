@@ -297,14 +297,14 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                 retval[x['file_id']] = x['post_id']
         return retval
 
-    def post_search_keyword(self, keywords, site_id, group_ids=[], 
+    def post_search_keyword(self, searchTokens, site_id, group_ids=[], 
         author_ids=[], limit=12, offset=0):
         
         statement = self.postTable.select()
         sc = Products.XWFMailingListManager.queries.MessageQuery
         aswc = sc.__add_std_where_clauses
         aswc(self, statement, self.postTable, site_id, group_ids)
-        
+                    
         author_ids = [a for a in author_ids if a]
         authorCol = self.postTable.c.user_id
         if (len(author_ids) == 1):
@@ -318,25 +318,26 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             # We do not need to do anything if there are no authors
             pass
 
-        keywords = [k for k in keywords if k]
+        keywords = [k for k in searchTokens.keywords if k]
         if keywords:
+            # --=mpj17=-- Need to search the subject-line of the topics.
             topics = self.topic_search_keyword(keywords, site_id,
                group_ids, limit=None)
-            # --=mpj17=-- Need to search the subject-line of the topics.
-            conds = [(self.postTable.c.topic_id == t['topic_id']) 
-                     for t in topics]
-            statement.append_whereclause(sa.or_(*conds))
-
+            topicIdCol = self.postTable.c.topic_id
+            topicIds = [t['topic_id'] for t in topics]
+            statement.append_whereclause(topicIdCol.in_(*topicIds))
+            
         bodyCol = self.postTable.c.body
         subjectCol = self.postTable.c.subject
 
-        if (len(keywords) == 1):
-            regexp = keywords[0].lower()
+        phrases = searchTokens.phrases
+        if (len(phrases) == 1):
+            regexp = phrases[0].lower()
             statement.append_whereclause(bodyCol.op('~*')(regexp))
-        elif (len(keywords) > 1):
+        elif (len(phrases) > 1):
             # For each keyword, construct a regular expression match, and 
             #   "or" them all together
-            bodyConds = [bodyCol.op('~*')(k ) for k in keywords]
+            bodyConds = [bodyCol.op('~*')(p) for p in phrases]
             statement.append_whereclause(sa.or_(*bodyConds))
         else: # (len(keywords) == 0)
             # We do not need to do anything if there are no keywords
@@ -347,6 +348,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement.order_by(sa.desc(self.postTable.c.date))
         
         r = statement.execute()
+
         for x in r:
             retval = {
               'post_id': x['post_id'],
@@ -358,8 +360,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
               }
             yield retval
 
-    def count_post_search_keyword(self, keywords, site_id, group_ids=[], 
-        author_ids=[]):
+    def count_post_search_keyword(self, searchTokens, 
+        site_id, group_ids=[], author_ids=[]):
         
         statement = sa.select([sa.func.count(self.postTable.c.post_id)])
         sc = Products.XWFMailingListManager.queries.MessageQuery
@@ -379,25 +381,26 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             # We do not need to do anything if there are no authors
             pass
 
-        keywords = [k for k in keywords if k]
+        keywords = [k for k in searchTokens.keywords if k]
         if keywords:
             topics = self.topic_search_keyword(keywords, site_id,
                group_ids, limit=None)
             # --=mpj17=-- Need to search the subject-line of the topics.
-            conds = [(self.postTable.c.topic_id == t['topic_id']) 
-                     for t in topics]
-            statement.append_whereclause(sa.or_(*conds))
-
+            topicIdCol = self.postTable.c.topic_id
+            topicIds = [t['topic_id'] for t in topics]
+            statement.append_whereclause(topicIdCol.in_(*topicIds))
+            
         bodyCol = self.postTable.c.body
         subjectCol = self.postTable.c.subject
 
-        if (len(keywords) == 1):
-            regexp = keywords[0].lower()
+        phrases = searchTokens.phrases
+        if (len(phrases) == 1):
+            regexp = phrases[0].lower()
             statement.append_whereclause(bodyCol.op('~*')(regexp))
-        elif (len(keywords) > 1):
+        elif (len(phrases) > 1):
             # For each keyword, construct a regular expression match, and 
             #   "or" them all together
-            bodyConds = [bodyCol.op('~*')(k ) for k in keywords]
+            bodyConds = [bodyCol.op('~*')(p) for p in phrases]
             statement.append_whereclause(sa.or_(*bodyConds))
         else: # (len(keywords) == 0)
             # We do not need to do anything if there are no keywords
