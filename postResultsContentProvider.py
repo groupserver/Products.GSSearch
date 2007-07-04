@@ -124,9 +124,6 @@ class GSPostResultsContentProvider(object):
                 'onlyURL': self.view.only_author_link(authorId)
               }
               
-              assert post['group_id'] in visibleGroupIds, \
-                'Trying to show non-visible group %s' % post['group_id']
-              
               groupInfo = groupCache.get(post['group_id'], None)
               if not groupInfo:
                   groupInfo = createObject('groupserver.GroupInfo', 
