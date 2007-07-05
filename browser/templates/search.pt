@@ -64,10 +64,10 @@
       <form enctype="multipart/form-data" method="get"
         action="." tal:attributes="action request/URL"
         tal:define="searchText python:view.searchText;
-        groupIds python:[view.groupId];
-        authorIds python:[view.authorId];
-        limit python:view.limit;
-        startIndex python:view.startIndex;">
+          groupIds python:[view.groupId];
+          authorIds python:[view.authorId];
+          limit python:view.limit;
+          startIndex python:view.startIndex;">
         
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.

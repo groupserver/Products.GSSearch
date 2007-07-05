@@ -4,9 +4,10 @@ import DateTime, Globals
 from zope.component import createObject
 from zope.interface import implements
 from Products.Five import BrowserView
-from Products.GSContent.interfaces import IGSSiteInfo
 
 from interfaces import IGSSearchResults
+from queries import MessageQuery
+
 
 class GSSearchView(BrowserView):
 
@@ -15,9 +16,9 @@ class GSSearchView(BrowserView):
     def __init__(self, context, request):
         self.context = context
         self.request = request
-        self.siteInfo = IGSSiteInfo( context )
-        
-        # I need to fix these up below
+
+        self.siteInfo = createObject('groupserver.SiteInfo', 
+          self.context)
         
         self.searchText = self.request.get('searchText', '')
         if isinstance(self.searchText, list):
@@ -281,4 +282,51 @@ class GSSearchView(BrowserView):
         result['error'] = False
         result['message'] = 'Form processed successfully'
 
+class GSSearchATOMView(GSSearchView):
+    """View for the ATOM Feed
+    
+    This is a dirty hack, to get around a nasty disjoint between the
+    architecture of search and ATOM. Basically, the feed needs to
+    know the date of the most recent post, but "GSSearchView" does
+    not know this value, because it does not do the actual searching.
+    Instead the content-providers do all the leg-work. This class
+    solves the problem by performing a search for the most recent post,
+    and returning the date from that.
+    
+    *shudder*
+    """
+    def __init__(self, context, request):
+        GSSearchView.__init__(self, context, request)
+        
+        da = self.context.zsqlalchemy 
+        assert da, 'No data-adaptor found'
+        messageQuery = MessageQuery(self.context, da)
+        
+        searchTokens = createObject('groupserver.SearchTextTokens',
+            self.searchText)
+
+        siteInfo = createObject('groupserver.SiteInfo', context)
+        groupsInfo = createObject('groupserver.GroupsInfo', context)            
+
+        if self.groupId:
+            self.groupIds = groupsInfo.filter_visible_group_ids([self.groupId])
+        else:
+            self.groupIds = groupsInfo.get_visible_group_ids()
+
+        posts = messageQuery.post_search_keyword(searchTokens, 
+          siteInfo.get_id(), self.groupIds, [self.authorId], 
+          limit=1, offset=0)
+        
+        self.post = None
+        for post in posts:
+            self.post = post
+                
+    def most_recent_post_date(self):
+        retval = '1970-1-1T00:00:01'
+        if self.post:
+            retval = self.post['date']
+        return retval
+        
 Globals.InitializeClass( GSSearchView )
+Globals.InitializeClass( GSSearchATOMView )
+

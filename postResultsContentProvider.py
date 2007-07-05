@@ -107,6 +107,7 @@ class GSPostResultsContentProvider(object):
 
           authorCache = getattr(self.view, '__author_object_cache', {})
           groupCache =  getattr(self.view, '__group_object_cache', {})
+          siteURL = self.siteInfo.get_url()
           
           for post in self.posts:
               authorInfo = authorCache.get(post['user_id'], None)
@@ -139,6 +140,7 @@ class GSPostResultsContentProvider(object):
                   
               retval = {
                 'postId': post['post_id'],
+                'postURL': '%s/r/post/%s' % (siteURL, post['post_id']),
                 'topicName': post['subject'],
                 'author': authorD,
                 'group': groupD,

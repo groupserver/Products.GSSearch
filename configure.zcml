@@ -16,7 +16,7 @@
   
   <!--View of the index-page -->
   <browser:page 
-    for=".interfaces.IGSSearchFolder" 
+    for=".interfaces.IGSSearchFolder"
     name="index.html"
     class=".view.GSSearchView"
     template="browser/templates/search.pt" 
@@ -24,6 +24,17 @@
     
   <five:implements 
     class=".view.GSSearchView"
+    interface=".interfaces.IGSSearchResults" />
+
+  <browser:page 
+    for=".interfaces.IGSSearchFolder" 
+    name="search.atom"
+    class=".view.GSSearchATOMView"
+    template="browser/templates/search_atom.pt" 
+    permission="zope2.View" />
+
+  <five:implements 
+    class=".view.GSSearchATOMView"
     interface=".interfaces.IGSSearchResults" />
     
   <interface 
