@@ -1,0 +1,28 @@
+<tal:block define="view options/view">
+  <tal:block repeat="result view/get_results">
+    <entry>
+      <title tal:content="result/topicName">Atom-Powered Robots Sing</title>
+      <link rel="alternate" type="text/html" title="Post on the Web"
+        href="#"
+        tal:attributes="title result/topicName; href result/postURL"/>
+      <id tal:content="result/postURL">abc123</id>
+      <author>
+        <name tal:content="result/author/name">Me!</name>
+        <uri tal:condition="result/author/exists"
+          tal:content="string:/contacts/${result/author/id};"/>
+      </author>
+      <updated tal:define="d result/date"
+        tal:content="python:(d-d.utcoffset()).strftime('%Y-%m-%dT%H:%M:%SZ')">
+        2003-12-13T18:30:02Z
+      </updated>
+      <content type="xhtml">
+        <div xmlns="http://www.w3.org/1999/xhtml">
+          <pre tal:content="structure result/postSummary">
+            This is the body of the document.
+          </pre>
+        </div>
+      </content>
+    </entry>
+  </tal:block>
+</tal:block>
+

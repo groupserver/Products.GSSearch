@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+  xmlns:tal="http://xml.zope.org/namespaces/tal">
+  
+  <title tal:content="view/get_title">Search for Atom-Powered Robots</title>
+  <updated 
+    tal:content="view/most_recent_post_date">
+    2003-12-13T14:15:16Z
+  </updated>
+  <author>
+    <name tal:content="view/siteInfo/get_name">OnlineGroups.Net</name>
+    <uri tal:content="view/siteInfo/get_url">http://onlinegroups.net/</uri>
+  </author>
+  
+  <id tal:content="view/get_search_url">abc123</id>
+  <generator uri="http://groupserver.org/">GroupServer</generator>
+  <icon tal:content="string:${view/siteInfo/get_url}/favicon.ico"/>
+  <link rel="self" href="http://onlinegroups.net/groups/demo" 
+    tal:attributes="href view/get_search_url"/>
+
+  <tal:block tal:define="searchText python:view.searchText;
+    groupIds python:[view.groupId];
+    authorIds python:[view.authorId];
+    pageTemplateFileName string:browser/templates/postResultsFullATOM.pt;">
+    <p tal:replace="structure provider:groupserver.PostResults">
+      The baby's blood type? Human, mostly.</p>
+  </tal:block>
+
+</feed>
