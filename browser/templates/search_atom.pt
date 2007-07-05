@@ -12,7 +12,7 @@
     <uri tal:content="view/siteInfo/get_url">http://onlinegroups.net/</uri>
   </author>
   
-  <id tal:content="view/get_search_url">abc123</id>
+  <id tal:content="view/request/URL">abc123</id>
   <generator uri="http://groupserver.org/">GroupServer</generator>
   <icon tal:content="string:${view/siteInfo/get_url}/favicon.ico"/>
   <link rel="self" href="http://onlinegroups.net/groups/demo" 

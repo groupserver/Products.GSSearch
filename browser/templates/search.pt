@@ -27,6 +27,13 @@
       <script type="text/javascript"
         src="/++resource++disclosureButton/disclosure_toggle.js">&#160;</script>
     </tal:block>
+
+    <tal:block metal:fill-slot="metadata" 
+      tal:condition="view/only_posts_shown">
+      <link rel="alternate" type="application/atom+xml" href="#"
+        tal:define="base python:'%s/search.atom' % (view.request.URL1)"
+        tal:attributes="href python:view.get_search_url(baseURL=base)" />
+    </tal:block>
     
     <tal:block metal:fill-slot="style">
       <link rel="stylesheet" title="Search Stylesheet"

@@ -153,7 +153,7 @@ class GSSearchView(BrowserView):
         
     def get_search_url(self, searchText=None, groupId=None, authorId=None,
         viewTopics=None, viewPosts=None, viewFiles=None, viewProfiles=None,
-        startIndex=None, limit=None):
+        startIndex=None, limit=None, baseURL=None):
         """Get the URL for a search
         
         Returns the URL for the current search, or a modification of the
@@ -187,7 +187,9 @@ class GSSearchView(BrowserView):
         queries = '&'.join([searchTextQuery, groupIdQuery, authorIdQuery,
                             viewTopicsQuery, viewPostsQuery, viewFilesQuery, 
                             viewProfilesQuery, si, li])
-        retval = '%s?%s' % (self.request.URL, queries)
+        if baseURL == None:
+            baseURL = self.request.URL
+        retval = '%s?%s' % (baseURL, queries)
         return retval
         
     def get_query(self, rstr, defaultVal, val=None, valType=str):
