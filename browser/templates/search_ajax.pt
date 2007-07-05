@@ -1,0 +1,28 @@
+<tal:block 
+  tal:define="searchText python:view.searchText;
+    groupIds python:[view.groupId];
+    authorIds python:[view.authorId];
+    limit python:view.limit;
+    startIndex python:view.startIndex;">
+        
+  <div tal:condition="view/view_topics"
+    tal:define="pageTemplateFileName string:browser/templates/topicResultsList.pt"
+    tal:replace="structure provider:groupserver.TopicResults">
+      The baby's blood type? Human, mostly.
+  </div>
+  
+  <div tal:condition="view/view_files"
+    tal:replace="structure provider:groupserver.FileResults">
+      The baby's blood type? Human, mostly.
+  </div>
+
+  <div tal:condition="view/view_posts"
+    tal:replace="structure provider:groupserver.PostResults">
+      The baby's blood type? Human, mostly.
+  </div>
+  
+  <!--  div tal:condition="view/view_profiles"
+    tal:replace="structure provider:groupserver.ProfileResults">
+      The baby's blood type? Human, mostly.
+  </div-->
+</tal:block>

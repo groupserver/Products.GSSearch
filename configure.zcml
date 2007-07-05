@@ -36,6 +36,13 @@
   <five:implements 
     class=".view.GSSearchATOMView"
     interface=".interfaces.IGSSearchResults" />
+
+  <browser:page 
+    for=".interfaces.IGSSearchFolder" 
+    name="search.ajax"
+    class=".view.GSSearchView"
+    template="browser/templates/search_ajax.pt" 
+    permission="zope2.View" />
     
   <interface 
     interface=".interfaces.IGSSearchFolder"

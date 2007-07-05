@@ -1,0 +1,27 @@
+<ul tal:define="view options/view">
+  <tal:block tal:repeat="topic view/get_results">
+    <li id="abc123" tal:attributes="id topic/topic_id">
+      <a class="topic" href="#"
+        tal:attributes="href string:/r/topic/${topic/last_post_id}"
+        tal:content="topic/subject"/>
+      in
+      <a class="group" href="#" 
+        tal:attributes="href topic/group/url;"
+        tal:content="topic/group/name"/>
+      (<span class="postCount">
+        <span class="cardinal" tal:content="topic/num_posts"/>
+        posts
+      </span> &#8212;
+      latest post by
+      <span class="name">Me!</span>
+      at
+      <span class="date" tal:content="topic/last_post_date"/>
+      <ul class="keywords">
+        <tal:block tal:repeat="keyword topic/keywords">
+          <li tal:content="keyword/word"></li>
+        </tal:block>
+      </ul>
+    </li>
+  </tal:block>
+</ul>
+
