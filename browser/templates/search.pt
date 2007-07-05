@@ -32,7 +32,7 @@
       tal:condition="view/only_posts_shown">
       <link rel="alternate" type="application/atom+xml" href="#"
         tal:define="base python:'%s/search.atom' % (view.request.URL1)"
-        tal:attributes="href python:view.get_search_url(baseURL=base)" />
+        tal:attributes="href python:view.get_search_url(baseURL=base, startIndex=0)" />
     </tal:block>
     
     <tal:block metal:fill-slot="style">
