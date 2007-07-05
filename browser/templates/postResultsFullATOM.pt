@@ -17,7 +17,7 @@
       </updated>
       <content type="xhtml">
         <div xmlns="http://www.w3.org/1999/xhtml">
-          <pre tal:content="structure result/postBody">
+          <pre tal:content="result/postBody">
             This is the body of the document.
           </pre>
         </div>

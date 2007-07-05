@@ -306,6 +306,7 @@ class GSSearchATOMView(GSSearchView):
             self.searchText)
 
         siteInfo = createObject('groupserver.SiteInfo', context)
+        self.siteInfo = siteInfo
         groupsInfo = createObject('groupserver.GroupsInfo', context)            
 
         if self.groupId:

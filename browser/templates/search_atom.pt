@@ -3,8 +3,8 @@
   xmlns:tal="http://xml.zope.org/namespaces/tal">
   
   <title tal:content="view/get_title">Search for Atom-Powered Robots</title>
-  <updated 
-    tal:content="view/most_recent_post_date">
+  <updated tal:define="d view/most_recent_post_date"
+    tal:content="python:(d-d.utcoffset()).strftime('%Y-%m-%dT%H:%M:%SZ')">
     2003-12-13T14:15:16Z
   </updated>
   <author>
