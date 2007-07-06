@@ -13,9 +13,11 @@
         posts
       </span> &#8212;
       latest post by
-      <span class="name">Me!</span>
+      <a class="name" href="#" 
+        tal:attributes="href topic/last_author/url"
+        tal:content="topic/last_author/name">Me!</a>
       at
-      <span class="date" tal:content="topic/last_post_date"/>
+      <span class="date" tal:content="topic/last_post_date"/>)
       <ul class="keywords">
         <tal:block tal:repeat="keyword topic/keywords">
           <li tal:content="keyword/word"></li>

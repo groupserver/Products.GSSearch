@@ -85,9 +85,26 @@ class GSTopicResultsContentProvider(object):
               raise interfaces.UpdateNotCalled
 
           groupCache =  getattr(self.view, '__group_object_cache', {})
-              
+          authorCache = getattr(self.view, '__author_object_cache', {})
+          
           for topic in self.topics:
               retval = topic
+              
+              authorInfo = authorCache.get(retval['last_post_user_id'], None)
+              if not authorInfo:
+                  authorInfo = createObject('groupserver.AuthorInfo', 
+                    self.context, retval['last_post_user_id'])
+                  authorCache[retval['last_post_user_id']] = authorInfo
+              authorId = authorInfo.get_id()
+              authorD = {
+                'exists': authorInfo.exists(),
+                'id': authorId,
+                'name': authorInfo.get_realnames(),
+                'url': authorInfo.get_url(),
+                'only': self.view.only_author(authorId),
+                'onlyURL': self.view.only_author_link(authorId)
+              }
+              retval['last_author'] = authorD
 
               groupInfo = groupCache.get(topic['group_id'], None)
               if not groupInfo:

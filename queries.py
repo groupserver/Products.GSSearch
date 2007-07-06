@@ -60,8 +60,14 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         group_ids=[], limit=12, offset=0):
         """Search for the search text in the content and subject-lines of
         topics"""
-        
-        statement = self.topicTable.select()
+
+        tt = self.topicTable
+        pt = self.postTable
+        cols = [tt.c.topic_id, tt.c.last_post_id, tt.c.first_post_id, 
+          tt.c.group_id, tt.c.site_id, tt.c.original_subject, 
+          tt.c.last_post_date, tt.c.num_posts, pt.c.user_id]
+          
+        statement = sa.select(cols, tt.c.last_post_id == pt.c.post_id)
         
         aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
         aswc(self, statement, self.topicTable, site_id, group_ids)
@@ -88,6 +94,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                  'site_id': x['site_id'], 
                  'subject': unicode(x['original_subject'], 'utf-8'), 
                  'last_post_date': x['last_post_date'], 
+                 'last_post_user_id': x['user_id'],
                  'num_posts': x['num_posts']})
         return retval
     
