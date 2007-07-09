@@ -17,8 +17,9 @@ class GSSearchView(BrowserView):
         self.context = context
         self.request = request
 
-        self.siteInfo = createObject('groupserver.SiteInfo', 
-          self.context)
+        self.siteInfo = createObject('groupserver.SiteInfo', context)
+        print self.siteInfo
+        print self.siteInfo.get_name()
         
         self.searchText = self.request.get('searchText', '')
         if isinstance(self.searchText, list):
