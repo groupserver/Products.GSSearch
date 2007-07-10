@@ -2,21 +2,21 @@
   <ol>
     <tal:block tal:repeat="result view/get_results">
        <li><a title="I am a fish"
-          tal:attributes="title string:View ${result/title}; 
-            href result/url;"
-          href="#"><img tal:attributes="src result/icon"/>
-          <span class="fileName" tal:content="result/title">Fish</span></a>
+          tal:attributes="title string:View ${result/file/title}; 
+            href result/file/url;"
+          href="#"><img tal:attributes="src result/file/icon"/>
+          <span class="fileName" tal:content="result/file/title">Fish</span></a>
         <span class="author" tal:condition="result/author/exists">
           Author: 
           <a class="name" href="#"
             tal:attributes="href result/author/url"
             tal:content="result/author/name">The User</a>
         </span>
-        <span  tal:condition="result/post_id">
+        <span tal:condition="result/post/id">
           Topic:
           <a href="#"
-            tal:attributes="href string:/r/topic/${result/post_id}"
-            tal:content="result/topic_name">topic</a>
+            tal:attributes="href result/topic/url"
+            tal:content="result/topic/name">topic</a>
           <span class="groupInfo" tal:condition="not:result/group/only">
             Group
             <a href="#" class="group"
@@ -26,15 +26,15 @@
         </span>
         <span class="dateInfo">
           Date:
-          <span class="date" tal:content="result/date">Whenever</span>
+          <span class="date" tal:content="result/file/date">Whenever</span>
         </span>
-        <ul tal:condition="result/tags" class="keywords">
-          <tal:block tal:repeat="tag result/tags">
+        <ul tal:condition="result/file/tags" class="keywords">
+          <tal:block tal:repeat="tag result/file/tags">
             <li tal:content="tag">Tag</li>
           </tal:block>
         </ul>
         <div class="disclosureWidget" id="#"
-          tal:define="widgetId string:refinement-${result/file_id}"
+          tal:define="widgetId string:refinement-${result/file/id}"
           tal:attributes="id widgetId"
           tal:condition="python:not(result['group']['only'] and result['author']['only'])">
           <p>
@@ -57,8 +57,8 @@
                     <cite class="name"
                       tal:content="result/author/name">Name</cite></a>
                 </li>
-                <li tal:condition="result/tags">
-                  <a tal:attributes="href result/tag_search"
+                <li tal:condition="result/file/tags">
+                  <a tal:attributes="href result/file/tag_search"
                     href="#">Search for documents related to this file</a>
                 </li>
               </ul>
@@ -69,4 +69,4 @@
     </tal:block>
   </ol>
 </div><!--fileResults-->
-
+  
