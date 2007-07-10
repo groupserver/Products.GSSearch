@@ -3,6 +3,7 @@ from sets import Set
 import Products.Five, DateTime, Globals
 import zope.schema
 import zope.app.pagetemplate.viewpagetemplatefile
+from zope.component import createObject
 import zope.pagetemplate.pagetemplatefile
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.viewlet.interfaces, zope.contentprovider.interfaces 
@@ -159,23 +160,55 @@ class GSFileResultsContentProvider(object):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
 
+          groupCache =  getattr(self.view, '__group_object_cache', {})
+          authorCache = getattr(self.view, '__author_object_cache', {})
+
           for result in self.results:
               r = GSFileSearchResult(self.view, self.context, result)
               
+              authorInfo = authorCache.get(r.get_owner_id(), None)
+              if not authorInfo:
+                  authorInfo = createObject('groupserver.AuthorInfo', 
+                    self.context, r.get_owner_id())
+                  authorCache[r.get_owner_id()] = authorInfo
+              authorId = authorInfo.get_id()
+              authorD = {
+                'exists': authorInfo.exists(),
+                'id': authorId,
+                'name': authorInfo.get_realnames(),
+                'url': authorInfo.get_url(),
+                'only': self.view.only_author(authorId),
+                'onlyURL': self.view.only_author_link(authorId)
+              }
+
+              groupInfo = groupCache.get(r.get_group_info().get_id(), None)
+              if not groupInfo:
+                  groupInfo = createObject('groupserver.GroupInfo', 
+                    self.context, r.get_group_info().get_id())
+                  groupCache[r.get_group_info().get_id()] = groupInfo
+              groupD = {
+                'id': groupInfo.get_id(),
+                'name': groupInfo.get_name(),
+                'url': groupInfo.get_url(),
+                'only': self.view.only_group(groupInfo.get_id()),
+                'onlyURL': self.view.only_group_link(groupInfo.get_id())
+              }
+              
+              tags = ' '.join(r.get_tags())
+              tagSearch = self.view.get_search_url(searchText=tags)
+              
               retval =  {
+                'file_id': r.get_id(),
                 'icon': r.get_icon(),
                 'title': r.get_title(),
                 'tags': r.get_tags(),
+                'tag_search': tagSearch,
                 'date': r.get_date(),
                 'url': r.get_url(),
-                'owner_name': r.get_owner_name(),
-                'owner_id': r.get_owner_id(),
-                'group_id': r.get_group_info().get_id(),
-                'group_name': r.get_group_info().get_name(),
-                'group_url': r.get_group_info().get_url(),
+                'group': groupD,
+                'author': authorD,
                 'post_id': self.filePostMap.get(r.get_id(), ''),
-                'topic_name': r.get_topic_name(),
-                'show_group': self.view.groupId != r.get_group_info().get_id(),
+                'topic_name': r.get_topic_name()
               }
               assert retval
               yield retval

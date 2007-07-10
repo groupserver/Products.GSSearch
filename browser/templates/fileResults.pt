@@ -2,23 +2,26 @@
   <ol>
     <tal:block tal:repeat="result view/get_results">
        <li><a title="I am a fish"
-          tal:attributes="title string:View ${result/title}; href result/url;"
+          tal:attributes="title string:View ${result/title}; 
+            href result/url;"
           href="#"><img tal:attributes="src result/icon"/>
           <span class="fileName" tal:content="result/title">Fish</span></a>
-        Author: 
-        <a class="name" href="#"
-          tal:attributes="href string:/contacts/${result/owner_id}"
-          tal:content="result/owner_name">The User</a>
+        <span class="author" tal:condition="result/author/exists">
+          Author: 
+          <a class="name" href="#"
+            tal:attributes="href result/author/url"
+            tal:content="result/author/name">The User</a>
+        </span>
         <span  tal:condition="result/post_id">
           Topic:
           <a href="#"
             tal:attributes="href string:/r/topic/${result/post_id}"
             tal:content="result/topic_name">topic</a>
-          <span class="groupInfo" tal:condition="result/show_group">
+          <span class="groupInfo" tal:condition="not:result/group/only">
             Group
             <a href="#" class="group"
-              tal:attributes="href result/group_url"
-              tal:content="result/group_name">group</a>
+              tal:attributes="href result/group/url"
+              tal:content="result/group/name">group</a>
           </span>
         </span>
         <span class="dateInfo">
@@ -30,26 +33,31 @@
             <li tal:content="tag">Tag</li>
           </tal:block>
         </ul>
-        <div class="refine"
-          tal:define="buttonId string:refineFileOptionsButton${repeat/result/number};
-            optionsId string:refineFileOptions${repeat/result/number}">
-          <div class="showrefine">
-            <a href="#" id="abc123"
-              tal:attributes="id buttonId;
-                href string:javascript:showHideInline('${optionsId}','${buttonId}')"
-              title="Refine the results">&#9654;</a>
-          </div>
-          <div class="refineOptions" id="abc123" style="display:none;"
-            tal:attributes="id optionsId">
+        <div class="disclosureWidget" id="#"
+          tal:define="widgetId string:refinement-${result/file_id}"
+          tal:attributes="id widgetId">
+          <p>
+            <a class="disclosureButton"
+              tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
+              href="#">Refine</a>
+          </p>
+          <div class="disclosureShowHide" style="display:none;">
             <div>
               <ul>
-                <li tal:condition="result/show_group">
-                  <a tal:attributes="href python:view.view.get_search_url(groupId=result['group_id'])"
+                <li tal:condition="not:result/group/only">
+                  <a tal:attributes="href result/group/onlyURL"
                     href="#">Only search the group
-                    <cite class="group" tal:content="result/group_name">A Group Name</cite></a>
+                    <cite class="group" 
+                      tal:content="result/group/name">Name</cite></a>
+                </li>
+                <li tal:condition="not:result/author/only">
+                  <a tal:attributes="href result/author/onlyURL"
+                    href="#">Only search for files by
+                    <cite class="name"
+                      tal:content="result/author/name">Name</cite></a>
                 </li>
                 <li tal:condition="result/tags">
-                  <a tal:attributes="href python:view.view.get_search_url(searchText=' '.join(result['tags']))"
+                  <a tal:attributes="href result/tag_search"
                     href="#">Search for documents related to this file</a>
                 </li>
               </ul>
