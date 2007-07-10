@@ -197,8 +197,16 @@ class GSFileResultsContentProvider(object):
               tags = ' '.join(r.get_tags())
               tagSearch = self.view.get_search_url(searchText=tags)
               
+              postId = self.filePostMap.get(r.get_id(), '')
+              postURL = '/r/post/%s' % postId
+              
+              fileURL = 'r/file/%s' % r.get_id()
+              
               retval =  {
                 'file_id': r.get_id(),
+                'file_url': fileURL,
+                'type': r.get_type(),
+                'size': r.get_size(),
                 'icon': r.get_icon(),
                 'title': r.get_title(),
                 'tags': r.get_tags(),
@@ -207,7 +215,8 @@ class GSFileResultsContentProvider(object):
                 'url': r.get_url(),
                 'group': groupD,
                 'author': authorD,
-                'post_id': self.filePostMap.get(r.get_id(), ''),
+                'post_id': postId,
+                'post_url': postURL,
                 'topic_name': r.get_topic_name()
               }
               assert retval

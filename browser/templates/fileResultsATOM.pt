@@ -1,0 +1,45 @@
+<tal:block define="view options/view">
+  <tal:block repeat="result view/get_results">
+    <entry>
+      <title tal:content="result/topic_name">Atom-Powered Robots File</title>
+      <link rel="alternate" type="text/html" title="Post on the Web"
+        href="#"
+        tal:attributes="title result/topic_name; href result/post_url"/>
+      <link rel="enclosure"
+        tal:attributes="type result/type;
+          title result/title;
+          href result/file_url;
+          length result/size" />
+      <id tal:content="result/file_id">abc123</id>
+      <author>
+        <name tal:content="result/author/name">Me!</name>
+        <uri tal:condition="result/author/exists"
+          tal:content="result/author/url"/>
+      </author>
+      <updated tal:define="d result/date"
+        tal:content="result/date">
+        2003-12-13T18:30:02Z
+      </updated>
+      <content type="xhtml">
+        <p xmlns="http://www.w3.org/1999/xhtml">
+          The file 
+          <a tal:attributes="href result/file_url;
+              type result/type;"
+            href="#"><img tal:attributes="src result/icon" />
+            <code class="filename" tal:content="result/title"/>
+          </a>
+          was added to the topic 
+          <span class="topic" tal:content="result/topic_name"/>
+          in the group
+          <a class="group" tal:content="result/group/name"
+            tal:attributes="href result/group/url"/>
+          by
+          <a class="name" tal:omit-tag="not:result/author/exists"
+            tal:content="result/author/name"
+            tal:attributes="href result/author/url"/>.
+        </p>
+      </content>
+    </entry>
+  </tal:block>
+</tal:block>
+

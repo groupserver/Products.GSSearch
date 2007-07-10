@@ -19,6 +19,10 @@ class GSFileSearchResult(object):
         retval = self.result['id']
         return retval
     
+    def get_type(self):
+        retval = self.result['content_type']
+        return retval
+    
     def get_icon(self):
         mimeType = self.result['content_type']
         fileName = mimeType.replace('/','-')
@@ -28,6 +32,10 @@ class GSFileSearchResult(object):
     def get_date(self):
         d = self.result['modification_time']
         retval = str(d)
+        return retval
+
+    def get_size(self):
+        retval = self.result['size']
         return retval
 
     def get_url(self):

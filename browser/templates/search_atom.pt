@@ -20,10 +20,16 @@
 
   <tal:block tal:define="searchText python:view.searchText;
     groupIds python:[view.groupId];
-    authorIds python:[view.authorId];
-    pageTemplateFileName string:browser/templates/postResultsFullATOM.pt;">
-    <p tal:replace="structure provider:groupserver.PostResults">
-      The baby's blood type? Human, mostly.</p>
+    authorIds python:[view.authorId];">
+    <tal:block tal:condition="view/view_posts"
+      tal:define="pageTemplateFileName string:browser/templates/postResultsFullATOM.pt;">
+      <p tal:replace="structure provider:groupserver.PostResults">
+        The baby's blood type? Human, mostly.</p>
+    </tal:block>
+    <tal:block tal:condition="view/view_files"
+      tal:define="pageTemplateFileName string:browser/templates/fileResultsATOM.pt;">
+      <p tal:replace="structure provider:groupserver.FileResults">
+        The baby's blood type? Human, mostly.</p>
+    </tal:block>
   </tal:block>
-
 </feed>

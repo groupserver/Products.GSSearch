@@ -35,7 +35,8 @@
         </ul>
         <div class="disclosureWidget" id="#"
           tal:define="widgetId string:refinement-${result/file_id}"
-          tal:attributes="id widgetId">
+          tal:attributes="id widgetId"
+          tal:condition="python:not(result['group']['only'] and result['author']['only'])">
           <p>
             <a class="disclosureButton"
               tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
