@@ -10,7 +10,7 @@
           title result/file/title;
           href result/file/url;
           length result/file/size" />
-      <id tal:content="result/file/id">abc123</id>
+      <id tal:content="result/file/url">abc123</id>
       <author>
         <name tal:content="result/author/name">Me!</name>
         <uri tal:condition="result/author/exists"
@@ -21,31 +21,33 @@
         2003-12-13T18:30:02Z
       </updated>
       <content type="xhtml">
-        <p xmlns="http://www.w3.org/1999/xhtml">
-          The file 
-          <a tal:attributes="href result/file/url;
-              type result/file/type;"
-            href="#"><img tal:attributes="src result/file/icon" />
-            <code class="filename" tal:content="result/file/title"/>
-          </a>
-          was added by
-          <a class="name" tal:omit-tag="not:result/author/exists"
-            tal:content="result/author/name"
-            tal:attributes="href result/author/url"/>
-          &#8212;
-          as part of
-          <a href="#" title="Post Link"
-            tal:attributes="title string:The post to ${result/topic/name};
-              href result/post/url">a post that was added at
-              <span class="date" tal:content="result/file/date" /></a>,
-          to the topic 
-          <a class="topic" href="#"
-            tal:attributes="href result/topic/url" 
-            tal:content="result/topic/name"/>,
-          in the group
-          <a class="group" tal:content="result/group/name"
-            tal:attributes="href result/group/url"/>.
-        </p>
+        <div xmlns="http://www.w3.org/1999/xhtml">
+          <p>
+            The file 
+            <a tal:attributes="href result/file/url;
+                type result/file/type;"
+              href="#"><img tal:attributes="src result/file/icon" />
+              <code class="filename" tal:content="result/file/title"/>
+            </a>
+            was added by
+            <a class="name" tal:omit-tag="not:result/author/exists"
+              tal:content="result/author/name"
+              tal:attributes="href result/author/url"/>
+            &#8212;
+            as part of
+            <a href="#" title="Post Link"
+              tal:attributes="title string:The post to ${result/topic/name};
+                href result/post/url">a post that was added at
+                <span class="date" tal:content="result/file/date" /></a>,
+            to the topic 
+            <a class="topic" href="#"
+              tal:attributes="href result/topic/url" 
+              tal:content="result/topic/name"/>,
+            in the group
+            <a class="group" tal:content="result/group/name"
+              tal:attributes="href result/group/url"/>.
+          </p>
+        </div>
       </content>
     </entry>
   </tal:block>

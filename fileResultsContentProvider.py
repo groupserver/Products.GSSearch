@@ -210,7 +210,8 @@ class GSFileResultsContentProvider(object):
                 'tags': r.get_tags(),
                 'tag_search': tagSearch,
                 'date': r.get_date(),
-                'url': r.get_url(),              }
+                'url': ''.join((self.siteInfo.get_url(), r.get_url())),
+              }
               
               topicURL = 'r/topic/%s' % postId
               topicD = {
