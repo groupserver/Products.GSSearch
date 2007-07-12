@@ -23,7 +23,7 @@ class GSPostResultsContentProvider(object):
       zope.component.adapts(zope.interface.Interface,
           zope.publisher.interfaces.browser.IDefaultBrowserLayer,
           zope.interface.Interface)
-      
+
       def __init__(self, context, request, view):
           self.__parent = view
           self.__updated = False

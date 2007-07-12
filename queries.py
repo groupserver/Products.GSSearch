@@ -1,8 +1,19 @@
 import Products.XWFMailingListManager.queries
+from sqlalchemy.exceptions import NoSuchTableError
 import sqlalchemy as sa
+from Products.XWFCore import cache
+import datetime
 
 class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     """Query the message database"""
+
+    # a cache for the count of keywords across the whole database, keyed
+    # by the name of the database, since we might have more than one.
+    # The cache structure is:
+    #
+    # {'object': wordcounts, 'expires': datetime)
+    cache_wordCount = cache.SimpleCacheWithExpiry()
+    cache_wordCount.set_expiry_interval(datetime.timedelta(0,3600)) # 1 hour 
 
     def __init__(self, context, da):
         super_query = Products.XWFMailingListManager.queries.MessageQuery
@@ -11,10 +22,18 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         session = da.getSession()
         metadata = session.getMetaData()
 
-        self.word_countTable = sa.Table('word_count', metadata, 
-          autoload=True)
-    
-    def topic_search_subect(self, keywords, site_id, group_ids=[], 
+        self.word_countTable = da.createMapper('word_count')[1]
+
+        try:
+            self.rowcountTable = da.createMapper('rowcount')[1]
+        except NoSuchTableError:
+            self.rowcountTable = None    
+
+        # useful for cache
+        self.dbname = da.getProperty('database')
+        self.now = datetime.datetime.now()
+
+    def topic_search_subject(self, keywords, site_id, group_ids=[], 
         limit=12, offset=0):
         """Search for a particular subject in the list of topics."""
         
@@ -123,26 +142,47 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         assert retval >= 0
         return retval
 
+    def __row_count(self, table, tablename):
+        count = 0
+        if self.rowcountTable:
+            statement = self.rowcountTable.select()
+            statement.append_whereclause(self.rowcountTable.c.table_name==tablename)
+            r = statement.execute()
+            if r.rowcount:
+                count = r.fetchone()['total_rows']
+        
+        if not count:
+            statement = sa.select([sa.func.count("*")], from_obj=[table])
+            r = statement.execute()
+            count = r.scalar()
+        
+        return count
+
     def count_topics(self):
-        countTable = self.topicTable
-        statement = sa.select([sa.func.count(countTable.c.topic_id)])
-        r = statement.execute()
-        return r.scalar()
+        return self.__row_count(self.topicTable, 'topic')
+
+    def count_posts(self):
+        return self.__row_count(self.postTable, 'post')
         
     def word_counts(self):
-        statement = self.word_countTable.select()
-        # The following where clause speeds up the query: we will assume 1
-        #   later on, if the word is not in the dictionary.
-        statement.append_whereclause(self.word_countTable.c.count > 1)
-        r = statement.execute()
-        retval = {}
-        if r.rowcount:
-            for x in r:
-                retval[unicode(x['word'], 'utf-8')] = x['count']
+        retval = self.cache_wordCount.get(self.dbname)
+        if not retval:
+            statement = self.word_countTable.select()
+            # The following where clause speeds up the query: we will assume 1
+            #   later on, if the word is not in the dictionary.
+            statement.append_whereclause(self.word_countTable.c.count > 1)
+            r = statement.execute()
+            retval = {}
+            if r.rowcount:
+                for x in r:
+                    retval[unicode(x['word'], 'utf-8')] = x['count']
+            
+            self.cache_wordCount.add(self.dbname, retval)
+        
         return retval
         
     def count_total_topic_word(self, word):
-        """Count the totoal number of topics that contain a particular word"""
+        """Count the total number of topics that contain a particular word"""
         countTable = self.word_countTable
         statement = countTable.select()
         statement.append_whereclause(countTable.c.word == word)

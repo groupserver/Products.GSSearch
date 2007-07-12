@@ -1,4 +1,4 @@
-import sys, re, datetime, time, types, string, math
+import sys, re, datetime, time, types, string, math, sha
 from sets import Set
 import Products.Five, DateTime, Globals
 import zope.schema
@@ -19,6 +19,17 @@ from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
 from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
 
+from Products.XWFCore import cache
+
+def tfidf_sort(a, b):
+    if a['tfidf'] < b['tfidf']:
+        retval = 1
+    elif a['tfidf'] == b['tfidf']:
+        retval = 0
+    else:
+        retval = -1
+    return retval
+    
 class GSTopicResultsContentProvider(object):
       """GroupServer Topic Search-Results Content Provider
       """
@@ -27,6 +38,8 @@ class GSTopicResultsContentProvider(object):
       zope.component.adapts(zope.interface.Interface,
           zope.publisher.interfaces.browser.IDefaultBrowserLayer,
           zope.interface.Interface)
+
+      cache_topicsWordCounts = cache.SimpleCache()
       
       def __init__(self, context, request, view):
           self.__parent__ = self.view = view
@@ -40,12 +53,17 @@ class GSTopicResultsContentProvider(object):
 
           self.da = self.context.zsqlalchemy 
           assert self.da, 'No data-adaptor found'
+          
+          dbname = self.da.getProperty('database')
+
           self.messageQuery = MessageQuery(self.context, self.da)
+
+          postCount = self.messageQuery.count_posts()
+
           self.siteInfo = createObject('groupserver.SiteInfo', 
             self.context)
           self.groupsInfo = createObject('groupserver.GroupsInfo', 
             self.context)
-
           self.searchTokens = createObject('groupserver.SearchTextTokens',
             self.searchText)          
           
@@ -53,7 +71,7 @@ class GSTopicResultsContentProvider(object):
           if self.groupIds:
               groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
           else:
-             groupIds = self.groupsInfo.get_visible_group_ids()
+              groupIds = self.groupsInfo.get_visible_group_ids()
 
           self.topics = self.messageQuery.topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), 
@@ -61,12 +79,23 @@ class GSTopicResultsContentProvider(object):
 
           self.topicCount = self.messageQuery.count_topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), groupIds)
-          
+
           self.totalNumTopics = self.messageQuery.count_topics()
+          
           self.wordCounts = self.messageQuery.word_counts()
+
           tIds = [t['topic_id'] for t in self.topics]
-          self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
-                   
+          
+          hashkey = sha.new('-'.join(tIds)+dbname).hexdigest()
+          cTopicsWordCounts = self.cache_topicsWordCounts.get(hashkey)
+          if cTopicsWordCounts and cTopicsWordCounts['postCount'] == postCount:
+              self.topicsWordCounts = cTopicsWordCounts['object']
+          else:
+              self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
+              cTopicsWordCounts = {'object': self.topicsWordCounts,
+                                   'postCount': postCount}
+              self.cache_topicsWordCounts.add(hashkey, cTopicsWordCounts)
+
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
@@ -140,21 +169,12 @@ class GSTopicResultsContentProvider(object):
                     for w in topicWords
                     if ((len(w['word']) > 3) and 
                          (w['word'] not in STOP_WORDS))]
-          words.sort(self.keywords_sort)
+          words.sort(tfidf_sort)
 
           retval = words[:self.keywordLimit]          
           assert len(retval) <= self.keywordLimit
           return retval
           
-      def keywords_sort(self, a, b):
-          if a['tfidf'] < b['tfidf']:
-              retval = 1
-          elif a['tfidf'] == b['tfidf']:
-              retval = 0
-          else:
-              retval = -1
-          return retval
-      
       def show_previous(self):
           retval = (self.startIndex > 0)
           return retval
