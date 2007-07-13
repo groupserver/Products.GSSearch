@@ -22,7 +22,6 @@
       </div><!--tags-->
       <div class="metadata">
         <span class="groupInfo" tal:condition="not:topic/group/only">
-          Group: 
           <a class="group" href="#" 
             tal:attributes="href topic/group/url;"
             tal:content="topic/group/name"/>
