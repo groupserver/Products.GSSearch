@@ -4,25 +4,42 @@
       <a class="topic" href="#"
         tal:attributes="href string:/r/topic/${topic/last_post_id}"
         tal:content="topic/subject"/>
-      in
-      <a class="group" href="#" 
-        tal:attributes="href topic/group/url;"
-        tal:content="topic/group/name"/>
-      (<span class="postCount">
-        <span class="cardinal" tal:content="topic/num_posts"/>
-        posts
-      </span> &#8212;
-      latest post by
-      <a class="name" href="#" 
-        tal:attributes="href topic/last_author/url"
-        tal:content="topic/last_author/name">Me!</a>
-      at
-      <span class="date" tal:content="topic/last_post_date"/>)
-      <ul class="keywords">
-        <tal:block tal:repeat="keyword topic/keywords">
-          <li tal:content="keyword/word"></li>
+      <!--Files go here-->
+      <span class="files" tal:condition="topic/files">
+        <tal:block tal:repeat="file topic/files">
+          <a href="#" title="foo"
+            tal:attributes="title file/name;
+              href file/url"><img src="#" tal:attributes="src file/icon"/></a>
         </tal:block>
-      </ul>
+      </span>
+      <div class="tags">
+        <p class="label">Tags:</p>
+        <ul>
+          <tal:block tal:repeat="keyword topic/keywords">
+            <li tal:content="keyword/word"></li>
+          </tal:block>
+        </ul>
+      </div><!--tags-->
+      <div class="metadata">
+        <span class="groupInfo">
+          Group: 
+          <a class="group" href="#" 
+            tal:attributes="href topic/group/url;"
+            tal:content="topic/group/name"/>
+        </span>
+        &#8212;
+        <span class="postCount">
+          <span class="cardinal" tal:content="topic/num_posts"/>
+          posts
+        </span> 
+        &#8212;
+        latest post by
+        <a class="name" href="#" 
+          tal:attributes="href topic/last_author/url"
+          tal:content="topic/last_author/name">Me!</a>
+        at
+        <span class="date" tal:content="topic/last_post_date"/>)
+      </div><!--metadata-->
     </li>
   </tal:block>
 </ul>

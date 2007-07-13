@@ -363,3 +363,30 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         assert retval >= 0
         return retval
 
+    def files_metata_topic(self, topic_ids):
+        ft = self.fileTable
+        pt = self.postTable
+        cols = [
+          pt.c.site_id, pt.c.group_id, pt.c.topic_id, pt.c.user_id, 
+          ft.c.post_id, ft.c.file_id, ft.c.mime_type, ft.c.file_name,
+          ft.c.file_size, ft.c.date,]
+        statement = sa.select(cols, ft.c.topic_id.in_(*topic_ids))
+        statement.append_whereclause(ft.c.post_id == pt.c.post_id)
+        statement.order_by(self.fileTable.c.date)
+
+        r = statement.execute()
+        
+        retval = [{
+                  'site_id': x['site_id'],
+                  'group_id': x['group_id'],
+                  'topic_id': x['topic_id'],
+                  'user_id': x['user_id'],
+                  'post_id': x['post_id'],
+                  'file_id': x['file_id'],
+                  'file_size': x['file_size'],
+                  'mime_type': x['mime_type'],
+                  'file_name': x['file_name'],
+                  'date': x['date'],
+                  } for x in r]
+        return retval
+

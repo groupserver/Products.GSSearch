@@ -86,6 +86,8 @@ class GSTopicResultsContentProvider(object):
 
           tIds = [t['topic_id'] for t in self.topics]
           
+          self.topicFiles = self.messageQuery.files_metata_topic(tIds)
+          
           hashkey = sha.new('-'.join(tIds)+dbname).hexdigest()
           cTopicsWordCounts = self.cache_topicsWordCounts.get(hashkey)
           if cTopicsWordCounts and cTopicsWordCounts['postCount'] == postCount:
@@ -148,6 +150,15 @@ class GSTopicResultsContentProvider(object):
                 'onlyURL': self.view.only_group_link(groupInfo.get_id())
               }
               retval['group'] = groupD
+              
+              files = [{'name': f['file_name'],
+                        'url': '/r/topic/%s#post-%s' % (f['post_id'], f['post_id']),
+                        'icon': '/++resource++fileIcons/%s.png' % \
+                          f['mime_type'].replace('/','-')
+                       } for f in self.topicFiles 
+                       if f['topic_id'] == topic['topic_id']]
+                       
+              retval['files'] = files
               
               kwds = self.get_keywords_for_topic(topic)
               retval['keywords'] = kwds
