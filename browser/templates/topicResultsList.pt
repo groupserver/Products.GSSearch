@@ -12,7 +12,7 @@
               href file/url"><img src="#" tal:attributes="src file/icon"/></a>
         </tal:block>
       </span>
-      <div class="tags">
+      <div class="tags" tal:condition="topic/keywords">
         <p class="label">Tags:</p>
         <ul>
           <tal:block tal:repeat="keyword topic/keywords">
@@ -31,7 +31,7 @@
         </tal:block>
         <span class="postCount">
           <span class="cardinal" tal:content="topic/num_posts"/>
-          posts
+          posts in the topic
         </span>
         &#8212;
         latest post by
