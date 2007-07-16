@@ -1,4 +1,4 @@
-<ul tal:define="view options/view">
+<ul tal:define="view options/view; munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <tal:block tal:repeat="topic view/get_results">
     <li id="abc123" tal:attributes="id topic/topic_id">
       <a class="topic" href="#"
@@ -41,7 +41,7 @@
           tal:attributes="href topic/last_author/url"
           tal:content="topic/last_author/name">Me!</a>
         at
-        <span class="date" tal:content="topic/last_post_date"/>
+        <span class="date" tal:content="python:munge_date(topic['group'], topic['last_post_date'])"/>
       </div><!--metadata-->
     </li>
   </tal:block>
