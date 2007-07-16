@@ -191,7 +191,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         retval = 0
         if r.rowcount:
             v = [{'count': x['count']} for x in r]
-            print len(v)
             retval = v[0]['count']
         return retval
 
@@ -304,12 +303,15 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
         for x in r:
             retval = {
-              'post_id': x['post_id'],
-              'user_id': x['user_id'],
-              'group_id': x['group_id'],
-              'subject': x['subject'],
-              'date':    x['date'],
-              'body':    x['body'],
+              'post_id':          x['post_id'],
+              'user_id':          x['user_id'],
+              'group_id':         x['group_id'],
+              'subject':          x['subject'],
+              'date':             x['date'],
+              'body':             x['body'],
+              'files_metadata':   x['has_attachments'] 
+                                  and self.files_metadata(x['post_id']) 
+                                  or [],
               }
             yield retval
 

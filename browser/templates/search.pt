@@ -104,7 +104,8 @@
             The baby's blood type? Human, mostly.</p>
         </div>
 
-        <div id="posts" tal:condition="view/view_posts">
+        <div id="posts" tal:condition="view/view_posts"
+          tal:define="pageTemplateFileName string:browser/templates/postResultsTable.pt">
           <h2 tal:condition="not:view/only_posts_shown">Posts</h2>          
           <p tal:replace="structure provider:groupserver.PostResults">
             The baby's blood type? Human, mostly.</p>

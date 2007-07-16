@@ -149,7 +149,8 @@ class GSPostResultsContentProvider(object):
                 'date': post['date'],
                 'timezone': 'foo',
                 'postSummary': self.get_summary(post['body']),
-                'postBody': post['body']
+                'postBody': post['body'],
+                'files': post['files_metadata']
               }
               yield retval
 

@@ -6,6 +6,7 @@
       <th class="groupInfo" 
         tal:condition="not:options/onlyGroup">Group</th>
       <th class="topic">Topic</th>
+      <th class="files">Files</th>
       <th class="date">Date</th>
     </tr>
   </thead>
@@ -28,6 +29,16 @@
           <a tal:condition="result/topicName"
             tal:attributes="href string:/r/post/${result/postId}"
             tal:content="python:result['topicName'][:50]">A Topic</a>
+        </td>
+        <td class="files">
+          <tal:block tal:repeat="file result/files">
+            <a href="#" 
+              tal:attributes="title file/file_name;
+                href string:/r/post/${result/postId}"
+                title="foo"><img src="#" 
+                  tal:define="iconName python:file['mime_type'].replace('/','-');"
+                  tal:attributes="src string:/++resource++fileIcons/${iconName}.png"/></a>
+          </tal:block>
         </td>
         <td class="date" 
           tal:define="ctx result/context"
