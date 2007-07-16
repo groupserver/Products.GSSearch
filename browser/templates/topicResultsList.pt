@@ -1,4 +1,5 @@
-<ul tal:define="view options/view; munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
+<ul tal:define="view options/view; 
+  munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <tal:block tal:repeat="topic view/get_results">
     <li id="abc123" tal:attributes="id topic/topic_id">
       <a class="topic" href="#"
@@ -30,6 +31,7 @@
         <tal:block condition="multiplePosts">latest post</tal:block>
         by
         <a class="name" href="#" 
+          tal:omit-tag="not:topic/last_author/exists"
           tal:attributes="href topic/last_author/url"
           tal:content="topic/last_author/name">Me!</a>
         at

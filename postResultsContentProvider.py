@@ -139,6 +139,7 @@ class GSPostResultsContentProvider(object):
               }
                   
               retval = {
+                'context': groupInfo.groupObj,
                 'postId': post['post_id'],
                 'postURL': '%s/r/post/%s' % (siteURL, post['post_id']),
                 'topicName': post['subject'],

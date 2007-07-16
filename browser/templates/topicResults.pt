@@ -31,6 +31,7 @@
           <tal:block condition="multiplePosts">latest post</tal:block>
           by
           <a class="name" href="#" 
+            tal:omit-tag="not:topic/last_author/exists"
             tal:attributes="href topic/last_author/url"
             tal:content="topic/last_author/name">Me!</a>
           at

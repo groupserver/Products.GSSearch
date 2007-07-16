@@ -1,73 +1,69 @@
-<tal:block define="view options/view">
-  <tal:block repeat="result view/get_results">
-    <div tal:define="n repeat/result/number; odd python:n%2"
-      tal:attributes="class python: odd and 'odd' or 'even'; 
-      id string:post-${result/postId};">
-      <p class="email-metadata">
+<tal:block define="view options/view;
+  munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
+  <ul>
+    <tal:block repeat="result view/get_results">
+      <li tal:attributes="id string:post-${result/postId};">
         <a class="topic" tal:condition="result/topicName"
-          tal:attributes="href string:/r/topic/${result/postId}#post-${result/postId};"
+          tal:attributes="href string:/r/post/${result/postId}"
           tal:content="result/topicName">A Topic</a>
-        <span class="recipient">
-          <strong>To:</strong>
+        <pre class="email-summary" 
+          tal:content="structure result/postSummary">
+            This is the body of the document.
+        </pre><!--email-summary-->
+        <div class="metadata">
+          <span class="author">
+            By
+            <a tal:omit-tag="not:result/author/exists" class="name"
+              tal:attributes="href string:/contacts/${result/author/id};
+              title string:Profile of ${result/author/name};"
+              tal:content="result/author/name">Me!</a>,
+          </span>
+          <span class="posted">
+            at
+            <span class="date" 
+              tal:define="ctx result/context"
+              tal:content="python:munge_date(ctx, result['date'])">
+              Today, Tomorrow, Timaru
+            </span>
+          </span>
+        </div><!--metadata-->
+        <div class="groupInfo" tal:condition="not:result/group/only">
           <a href="#"
             tal:attributes="href result/group/url"
             tal:content="result/group/name">A group</a>
-        </span> 
-        <span class="author">
-          <strong>From:</strong>
-          <a tal:omit-tag="not:result/author/exists" class="name"
-            tal:attributes="href string:/contacts/${result/author/id};
-            title string:Profile of ${result/author/name};"
-            tal:content="result/author/name">Me!</a>
-        </span>
-        <span class="posted">
-          <strong>Date:</strong>
-          <span class="date">
-            <span tal:replace="result/date">
-              Today, Tomorrow, Timaru
-            </span>
-            (<span tal:replace="result/timezone"/>)
-          </span>
-        </span>
-        <a class="email-link"
-          tal:attributes="href string:/r/post/${result/postId};"
-          title="A short link to this post">Short link</a>
-      </p><!--email-metadata-->
-      <pre class="email-summary" 
-        tal:content="structure result/postSummary">
-          This is the body of the document.
-      </pre><!--email-summary-->
-      <div class="disclosureWidget" id="#"
-        tal:condition="python:not(result['group']['only'] and result['author']['only'])"
-        tal:define="widgetId string:refinement-${result/postId}"
-        tal:attributes="id widgetId">
-        <p>
-          <a class="disclosureButton"
-            tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
-            href="#">Refine</a>
-        </p>
-        <div class="disclosureShowHide" style="display:none;">
-          <div>
-            <ul>
-              <li tal:condition="not:result/group/only">
-                <a title="Show only posts from the same group as this post"
-                  tal:attributes="href result/group/onlyURL"
-                  href="#">Show only posts from 
-                  <span class="group" 
-                    tal:content="result/group/name">this group</span></a>
-              </li>
-              <li tal:condition="not:result/author/only">
-                <a tal:attributes="href result/author/onlyURL"
-                  href="#">Show only posts by 
-                <span class="name" 
-                  tal:content="result/author/name">this author</span></a>
-              </li>
-            </ul>
+        </div>
+        <div class="disclosureWidget" id="#"
+          tal:condition="python:not(result['group']['only'] and result['author']['only'])"
+          tal:define="widgetId string:refinement-${result/postId}"
+          tal:attributes="id widgetId">
+          <p>
+            <a class="disclosureButton"
+              tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
+              href="#">Refine</a>
+          </p>
+          <div class="disclosureShowHide" style="display:none;">
+            <div>
+              <ul>
+                <li tal:condition="not:result/group/only">
+                  <a title="Show only posts from the same group as this post"
+                    tal:attributes="href result/group/onlyURL"
+                    href="#">Show only posts from 
+                    <span class="group" 
+                      tal:content="result/group/name">this group</span></a>
+                </li>
+                <li tal:condition="not:result/author/only">
+                  <a tal:attributes="href result/author/onlyURL"
+                    href="#">Show only posts by 
+                  <span class="name" 
+                    tal:content="result/author/name">this author</span></a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-    </div><!--email-details-->
-  </tal:block>
+      </li><!--email-details-->
+    </tal:block>
+  </ul>
   <ul class="navigation">
     <li class="previous"><a href="#" 
       tal:omit-tag="not:view/show_previous"
