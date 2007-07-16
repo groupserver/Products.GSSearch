@@ -254,8 +254,11 @@ class GSSearchView(BrowserView):
         return self.viewProfiles and \
           not(self.viewTopics or self.viewPosts or self.viewFiles)
     
-    def only_group(self, groupId):
+    def searching_group(self, groupId):
         return groupId == self.groupId
+    
+    def only_group(self, groupId=None):
+        return bool(self.groupId)
     
     def only_group_link(self, groupId):
         return self.get_search_url(groupId=groupId)

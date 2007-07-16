@@ -1,0 +1,41 @@
+<table tal:define="view options/view;
+  munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
+  <thead>
+    <tr>
+      <th class="author" tal:condition="not:options/onlyAuthor">Author</th>
+      <th class="groupInfo" 
+        tal:condition="not:options/onlyGroup">Group</th>
+      <th class="topic">Topic</th>
+      <th class="date">Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tal:block repeat="result view/get_results">
+      <tr tal:attributes="id string:post-${result/postId};">
+        <td class="author" tal:condition="not:options/onlyAuthor">
+          <a tal:omit-tag="not:result/author/exists" class="name"
+            tal:attributes="href string:/contacts/${result/author/id};
+            title string:Profile of ${result/author/name};"
+            tal:content="result/author/name">Me!</a>
+        </td>
+        <td class="groupInfo"
+          tal:condition="not:options/onlyGroup">
+          <a href="#"
+            tal:attributes="href result/group/url"
+            tal:content="result/group/name">A group</a>
+        </td>
+        <td class="topic">
+          <a tal:condition="result/topicName"
+            tal:attributes="href string:/r/post/${result/postId}"
+            tal:content="python:result['topicName'][:50]">A Topic</a>
+        </td>
+        <td class="date" 
+          tal:define="ctx result/context"
+          tal:content="python:munge_date(ctx, result['date'])">
+          Today, Tomorrow, Timaru
+        </td>
+      </tr>
+    </tal:block>
+  </tbody>
+</table>
+

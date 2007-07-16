@@ -66,7 +66,10 @@ class GSPostResultsContentProvider(object):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
           pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-          r = pageTemplate(view=self)
+          onlyGroup = self.view.only_group()
+          onlyAuthor = self.view.only_author()
+          r = pageTemplate(view=self, 
+            onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
           return r
           
       #########################################
@@ -121,7 +124,6 @@ class GSPostResultsContentProvider(object):
                 'id': authorId,
                 'name': authorInfo.get_realnames(),
                 'url': authorInfo.get_url(),
-                'only': self.view.only_author(authorId),
                 'onlyURL': self.view.only_author_link(authorId)
               }
               
@@ -134,7 +136,6 @@ class GSPostResultsContentProvider(object):
                 'id': groupInfo.get_id(),
                 'name': groupInfo.get_name(),
                 'url': groupInfo.get_url(),
-                'only': self.view.only_group(groupInfo.get_id()),
                 'onlyURL': self.view.only_group_link(groupInfo.get_id())
               }
                   

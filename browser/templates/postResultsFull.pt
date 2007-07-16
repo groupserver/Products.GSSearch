@@ -1,4 +1,6 @@
 <tal:block define="view options/view;
+  onlyGroup options/onlyGroup;
+  onlyAuthor options/onlyAuthor;
   munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <ul>
     <tal:block repeat="result view/get_results">
@@ -11,7 +13,7 @@
             This is the body of the document.
         </pre><!--email-summary-->
         <div class="metadata">
-          <span class="author">
+          <span class="author" tal:condition="not:onlyAuthor">
             By
             <a tal:omit-tag="not:result/author/exists" class="name"
               tal:attributes="href string:/contacts/${result/author/id};
@@ -27,13 +29,13 @@
             </span>
           </span>
         </div><!--metadata-->
-        <div class="groupInfo" tal:condition="not:result/group/only">
+        <div class="groupInfo" tal:condition="not:onlyGroup">
           <a href="#"
             tal:attributes="href result/group/url"
             tal:content="result/group/name">A group</a>
         </div>
         <div class="disclosureWidget" id="#"
-          tal:condition="python:not(result['group']['only'] and result['author']['only'])"
+          tal:condition="python:not(onlyGroup and onlyAuthor)"
           tal:define="widgetId string:refinement-${result/postId}"
           tal:attributes="id widgetId">
           <p>
@@ -44,14 +46,14 @@
           <div class="disclosureShowHide" style="display:none;">
             <div>
               <ul>
-                <li tal:condition="not:result/group/only">
+                <li tal:condition="not:onlyGroup">
                   <a title="Show only posts from the same group as this post"
                     tal:attributes="href result/group/onlyURL"
                     href="#">Show only posts from 
                     <span class="group" 
                       tal:content="result/group/name">this group</span></a>
                 </li>
-                <li tal:condition="not:result/author/only">
+                <li tal:condition="not:onlyAuthor">
                   <a tal:attributes="href result/author/onlyURL"
                     href="#">Show only posts by 
                   <span class="name" 

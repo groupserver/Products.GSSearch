@@ -1,4 +1,5 @@
 <ul tal:define="view options/view; 
+  onlyGroup options/onlyGroup;
   munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <tal:block tal:repeat="topic view/get_results">
     <li id="abc123" tal:attributes="id topic/topic_id">
@@ -39,7 +40,7 @@
           tal:define="ctx topic/context" 
           tal:content="python:munge_date(ctx, topic['last_post_date'])"/>
       </div><!--metadata-->
-      <div class="groupInfo" tal:condition="not:topic/group/only">
+      <div class="groupInfo" tal:condition="not:onlyGroup">
         <a class="group" href="#" 
           tal:attributes="href topic/group/url;"
           tal:content="topic/group/name"/>

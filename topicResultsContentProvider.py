@@ -103,7 +103,8 @@ class GSTopicResultsContentProvider(object):
               raise interfaces.UpdateNotCalled
 
           pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-          r = pageTemplate(view=self)
+          onlyGroup = self.view.only_group(self)
+          r = pageTemplate(view=self, onlyGroup=onlyGroup)
          
           return r
           
@@ -132,7 +133,6 @@ class GSTopicResultsContentProvider(object):
                 'id': authorId,
                 'name': authorInfo.get_realnames(),
                 'url': authorInfo.get_url(),
-                'only': self.view.only_author(authorId),
                 'onlyURL': self.view.only_author_link(authorId)
               }
               retval['last_author'] = authorD
@@ -146,7 +146,6 @@ class GSTopicResultsContentProvider(object):
                 'id': groupInfo.get_id(),
                 'name': groupInfo.get_name(),
                 'url': groupInfo.get_url(),
-                'only': self.view.only_group(groupInfo.get_id()),
                 'onlyURL': self.view.only_group_link(groupInfo.get_id())
               }
               retval['group'] = groupD
