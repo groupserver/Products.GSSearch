@@ -15,9 +15,10 @@
           <span class="cardinal" tal:content="topic/num_posts"/>
           posts
         </span>
-        <span class="dates">
+        <span class="dates" tal:define="ctx topic/context">
             Last post:
-            <span class="date" tal:content="python:munge_date(topic['group'], topic['last_post_date'])"/>
+            <span class="date" 
+              tal:content="python:munge_date(ctx, topic['last_post_date'])"/>
         </span>
         <ul class="keywords">
           <tal:block tal:repeat="keyword topic/keywords">

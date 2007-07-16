@@ -150,7 +150,8 @@ class GSTopicResultsContentProvider(object):
                 'onlyURL': self.view.only_group_link(groupInfo.get_id())
               }
               retval['group'] = groupD
-              
+              retval['context'] = groupInfo.groupObj
+                            
               files = [{'name': f['file_name'],
                         'url': '/r/topic/%s#post-%s' % (f['post_id'], f['post_id']),
                         'icon': '/++resource++fileIcons/%s.png' % \
