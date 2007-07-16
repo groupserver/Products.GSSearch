@@ -20,22 +20,14 @@
           </tal:block>
         </ul>
       </div><!--tags-->
-      <div class="metadata">
-        <span class="groupInfo" tal:condition="not:topic/group/only">
-          <a class="group" href="#" 
-            tal:attributes="href topic/group/url;"
-            tal:content="topic/group/name"/>
-        </span>
-        <tal:block condition="not:topic/group/only">
-          &#8212;
-        </tal:block>
+      <div class="metadata"
+        tal:define="multiplePosts python:topic['num_posts']&gt;1">
         <span class="postCount">
           <span class="cardinal" tal:content="topic/num_posts"/>
-          post<tal:block condition="python:topic['num_posts']&gt;1">s</tal:block> 
-          in the topic
+          post<tal:block condition="multiplePosts">s</tal:block> 
         </span>
         &#8212;
-        <tal:block condition="python:topic['num_posts']&gt;1">latest</tal:block>
+        <tal:block condition="multiplePosts">latest</tal:block>
         post by
         <a class="name" href="#" 
           tal:attributes="href topic/last_author/url"
@@ -45,6 +37,11 @@
           tal:define="ctx topic/context" 
           tal:content="python:munge_date(ctx, topic['last_post_date'])"/>
       </div><!--metadata-->
+      <div class="groupInfo" tal:condition="not:topic/group/only">
+        <a class="group" href="#" 
+          tal:attributes="href topic/group/url;"
+          tal:content="topic/group/name"/>
+      </div>
     </li>
   </tal:block>
 </ul>
