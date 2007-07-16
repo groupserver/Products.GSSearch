@@ -43,7 +43,6 @@
         at
         <span class="date" 
           tal:content="python:munge_date(ctx, topic['last_post_date'])"/>
-        </span>
       </div><!--metadata-->
     </li>
   </tal:block>
