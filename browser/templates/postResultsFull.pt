@@ -22,6 +22,11 @@
           tal:content="structure result/postSummary">
             This is the body of the document.
         </pre><!--email-summary-->
+        <div class="groupInfo" tal:condition="not:onlyGroup">
+          <a href="#"
+            tal:attributes="href result/group/url"
+            tal:content="result/group/name">A group</a>
+        </div>
         <div class="metadata">
           <span class="author" tal:condition="not:onlyAuthor">
             By
@@ -39,11 +44,6 @@
             </span>
           </span>
         </div><!--metadata-->
-        <div class="groupInfo" tal:condition="not:onlyGroup">
-          <a href="#"
-            tal:attributes="href result/group/url"
-            tal:content="result/group/name">A group</a>
-        </div>
         <div class="disclosureWidget" id="#"
           tal:condition="python:not(onlyGroup and onlyAuthor)"
           tal:define="widgetId string:refinement-${result/postId}"

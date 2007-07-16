@@ -15,6 +15,11 @@
                 href file/url"><img src="#" tal:attributes="src file/icon"/></a>
           </tal:block>
         </span>
+        <div class="groupInfo" tal:condition="not:onlyGroup">
+          <a class="group" href="#" 
+            tal:attributes="href topic/group/url;"
+            tal:content="topic/group/name"/>
+        </div>
         <div class="tags" tal:condition="topic/keywords">
           <p class="label">Tags:</p>
           <ul>
@@ -41,11 +46,6 @@
             tal:define="ctx topic/context" 
             tal:content="python:munge_date(ctx, topic['last_post_date'])"/>
         </div><!--metadata-->
-        <div class="groupInfo" tal:condition="not:onlyGroup">
-          <a class="group" href="#" 
-            tal:attributes="href topic/group/url;"
-            tal:content="topic/group/name"/>
-        </div>
         <div class="disclosureWidget" id="#"
           tal:define="widgetId string:refinement-${topic/last_post_id}"
           tal:attributes="id widgetId">
