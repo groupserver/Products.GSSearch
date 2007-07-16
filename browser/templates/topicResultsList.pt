@@ -41,7 +41,9 @@
           tal:attributes="href topic/last_author/url"
           tal:content="topic/last_author/name">Me!</a>
         at
-        <span class="date" tal:content="python:munge_date(topic['group'], topic['last_post_date'])"/>
+        <span class="date" 
+          tal:content="python:munge_date(ctx, topic['last_post_date'])"/>
+        </span>
       </div><!--metadata-->
     </li>
   </tal:block>
