@@ -27,8 +27,8 @@
           post<tal:block condition="multiplePosts">s</tal:block> 
         </span>
         &#8212;
-        <tal:block condition="multiplePosts">latest</tal:block>
-        post by
+        <tal:block condition="multiplePosts">latest post</tal:block>
+        by
         <a class="name" href="#" 
           tal:attributes="href topic/last_author/url"
           tal:content="topic/last_author/name">Me!</a>
