@@ -1,5 +1,6 @@
-<table tal:define="view options/view;
+<tal:block tal:define="view options/view;
   munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
+  <table>
   <thead>
     <tr>
       <th class="author" tal:condition="not:options/onlyAuthor">Author</th>
@@ -12,7 +13,11 @@
   </thead>
   <tbody>
     <tal:block repeat="result view/get_results">
-      <tr tal:attributes="id string:post-${result/postId};">
+      <tr tal:define="n repeat/result/number;
+        odd python:n%2;
+        class python:odd and 'odd' or 'even';"
+        tal:attributes="id string:post-${result/postId};
+          class class;">
         <td class="author" tal:condition="not:options/onlyAuthor">
           <a tal:omit-tag="not:result/author/exists" class="name"
             tal:attributes="href string:/contacts/${result/author/id};
@@ -49,4 +54,14 @@
     </tal:block>
   </tbody>
 </table>
-
+  <ul class="navigation">
+    <li class="previous"><a href="#" 
+      tal:omit-tag="not:view/show_previous"
+      tal:attributes="href view/previous_link">More recent 
+      <span class="n" tal:content="view/limit"/> topics</a></li>
+    <li class="next"><a href="#"
+      tal:omit-tag="not:view/show_next"
+      tal:attributes="href view/next_link">Older
+      <span class="n" tal:content="view/limit"/> topics</a></li>
+  </ul>
+</tal:block>
