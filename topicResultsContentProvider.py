@@ -181,7 +181,7 @@ class GSTopicResultsContentProvider(object):
               retval['files'] = files
               
               kwds = self.get_keywords_for_topic(topic)
-              wds = [w['word'] for w in kwds]
+              wds = [w['word'] for w in kwds][:self.keywordLimit*3]
               remove_plurals(wds)
               wds = wds[:self.keywordLimit]
               retval['keywords'] = wds
