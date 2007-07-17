@@ -1,4 +1,4 @@
-import sys, re, datetime, time, types, string, math, sha
+import sys, re, datetime, time, types, string, math, sha, difflib, copy
 from sets import Set
 import Products.Five, DateTime, Globals
 import zope.schema
@@ -29,6 +29,26 @@ def tfidf_sort(a, b):
     else:
         retval = -1
     return retval
+
+def remove_plurals(tags):
+    # --=mpj17=-- Warning, this modifies "tags" INPLACE
+    for tag in copy.copy(tags):
+        # find the closest match to the tag
+        matches = difflib.get_close_matches(tag, tags, n=10, cutoff=0.85)
+        if not matches:
+            continue
+        
+        # find the shortest of the matches
+        shortest = None
+        for match in matches:
+            if not shortest or len(match) <= len(shortest):
+                shortest = match
+        
+        # remove the shortest match from the matches, then
+        # clean up the original tags to remove all other matches
+        matches.remove(shortest)
+        for match in matches:
+            tags.remove(match)
     
 class GSTopicResultsContentProvider(object):
       """GroupServer Topic Search-Results Content Provider
@@ -161,8 +181,10 @@ class GSTopicResultsContentProvider(object):
               retval['files'] = files
               
               kwds = self.get_keywords_for_topic(topic)
-              retval['keywords'] = kwds
               wds = [w['word'] for w in kwds]
+              remove_plurals(wds)
+              wds = wds[:self.keywordLimit]
+              retval['keywords'] = wds
               retval['keywordSearch'] = self.get_keyword_search_link(wds)
               
               yield retval
@@ -180,11 +202,10 @@ class GSTopicResultsContentProvider(object):
                     for w in topicWords
                     if ((len(w['word']) > 3) and 
                          (w['word'] not in STOP_WORDS))]
+
           words.sort(tfidf_sort)
 
-          retval = words[:self.keywordLimit]          
-          assert len(retval) <= self.keywordLimit
-          return retval
+          return words
           
       def show_previous(self):
           retval = (self.startIndex > 0)
