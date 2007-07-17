@@ -18,15 +18,15 @@
                   tal:attributes="src string:/++resource++fileIcons/${iconName}.png"/></a>
           </tal:block>
         </span><!--files-->
-        <pre class="email-summary" 
-          tal:content="structure result/postSummary">
-            This is the body of the document.
-        </pre><!--email-summary-->
         <div class="groupInfo" tal:condition="not:onlyGroup">
           <a href="#"
             tal:attributes="href result/group/url"
             tal:content="result/group/name">A group</a>
         </div>
+        <pre class="email-summary" 
+          tal:content="structure result/postSummary">
+            This is the body of the document.
+        </pre><!--email-summary-->
         <div class="metadata">
           <span class="author" tal:condition="not:onlyAuthor">
             By

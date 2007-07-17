@@ -38,6 +38,13 @@
     interface=".interfaces.IGSSearchResults" />
 
   <browser:page 
+    for="Products.XWFMailingListManager.interfaces.IGSMessagesFolder"
+    name="postsSummary.html"
+    class=".view.GSSearchView"
+    template="browser/templates/groupPostsSummary.pt" 
+    permission="zope2.View" />
+
+  <browser:page 
     for=".interfaces.IGSSearchFolder" 
     name="search.ajax"
     class=".view.GSSearchView"
