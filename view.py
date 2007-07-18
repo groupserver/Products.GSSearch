@@ -331,7 +331,24 @@ class GSSearchATOMView(GSSearchView):
         if self.post:
             retval = self.post['date']
         return retval
+
+class GSSearchGroupView(GSSearchView):
+    """View for Searches within Groups
+    
+    Like a standard search, except that it only works with a group, 
+    setting "groupId" to be the ID ofthe containing group.
+    """
+    def __init__(self, context, request):
+        GSSearchView.__init__(self, context, request)
+        self.groupInfo = createObject('groupserver.GroupInfo', context)
+        self.groupId = self.groupInfo.get_id()
+        assert self.groupId, "Search outside a group"
+
+    def only_group(self, groupId=None):
+        """By definition, only the group is being searched."""
+        return True
         
 Globals.InitializeClass( GSSearchView )
 Globals.InitializeClass( GSSearchATOMView )
+Globals.InitializeClass( GSSearchGroupView )
 

@@ -40,7 +40,7 @@
   <browser:page 
     for="Products.XWFMailingListManager.interfaces.IGSMessagesFolder"
     name="postsSummary.html"
-    class=".view.GSSearchView"
+    class=".view.GSSearchGroupView"
     template="browser/templates/groupPostsSummary.pt" 
     permission="zope2.View" />
 
