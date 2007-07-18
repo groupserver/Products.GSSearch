@@ -70,11 +70,11 @@
     <tal:block metal:fill-slot="body">
       <form enctype="multipart/form-data" method="get"
         action="." tal:attributes="action request/URL"
-        tal:define="searchText python:view.searchText;
-          groupIds python:[view.groupId];
-          authorIds python:[view.authorId];
-          limit python:view.limit;
-          startIndex python:view.startIndex;">
+        tal:define="s python:view.searchText;
+          gs python:[view.groupId];
+          a python:[view.authorId];
+          l python:view.limit;
+          i python:view.startIndex;">
         
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.
@@ -115,21 +115,21 @@
             The baby's blood type? Human, mostly.</p>
         </div-->
         <fieldset>
-          <input type="text" class="text" name="searchText"
+          <input type="text" class="text" name="s"
             id="searchTextBottom" title="Text to search for"
             tal:attributes="value view/searchText | nothing"/>
           <input type="submit" class="button" value="Search"/>
-          <input type="hidden" name="viewTopics" value="#"
+          <input type="hidden" name="t" value="#"
             tal:attributes="value python:'%d' % view.view_topics()"/>
-          <input type="hidden" name="viewPosts" value="#"
+          <input type="hidden" name="p" value="#"
             tal:attributes="value python: '%d' % view.view_posts()"/>
-          <input type="hidden" name="viewFiles" value="#"
+          <input type="hidden" name="f" value="#"
             tal:attributes="value python: '%d' % view.view_files()"/>
-          <input type="hidden" name="viewProfiles" value="#"
+          <input type="hidden" name="r" value="#"
             tal:attributes="value python: '%d' % view.view_profiles()"/>
-          <input type="hidden" name="groupIds" value="#"
-            tal:attributes="value groupIds"/> 
-          <input type="hidden" name="authorId" value="#"
+          <input type="hidden" name="gs" value="#"
+            tal:attributes="value gs"/> 
+          <input type="hidden" name="a" value="#"
             tal:attributes="value view/authorId"/>
         </fieldset> 
       </form>

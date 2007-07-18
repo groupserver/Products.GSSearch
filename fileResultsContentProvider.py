@@ -46,14 +46,14 @@ class GSFileResultsContentProvider(object):
           self.siteInfo = IGSSiteInfo(self.context)
           self.groups = IGSGroupsInfo(self.context)
          
-          searchKeywords = self.searchText.split()
+          searchKeywords = self.s.split()
 
           assert hasattr(self.context, 'Catalog'), 'Catalog cannot ' \
             "be found"
           self.catalog = self.context.Catalog
           self.results = []
           
-          self.groupIds = [gId for gId in self.groupIds if gId]
+          self.groupIds = [gId for gId in self.gs if gId]
           if self.groupIds:
               groupIds = self.groups.filter_visible_group_ids(self.groupIds)
           else:
@@ -62,8 +62,8 @@ class GSFileResultsContentProvider(object):
           self.results = self.search_files(searchKeywords, groupIds)
           self.results = self.remove_non_existant_groups(self.results)
           
-          start = self.startIndex
-          end = self.startIndex + self.limit
+          start = self.i
+          end = start + self.l
           self.resultsCount = len(self.results)
           self.results = self.results[start : end]
 

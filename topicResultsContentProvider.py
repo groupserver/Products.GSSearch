@@ -85,9 +85,9 @@ class GSTopicResultsContentProvider(object):
           self.groupsInfo = createObject('groupserver.GroupsInfo', 
             self.context)
           self.searchTokens = createObject('groupserver.SearchTextTokens',
-            self.searchText)          
+            self.s)
           
-          self.groupIds = [gId for gId in self.groupIds if gId]
+          self.groupIds = [gId for gId in self.gs if gId]
           if self.groupIds:
               groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
           else:
@@ -95,7 +95,7 @@ class GSTopicResultsContentProvider(object):
 
           self.topics = self.messageQuery.topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), 
-            groupIds, limit=self.limit, offset=self.startIndex)
+            groupIds, limit=self.l, offset=self.i)
 
           self.topicCount = self.messageQuery.count_topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), groupIds)
@@ -208,7 +208,7 @@ class GSTopicResultsContentProvider(object):
           return words
           
       def show_previous(self):
-          retval = (self.startIndex > 0)
+          retval = (self.i > 0)
           return retval
           
       def previous_link(self):
@@ -216,14 +216,14 @@ class GSTopicResultsContentProvider(object):
           return retval
           
       def previous_chunk(self):
-          retval = self.startIndex - self.limit
+          retval = self.i - self.l
           if retval < 0:
               retval = 0
           assert retval >= 0
           return retval
           
       def show_next(self):
-          retval = (self.topicCount >= (self.startIndex + self.limit))
+          retval = (self.topicCount >= (self.i + self.l))
           return retval
           
       def next_link(self):
@@ -231,7 +231,7 @@ class GSTopicResultsContentProvider(object):
           return retval
 
       def next_chunk(self):
-          retval = self.startIndex + self.limit
+          retval = self.i + self.l
           return retval
               
       def get_group_link(self, groupId):

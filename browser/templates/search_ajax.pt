@@ -1,9 +1,9 @@
 <tal:block 
-  tal:define="searchText python:view.searchText;
-    groupIds python:[view.groupId];
-    authorIds python:[view.authorId];
-    limit python:view.limit;
-    startIndex python:view.startIndex;">
+  tal:define="s python:view.searchText;
+    gs python:[view.groupId];
+    a python:[view.authorId];
+    l python:view.limit;
+    i python:view.startIndex;">
         
   <div tal:condition="view/view_topics"
     tal:define="pageTemplateFileName string:browser/templates/topicResultsList.pt"

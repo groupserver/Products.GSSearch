@@ -79,10 +79,10 @@
     <li class="previous"><a href="#" 
       tal:omit-tag="not:view/show_previous"
       tal:attributes="href view/previous_link">More recent 
-      <span class="n" tal:content="view/limit"/> topics</a></li>
+      <span class="n" tal:content="view/l"/> topics</a></li>
     <li class="next"><a href="#"
       tal:omit-tag="not:view/show_next"
       tal:attributes="href view/next_link">Older
-      <span class="n" tal:content="view/limit"/> topics</a></li>
+      <span class="n" tal:content="view/l"/> topics</a></li>
   </ul>
 </tal:block>

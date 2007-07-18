@@ -19,18 +19,18 @@ class GSSearchView(BrowserView):
 
         self.siteInfo = createObject('groupserver.SiteInfo', context)
         
-        self.searchText = self.request.get('searchText', '')
+        self.searchText = self.request.get('s', '')
         if isinstance(self.searchText, list):
             self.searchText = ' '.join(self.searchText).strip()
             
-        self.groupId = self.request.get('groupId', '')
+        self.groupId = self.request.get('g', '')
         if self.groupId:
             self.groupInfo = createObject('groupserver.GroupInfo', context, 
                self.groupId)
         else:
             self.groupInfo = None
            
-        self.authorId = self.request.get('authorId', '')
+        self.authorId = self.request.get('a', '')
         if self.authorId:
             self.authorInfo = createObject('groupserver.AuthorInfo', 
                                            self.context, self.authorId)
@@ -38,19 +38,19 @@ class GSSearchView(BrowserView):
             self.authorInfo = None
            
         try:
-            self.startIndex = int(self.request.get('startIndex', 0))
+            self.startIndex = int(self.request.get('i', 0))
         except ValueError, e:
             self.startIndex = 0
 
         try:
-            self.limit = int(self.request.get('limit', 6))
+            self.limit = int(self.request.get('l', 6))
         except ValueError, e:
             self.limit = 6
         
-        self.viewTopics = self.__get_boolean('viewTopics', True)
-        self.viewPosts = self.__get_boolean('viewPosts', False)
-        self.viewFiles = self.__get_boolean('viewFiles', True)
-        self.viewProfiles = self.__get_boolean('viewProfiles', True)
+        self.viewTopics = self.__get_boolean('t', True)
+        self.viewPosts = self.__get_boolean('p', False)
+        self.viewFiles = self.__get_boolean('f', True)
+        self.viewProfiles = self.__get_boolean('r', True)
 
     def get_title(self):
         retval = ''
@@ -160,27 +160,27 @@ class GSSearchView(BrowserView):
         """
         if isinstance(searchText, list):
             searchText = ' '.join(searchText).strip()
-        searchTextQuery = self.get_query(r'searchText=%s', 
+        searchTextQuery = self.get_query(r's=%s', 
                                          self.searchText, searchText)
                                          
-        groupIdQuery = self.get_query(r'groupId=%s', 
+        groupIdQuery = self.get_query(r'g=%s', 
                                       self.groupId, groupId)
         
-        authorIdQuery = self.get_query(r'authorId=%s', 
+        authorIdQuery = self.get_query(r'a=%s', 
                                        self.authorId, authorId)
         
-        viewTopicsQuery = self.get_query(r'viewTopics=%s',
+        viewTopicsQuery = self.get_query(r't=%s',
           self.viewTopics, viewTopics, valType=int)
-        viewPostsQuery = self.get_query(r'viewPosts=%s', 
+        viewPostsQuery = self.get_query(r'p=%s', 
           self.viewPosts, viewPosts, valType=int)
-        viewFilesQuery = self.get_query(r'viewFiles=%s', 
+        viewFilesQuery = self.get_query(r'f=%s', 
           self.viewFiles, viewFiles, valType=int)
-        viewProfilesQuery = self.get_query(r'viewProfiles=%s', 
+        viewProfilesQuery = self.get_query(r'r=%s', 
           self.viewProfiles, viewProfiles, valType=int)
           
-        si = self.get_query(r'startIndex=%s', self.startIndex, 
+        si = self.get_query(r'i=%s', self.startIndex, 
           startIndex, valType=int)
-        li = self.get_query(r'limit=%s', self.limit, limit, 
+        li = self.get_query(r'l=%s', self.limit, limit, 
           valType=int)
 
         queries = '&'.join([searchTextQuery, groupIdQuery, authorIdQuery,

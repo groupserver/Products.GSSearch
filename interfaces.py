@@ -10,35 +10,35 @@ class IGSSearchFolder(Interface):
 class IGSSearchResults(Interface):
     """The generic search results"""
     
-    searchText = TextLine(
+    s = TextLine(
         title=u"Search Text",
         description=u"Text that is searched for",
         required=False,
         default=u""
     )
     
-    groupId = TextLine(
+    g = TextLine(
         title=u"Group Identifier",
         description=u"Unique Identifier for a group",
         required=False
     )
     
-    groupIds = List(
+    gs = List(
         title=u"Group IDs",
         description=u"The groups to search in; defaults to all visible groups",
         required=False,
         default=[],
-        value_type=groupId,
+        value_type=g,
         unique=True,
     )
 
-    authorId = TextLine(
+    a = TextLine(
       title=u'Author ID',
       description=u'Unique Identifier of an author',
       required=False
     )
 
-    limit = Int(
+    l = Int(
         title=u"Limit",
         description=u"Number of items to show in the results",
         required=False,
@@ -46,7 +46,7 @@ class IGSSearchResults(Interface):
         default=20,
     )
     
-    startIndex = Int(
+    i = Int(
         title=u"Start Index",
         description=u"The index of the first item show in the results",
         required=False,
@@ -54,28 +54,28 @@ class IGSSearchResults(Interface):
         default=0,
     )
     
-    viewTopics = Bool(
+    t = Bool(
         title=u"View Topics",
         description=u"Whether the topic-results should be viewed",
         required=False,
         default=True
     )
 
-    viewPosts = Bool(
+    p = Bool(
         title=u"View Posts",
         description=u"Whether the post-results should be viewed",
         required=False,
         default=False
     )
     
-    viewFiles = Bool(
+    f = Bool(
         title=u"View Files",
         description=u"Whether the file-results should be viewed",
         required=False,
         default=True
     )
     
-    viewProfiles = Bool(
+    r = Bool(
         title=u"View Profiles",
         description=u"Whether the profile-results should be viewed",
         required=False,
