@@ -1,0 +1,2 @@
+CREATE TABLE word_count (word TEXT PRIMARY KEY, count INTEGER NOT NULL);
+
