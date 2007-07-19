@@ -260,7 +260,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         aswc = sc.__add_std_where_clauses
         aswc(self, statement, self.postTable, site_id, group_ids)
                     
-        author_ids = [a for a in author_ids if a]
+        author_ids = author_ids and [a for a in author_ids if a] or []
         authorCol = self.postTable.c.user_id
         if (len(author_ids) == 1):
             statement.append_whereclause(authorCol == author_ids[0])
@@ -323,7 +323,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         aswc = sc.__add_std_where_clauses
         aswc(self, statement, self.postTable, site_id, group_ids)
                     
-        author_ids = [a for a in author_ids if a]
+        author_ids = author_ids and [a for a in author_ids if a] or []
         authorCol = self.postTable.c.user_id
         if (len(author_ids) == 1):
             statement.append_whereclause(authorCol == author_ids[0])
