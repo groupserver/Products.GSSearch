@@ -33,14 +33,30 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         self.dbname = da.getProperty('database')
         self.now = datetime.datetime.now()
 
+    def add_standard_where_clauses(self, statement, table, 
+                                   site_id, group_ids):
+        statement.append_whereclause(table.c.site_id==site_id)
+        if group_ids:
+            inStatement = table.c.group_id.in_(*group_ids)
+            statement.append_whereclause(inStatement)
+        else:
+            # --=mpj17=-- No, I am not smoking (much) crack. If the 
+            #  "group_ids" are not specified, I want to return nothing in
+            #  all cases. However, I cannot append "False" to the 
+            #  statement, so I append two items that are mutually 
+            #  exclusive.
+            statement.append_whereclause(table.c.group_id == '')
+            statement.append_whereclause(table.c.group_id != '')
+            
+        return statement
+
     def topic_search_subject(self, keywords, site_id, group_ids=[], 
         limit=12, offset=0):
         """Search for a particular subject in the list of topics."""
         
         statement = self.topicTable.select()
-        sc = Products.XWFMailingListManager.queries.MessageQuery
-        aswc = sc.__add_std_where_clauses
-        aswc(self, statement, self.topicTable, site_id, group_ids)
+        self.add_standard_where_clauses(statement, self.topicTable, 
+          site_id, group_ids)
         
         subjCol = self.topicTable.c.original_subject
 
@@ -88,8 +104,9 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
           
         statement = sa.select(cols, tt.c.last_post_id == pt.c.post_id)
         
-        aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
-        aswc(self, statement, self.topicTable, site_id, group_ids)
+
+        self.add_standard_where_clauses(statement, self.topicTable, 
+          site_id, group_ids)
 
         if searchTokens.keywords:
             wct = self.topic_word_countTable
@@ -125,8 +142,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         cols = [sa.func.count(self.topicTable.c.topic_id.distinct())]
         statement = sa.select(cols)
         
-        aswc=Products.XWFMailingListManager.queries.MessageQuery.__add_std_where_clauses
-        aswc(self, statement, self.topicTable, site_id, group_ids)
+        self.add_standard_where_clauses(statement, self.topicTable, 
+          site_id, group_ids)
         
         if searchTokens.keywords:
             wct = self.topic_word_countTable
@@ -256,9 +273,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         author_ids=[], limit=12, offset=0):
         
         statement = self.postTable.select()
-        sc = Products.XWFMailingListManager.queries.MessageQuery
-        aswc = sc.__add_std_where_clauses
-        aswc(self, statement, self.postTable, site_id, group_ids)
+        self.add_standard_where_clauses(statement, self.postTable, 
+          site_id, group_ids)
                     
         author_ids = author_ids and [a for a in author_ids if a] or []
         authorCol = self.postTable.c.user_id
@@ -319,9 +335,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         site_id, group_ids=[], author_ids=[]):
         
         statement = sa.select([sa.func.count(self.postTable.c.post_id)])
-        sc = Products.XWFMailingListManager.queries.MessageQuery
-        aswc = sc.__add_std_where_clauses
-        aswc(self, statement, self.postTable, site_id, group_ids)
+        self.add_standard_where_clauses(statement, self.postTable, 
+          site_id, group_ids)
                     
         author_ids = author_ids and [a for a in author_ids if a] or []
         authorCol = self.postTable.c.user_id
