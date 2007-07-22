@@ -47,18 +47,5 @@
       </li><!--email-details-->
     </tal:block>
   </ul>
-  <ul class="navigation">
-    <li class="previous"><a href="#" 
-      tal:omit-tag="not:view/show_previous"
-      tal:attributes="href view/previous_link">More recent 
-      <span class="n" tal:content="view/l"/> posts</a></li>
-    <li class="next"><a href="#"
-      tal:omit-tag="not:view/show_next"
-      tal:attributes="href view/next_link">Older
-      <span class="n" tal:content="view/l"/> posts</a></li>
-  </ul>
-  <p class="postCount" style="display:none;">
-    <span class="n" tal:content="view/postCount"/> posts match.
-  </p>
 </tal:block>
 
