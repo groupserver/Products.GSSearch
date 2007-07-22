@@ -1,0 +1,64 @@
+<tal:block define="view options/view;
+  onlyGroup options/onlyGroup;
+  onlyAuthor options/onlyAuthor;
+  munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
+  <ul>
+    <tal:block repeat="result view/get_results">
+      <li tal:attributes="id string:post-${result/postId};">
+        <a class="topic" tal:condition="result/topicName"
+          tal:attributes="href string:/r/post/${result/postId}"
+          tal:content="result/topicName">A Topic</a>
+        <span class="files" tal:condition="result/files">
+          <tal:block tal:repeat="file result/files">
+            <a href="#" 
+              tal:attributes="title file/file_name;
+                href string:/r/post/${result/postId}"
+                title="foo"><img src="#" 
+                  tal:define="iconName python:file['mime_type'].replace('/','-');"
+                  tal:attributes="src string:/++resource++fileIcons/${iconName}.png"/></a>
+          </tal:block>
+        </span><!--files-->
+        <div class="groupInfo" tal:condition="not:onlyGroup">
+          <a href="#"
+            tal:attributes="href result/group/url"
+            tal:content="result/group/name">A group</a>
+        </div>
+        <pre class="email-summary" 
+          tal:content="structure result/postSummary">
+            This is the body of the document.
+        </pre><!--email-summary-->
+        <div class="metadata">
+          <span class="author" tal:condition="not:onlyAuthor">
+            By
+            <a tal:omit-tag="not:result/author/exists" class="name"
+              tal:attributes="href string:/contacts/${result/author/id};
+              title string:Profile of ${result/author/name};"
+              tal:content="result/author/name">Me!</a>,
+          </span>
+          <span class="posted">
+            at
+            <span class="date" 
+              tal:define="ctx result/context"
+              tal:content="python:munge_date(ctx, result['date'])">
+              Today, Tomorrow, Timaru
+            </span>
+          </span>
+        </div><!--metadata-->
+      </li><!--email-details-->
+    </tal:block>
+  </ul>
+  <ul class="navigation">
+    <li class="previous"><a href="#" 
+      tal:omit-tag="not:view/show_previous"
+      tal:attributes="href view/previous_link">More recent 
+      <span class="n" tal:content="view/l"/> posts</a></li>
+    <li class="next"><a href="#"
+      tal:omit-tag="not:view/show_next"
+      tal:attributes="href view/next_link">Older
+      <span class="n" tal:content="view/l"/> posts</a></li>
+  </ul>
+  <p class="postCount" style="display:none;">
+    <span class="n" tal:content="view/postCount"/> posts match.
+  </p>
+</tal:block>
+

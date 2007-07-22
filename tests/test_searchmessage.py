@@ -48,16 +48,7 @@ def test_emailmessage():
       ...                                             database='onlinegroups.net')
       
       >>> mq = queries.MessageQuery( {}, alchemy_adaptor )
-      >>> [t['subject'] for t in mq.topic_search_subect('Avail', 'ogs', [])]
-      [u'Availability']
-      >>> [t['subject'] for t in mq.topic_search_keyword('fish', 'ogs', [])]
-      [u'Availability', u'Interesting site']
-      >>> [t['subject'] for t in mq.topic_search_keyword_subject('Avail', 'ogs', [])]
-      [u'Availability', u'Permissions on Web Feed']
-      >>> mq.count_word_in_topic('fish', '5s7NnxmGiamrckAB4hQTPv')
-      22
-      >>> mq.topic_word_count('5s7NnxmGiamrckAB4hQTPv')
-      22
+      >>> from zope.component import createObject
       
     Clean up:
       >>> tearDown()

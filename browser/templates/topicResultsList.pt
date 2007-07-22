@@ -1,7 +1,8 @@
 <ul tal:define="view options/view; 
   onlyGroup options/onlyGroup;
-  munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
-  <tal:block tal:repeat="topic view/get_results">
+  munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;
+  topics view/get_results">
+  <tal:block tal:repeat="topic topics">
     <li id="abc123" tal:attributes="id topic/topic_id">
       <a class="topic" href="#"
         tal:attributes="href string:/r/topic/${topic/last_post_id}"
