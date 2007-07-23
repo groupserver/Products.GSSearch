@@ -58,12 +58,6 @@
               tal:attributes="href view/only_posts_link;
                 class python:current and 'current' or 'not-current'">Posts</a>
           </li>
-          <li>
-            <a href="#"
-              tal:define="current view/only_files_shown" 
-              tal:attributes="href view/only_files_link;
-                class python:current and 'current' or 'not-current'">Files</a>
-          </li>
         </ul>
       </div>
     </tal:block>  
@@ -79,7 +73,15 @@
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.
         </p>
-        <ul class="navigation">
+
+        <fieldset id="searchInput">
+          <input type="text" class="text" name="s"
+            id="searchText" title="Text to search for"
+            tal:attributes="value view/searchText | nothing"/>
+          <input type="submit" class="button" value="Search"/>
+        </fieldset>
+        
+        <ul class="navigation" id="widenSearch">
           <li tal:condition="view/groupId">
             <a href="#" 
               tal:attributes="href view/all_site_search_link">Search
@@ -91,18 +93,18 @@
                all authors</a>
           </li>
         </ul>
-        
+
         <div id="topics" tal:condition="view/view_topics">
           <h2 tal:condition="not:view/only_topics_shown">Topics</h2>
           <p tal:replace="structure provider:groupserver.TopicResults">
             The baby's blood type? Human, mostly.</p>
         </div>
         
-        <div id="files" tal:condition="view/view_files">
+        <!--div id="files" tal:condition="view/view_files">
           <h2 tal:condition="not:view/only_files_shown">Posted Files</h2>          
           <p tal:replace="structure provider:groupserver.FileResults">
             The baby's blood type? Human, mostly.</p>
-        </div>
+        </div-->
 
         <div id="posts" tal:condition="view/view_posts">
           <h2 tal:condition="not:view/only_posts_shown">Posts</h2>          
@@ -115,10 +117,6 @@
             The baby's blood type? Human, mostly.</p>
         </div-->
         <fieldset>
-          <input type="text" class="text" name="s"
-            id="searchTextBottom" title="Text to search for"
-            tal:attributes="value view/searchText | nothing"/>
-          <input type="submit" class="button" value="Search"/>
           <input type="hidden" name="t" value="#"
             tal:attributes="value python:'%d' % view.view_topics()"/>
           <input type="hidden" name="p" value="#"
@@ -129,6 +127,8 @@
             tal:attributes="value python: '%d' % view.view_profiles()"/>
           <input type="hidden" name="gs" value="#"
             tal:attributes="value gs"/> 
+          <input type="hidden" name="g" value="#"
+            tal:attributes="value view/groupId" />
           <input type="hidden" name="a" value="#"
             tal:attributes="value view/authorId"/>
         </fieldset> 

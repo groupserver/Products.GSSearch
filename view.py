@@ -22,7 +22,9 @@ class GSSearchView(BrowserView):
         self.searchText = self.request.get('s', '')
         if isinstance(self.searchText, list):
             self.searchText = ' '.join(self.searchText).strip()
-            
+        self.searchTokens = createObject('groupserver.SearchTextTokens', 
+            self.searchText)
+        
         self.groupId = self.request.get('g', '')
         if self.groupId:
             self.groupInfo = createObject('groupserver.GroupInfo', context, 
@@ -49,17 +51,17 @@ class GSSearchView(BrowserView):
         
         self.viewTopics = self.__get_boolean('t', True)
         self.viewPosts = self.__get_boolean('p', False)
-        self.viewFiles = self.__get_boolean('f', True)
-        self.viewProfiles = self.__get_boolean('r', True)
+        self.viewFiles = self.__get_boolean('f', False)
+        self.viewProfiles = self.__get_boolean('r', False)
 
     def get_title(self):
         retval = ''
 
         if self.searchText:
-            s = ', '.join(self.searchText.split())
-            s = '%s in' % s
+            s = ', '.join(self.searchTokens.phrases)
+            s = 'Results for "%s" in' % s
         else:
-            s = 'all'
+            s = 'All'
         
         in_ = []
         if self.view_topics():
@@ -79,11 +81,12 @@ class GSSearchView(BrowserView):
         grp = ''
         if self.groupInfo:
             grp = ': %s' % self.groupInfo.get_name()
+
         auth = ''
         if self.authorInfo:
-            auth = u', by %s' % self.authorInfo.get_realnames()
+            auth = u' by %s' % self.authorInfo.get_realnames()
 
-        r = r'Results for %s %s%s%s: %s'
+        r = r'%s %s%s%s: %s'
         retval = r % (s, inStr, auth, grp, self.siteInfo.get_name())
         
         return retval
@@ -92,10 +95,10 @@ class GSSearchView(BrowserView):
         retval = ''
 
         if self.searchText:
-            s = ', '.join(self.searchText.split())
-            s = '<q>%s</q> in' % s
+            s = ', '.join(self.searchTokens.phrases)
+            s = 'Results for <q>%s</q> in' % s
         else:
-            s = 'all'
+            s = 'All'
         
         in_ = []
         if self.view_topics():
@@ -112,19 +115,22 @@ class GSSearchView(BrowserView):
             inStr = '%s and %s' % (inStr, in_[-1])
         else:
             inStr = in_[0]
-        grp = ''
-        if self.groupInfo:
-            link = '<a class="group" href="%s">%s</a>' % \
-              (self.groupInfo.get_url(), self.groupInfo.get_name())
-            grp = u', in the group %s' % link
-            
+
         auth = ''
         if self.authorInfo:
             link= '<a class="name" href="%s">%s</a>' % \
               (self.authorInfo.get_url(), self.authorInfo.get_realnames())
-            auth = u', by %s' % link
+            auth = u' by %s' % link
             
-        r = u'Results for %s %s%s%s.' % (s, inStr, grp, auth)
+        grp = ''
+        if self.groupInfo:
+            link = '<a class="group" href="%s">%s</a>' % \
+              (self.groupInfo.get_url(), self.groupInfo.get_name())
+            grp = u' in the group %s' % link
+        else:
+            grp = u' in the site %s' % self.siteInfo.get_name()
+            
+        r = u'%s %s%s%s.' % (s, inStr, auth, grp)
         return r
 
     def __get_boolean(self, var, default=True):
