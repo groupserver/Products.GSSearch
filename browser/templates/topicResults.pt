@@ -21,7 +21,6 @@
             tal:content="topic/group/name"/>
         </div>
         <div class="tags" tal:condition="topic/keywords">
-          <p class="label">Tags:</p>
           <ul>
             <tal:block tal:repeat="keyword topic/keywords">
               <li tal:content="keyword"/>
