@@ -19,6 +19,12 @@
     />
     <meta name="date" content="2007-04-26"/>
         
+    <tal:block metal:fill-slot="metadata"> 
+      <link rel="up" href="posts.html" title="Posts" />
+      <link rel="bookmark" href="topics.html" title="Topics"/>
+      <link rel="help" href="/help" title="Help"/>
+    </tal:block>
+        
     <tal:block metal:fill-slot="javascript">
       <script type="text/javascript" 
         src="/++resource++prototype/prototype.js">&#160;</script>
@@ -42,14 +48,15 @@
   </head>
   <body>
     <tal:block metal:fill-slot="body">
-      <div id="posts" tal:define="limit python:view.limit;
-          startIndex python:view.startIndex;
+      <div id="posts" tal:define="l view/limit;
+          i view/startIndex;
           group context/Scripts/get/group_object;
-          groupIds python:[group.getId()];
-          authorIds python:[view.authorId];
+          gs python:[group.getId()];
+          a python:[view.authorId];
           pageTemplateFileName string:browser/templates/postResultsTable.pt;">
           
-        <h2>Posts</h2>          
+        <h2>Summary of Posts in 
+          <span tal:content="view/groupInfo/get_name" class="group">the Group</span></h2>
         <p tal:replace="structure provider:groupserver.PostResults">
           The baby's blood type? Human, mostly.</p>
       </div>
