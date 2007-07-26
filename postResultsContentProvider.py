@@ -9,6 +9,7 @@ import zope.viewlet.interfaces, zope.contentprovider.interfaces
 
 import DocumentTemplate
 import Products.XWFMailingListManager.view
+from Products.XWFMailingListManager.emailbody import get_email_intro_and_remainder
 
 import Products.GSContent, Products.XWFCore.XWFUtils
 
@@ -138,7 +139,7 @@ class GSPostResultsContentProvider(object):
               'url': groupInfo.get_url(),
               'onlyURL': self.view.only_group_link(groupInfo.get_id())
             }
-                
+            
             retval = {
               'context': groupInfo.groupObj,
               'postId': post['post_id'],
@@ -150,6 +151,7 @@ class GSPostResultsContentProvider(object):
               'timezone': 'foo',
               'postSummary': self.get_summary(post['body']),
               'postBody': post['body'],
+              'postIntro': get_email_intro_and_remainder(post['body'])[0],
               'files': post['files_metadata']
             }
             yield retval

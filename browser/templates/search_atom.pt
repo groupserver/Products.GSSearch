@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"
-  xmlns:tal="http://xml.zope.org/namespaces/tal">
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  tal:define="change_timezone python:modules['Products.XWFCore.XWFUtils'].change_timezone">
   
-  <title tal:content="view/get_title">Search for Atom-Powered Robots</title>
+  <title tal:content="view/get_title">Search for Atom-Powered 
+    Robots</title>
   <updated tal:define="d view/most_recent_post_date"
-    tal:content="python:(d-d.utcoffset()).strftime('%Y-%m-%dT%H:%M:%SZ')">
+    tal:content="python:change_timezone(d, 'UTC').strftime('%Y-%m-%dT%H:%M:%SZ')">
     2003-12-13T14:15:16Z
   </updated>
   <author>
@@ -18,9 +20,10 @@
   <link rel="self" href="http://onlinegroups.net/groups/demo" 
     tal:attributes="href view/get_search_url"/>
 
-  <tal:block tal:define="searchText python:view.searchText;
-    groupIds python:[view.groupId];
-    authorIds python:[view.authorId];">
+  <tal:block tal:define="s view/searchText;
+    gs python:[view.groupId];
+    a python:[view.authorId];
+    l view/limit;">
     <tal:block tal:condition="view/view_posts"
       tal:define="pageTemplateFileName string:browser/templates/postResultsFullATOM.pt;">
       <p tal:replace="structure provider:groupserver.PostResults">

@@ -64,11 +64,11 @@
     <tal:block metal:fill-slot="body">
       <form enctype="multipart/form-data" method="get"
         action="." tal:attributes="action request/URL"
-        tal:define="s python:view.searchText;
+        tal:define="s view/searchText;
           gs python:[view.groupId];
           a python:[view.authorId];
-          l python:view.limit;
-          i python:view.startIndex;">
+          l view/limit;
+          i view/startIndex;">
         
         <p tal:content="structure view/search_description">
           The baby's blood type? Human, mostly.
