@@ -61,6 +61,8 @@
         </ul>
       </div>
     </tal:block>  
+    <div metal:fill-slot="search" id="searcharea" 
+      style="display:none;">&#160;</div>
     <tal:block metal:fill-slot="body">
       <form enctype="multipart/form-data" method="get"
         action="." tal:attributes="action request/URL"
