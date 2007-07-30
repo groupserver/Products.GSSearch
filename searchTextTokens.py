@@ -44,6 +44,7 @@ class SearchTextTokens(object):
             if self.phraseDelimiter in self.searchText:
                 retval = [t.strip().strip(self.phraseDelimiter) 
                           for t in tokens]
+                retval = [t for t in retval if t]
             else:
                 retval = tokens
             self.__keywordCache = retval

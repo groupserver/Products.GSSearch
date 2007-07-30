@@ -247,8 +247,9 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         """
         countTable = self.topic_word_countTable
         statement = countTable.select()
-        inStatement = countTable.c.topic_id.in_(*topicIds)
-        statement.append_whereclause(inStatement)
+        if topicIds:
+            inStatement = countTable.c.topic_id.in_(*topicIds)
+            statement.append_whereclause(inStatement)
         statement.append_whereclause(countTable.c.count > 1)
         r = statement.execute()
         retval = []
