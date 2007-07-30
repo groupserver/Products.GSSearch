@@ -59,8 +59,6 @@ class GSTopicResultsContentProvider(object):
           zope.publisher.interfaces.browser.IDefaultBrowserLayer,
           zope.interface.Interface)
 
-      cache_topicsWordCounts = cache.SimpleCache()
-      
       def __init__(self, context, request, view):
           self.__parent__ = self.view = view
           self.__updated = False
@@ -109,14 +107,9 @@ class GSTopicResultsContentProvider(object):
           self.topicFiles = self.messageQuery.files_metata_topic(tIds)
           
           hashkey = sha.new('-'.join(tIds)+dbname).hexdigest()
-          cTopicsWordCounts = self.cache_topicsWordCounts.get(hashkey)
-          if cTopicsWordCounts and cTopicsWordCounts['postCount'] == postCount:
-              self.topicsWordCounts = cTopicsWordCounts['object']
-          else:
-              self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
-              cTopicsWordCounts = {'object': self.topicsWordCounts,
-                                   'postCount': postCount}
-              self.cache_topicsWordCounts.add(hashkey, cTopicsWordCounts)
+          self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
+          cTopicsWordCounts = {'object': self.topicsWordCounts,
+                               'postCount': postCount}
 
       def render(self):
           if not self.__updated:
