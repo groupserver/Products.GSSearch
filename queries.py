@@ -304,10 +304,11 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             regexep = bodyCol.op('~*')(searchTokens.phrases[0])
             statement.append_whereclause(regexep)
         elif (len(searchTokens.phrases) > 1):
-            # For each keyword, construct a regular expression match, and 
-            #   "or" them all together
-            bodyConds = [bodyCol.op('~*')(p) for p in searchTokens.phrases]
-            statement.append_whereclause(sa.or_(*bodyConds))
+            # For each keyword, construct a regular expression match that
+            #   will "or" them all together
+            brackets = ['(%s)' % k for k in searchTokens.phrases]
+            regularExpression = '|'.join(brackets)
+            statement.append_whereclause(bodyCol.op('~*')(regularExpression))
         else: # (len(keywords) == 0)
             # We do not need to do anything if there are no keywords
             pass
