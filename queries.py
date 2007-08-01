@@ -112,7 +112,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         self.add_standard_where_clauses(statement, self.topicTable, 
           site_id, group_ids)
-        
+          
+        pt = self.postTable        
         wct = self.topic_word_countTable
         topicIdCol = self.topicTable.c.topic_id
         if (searchTokens.keywords and
