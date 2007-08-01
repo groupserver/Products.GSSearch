@@ -50,47 +50,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             
         return statement
 
-    def topic_search_subject(self, keywords, site_id, group_ids=[], 
-        limit=12, offset=0):
-        """Search for a particular subject in the list of topics."""
-        
-        statement = self.topicTable.select()
-        self.add_standard_where_clauses(statement, self.topicTable, 
-          site_id, group_ids)
-        
-        subjCol = self.topicTable.c.original_subject
-
-        if (len(keywords) == 1):
-            regexp = '.*%s.*' % keywords[0].lower()
-            statement.append_whereclause(subjCol.op('~*')(regexp))
-        elif (len(keywords) > 1):
-            # For each keyword, construct a regular expression match
-            #   against the subject, and or them all together
-            regexp = r'.*%s.*'
-            conds = [subjCol.op('~*')(regexp % k ) for k in keywords]
-            statement.append_whereclause(sa.or_(*conds))
-        else: # (len(keywords) == 0)
-            # We do not need to do anything if there are no keywords
-            pass
-        statement.limit = limit
-        statement.offset = offset
-        statement.order_by(sa.desc(self.topicTable.c.last_post_date))
-        
-        r = statement.execute()
-        
-        retval = []
-        if r.rowcount:
-            retval = [ {'topic_id': x['topic_id'],
-                        'last_post_id': x['last_post_id'], 
-                        'first_post_id': x['first_post_id'], 
-                        'group_id': x['group_id'], 
-                        'site_id': x['site_id'], 
-                        'subject': unicode(x['original_subject'], 'utf-8'), 
-                        'last_post_date': x['last_post_date'], 
-                        'num_posts': x['num_posts']} for x in r ]
-        
-        return retval
-
     def topic_search_keyword(self, searchTokens, site_id, 
         group_ids=[], limit=12, offset=0):
         """Search for the search text in the content and subject-lines of
@@ -107,12 +66,21 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
         self.add_standard_where_clauses(statement, self.topicTable, 
           site_id, group_ids)
-
-        if searchTokens.keywords:
-            wct = self.topic_word_countTable
+          
+        wct = self.topic_word_countTable
+        topicIdCol = self.topicTable.c.topic_id
+        if (searchTokens.keywords and
+            (len(searchTokens.keywords) != len(searchTokens.phrases))):
+            # Do a phrase search. *shudder*
+            s2 = sa.select([wct.c.topic_id.distinct()], 
+                            wct.c.word.in_(*searchTokens.keywords))
+            brackets = ['(%s)' % k for k in searchTokens.phrases]
+            regularExpression = '|'.join(brackets)
+            s2.append_whereclause(pt.c.body.op('~*')(regularExpression))
+            statement.append_whereclause(topicIdCol.in_(s2))
+        elif searchTokens.keywords:
             s2 = sa.select([wct.c.topic_id.distinct()], 
                            wct.c.word.in_(*searchTokens.keywords))
-            topicIdCol = self.topicTable.c.topic_id
             statement.append_whereclause(topicIdCol.in_(s2))
 
         statement.limit = limit
@@ -145,13 +113,22 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         self.add_standard_where_clauses(statement, self.topicTable, 
           site_id, group_ids)
         
-        if searchTokens.keywords:
-            wct = self.topic_word_countTable
+        wct = self.topic_word_countTable
+        topicIdCol = self.topicTable.c.topic_id
+        if (searchTokens.keywords and
+            (len(searchTokens.keywords) != len(searchTokens.phrases))):
+            # Do a phrase search. *shudder*
+            s2 = sa.select([wct.c.topic_id.distinct()], 
+                            wct.c.word.in_(*searchTokens.keywords))
+            brackets = ['(%s)' % k for k in searchTokens.phrases]
+            regularExpression = '|'.join(brackets)
+            s2.append_whereclause(pt.c.body.op('~*')(regularExpression))
+            statement.append_whereclause(topicIdCol.in_(s2))
+        elif searchTokens.keywords:
             s2 = sa.select([wct.c.topic_id.distinct()], 
                            wct.c.word.in_(*searchTokens.keywords))
-            topicIdCol = self.topicTable.c.topic_id
             statement.append_whereclause(topicIdCol.in_(s2))
-
+            
         r = statement.execute()
         retval = r.scalar()
         if retval == None:
@@ -300,10 +277,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         bodyCol = self.postTable.c.body
         subjectCol = self.postTable.c.subject
 
-        if (len(searchTokens.phrases) == 1):
-            regexep = bodyCol.op('~*')(searchTokens.phrases[0])
-            statement.append_whereclause(regexep)
-        elif (len(searchTokens.phrases) > 1):
+        if (len(searchTokens.phrases) >= 1):
             # For each keyword, construct a regular expression match that
             #   will "or" them all together
             brackets = ['(%s)' % k for k in searchTokens.phrases]
@@ -363,14 +337,12 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         bodyCol = self.postTable.c.body
         subjectCol = self.postTable.c.subject
 
-        if (len(searchTokens.phrases) == 1):
-            regexep = bodyCol.op('~*')(searchTokens.phrases[0])
-            statement.append_whereclause(regexep)
-        elif (len(searchTokens.phrases) > 1):
-            # For each keyword, construct a regular expression match, and 
-            #   "or" them all together
-            bodyConds = [bodyCol.op('~*')(p) for p in searchTokens.phrases]
-            statement.append_whereclause(sa.or_(*bodyConds))
+        if (len(searchTokens.phrases) >= 1):
+            # For each keyword, construct a regular expression match that
+            #   will "or" them all together
+            brackets = ['(%s)' % k for k in searchTokens.phrases]
+            regularExpression = '|'.join(brackets)
+            statement.append_whereclause(bodyCol.op('~*')(regularExpression))
         else: # (len(keywords) == 0)
             # We do not need to do anything if there are no keywords
             pass
