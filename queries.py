@@ -94,8 +94,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))        
 
-        print statement
-
         r = statement.execute()
         retval = []
         for x in r:
