@@ -57,35 +57,44 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
         tt = self.topicTable
         pt = self.postTable
-        cols = [tt.c.topic_id, tt.c.last_post_id, tt.c.first_post_id, 
-          tt.c.group_id, tt.c.site_id, tt.c.original_subject, 
-          tt.c.last_post_date, tt.c.num_posts, pt.c.user_id]
-          
+        wct = self.topic_word_countTable
+
+        cols = [tt.c.topic_id.distinct(), tt.c.last_post_id, 
+          tt.c.first_post_id,  tt.c.group_id, tt.c.site_id, 
+          tt.c.original_subject,  tt.c.last_post_date, tt.c.num_posts, 
+          pt.c.user_id]
         statement = sa.select(cols, tt.c.last_post_id == pt.c.post_id)
-        
 
         self.add_standard_where_clauses(statement, self.topicTable, 
           site_id, group_ids)
           
-        wct = self.topic_word_countTable
         topicIdCol = self.topicTable.c.topic_id
-        if (searchTokens.keywords and
-            (len(searchTokens.keywords) != len(searchTokens.phrases))):
-            # Do a phrase search. *shudder*
-            s2 = sa.select([wct.c.topic_id.distinct()], 
-                            wct.c.word.in_(*searchTokens.keywords))
-            brackets = ['(%s)' % k for k in searchTokens.phrases]
-            regularExpression = '|'.join(brackets)
-            s2.append_whereclause(pt.c.body.op('~*')(regularExpression))
-            statement.append_whereclause(topicIdCol.in_(s2))
-        elif searchTokens.keywords:
-            s2 = sa.select([wct.c.topic_id.distinct()], 
-                           wct.c.word.in_(*searchTokens.keywords))
-            statement.append_whereclause(topicIdCol.in_(s2))
+        
+        if searchTokens.phrases:
+            # post.topic_id = topic_word_count.topic_id 
+            statement.append_whereclause(pt.c.topic_id == wct.c.topic_id)
+            
+            # topic_word_count.word IN ('blog','exposure') 
+            clause = wct.c.word.in_(*searchTokens.keywords)
+            statement.append_whereclause(clause)
+            
+            if (len(searchTokens.phrases) != len(searchTokens.keywords)):
+                # Do a phrase search. *Shudder*
+                # post.topic_id=topic.topic_id
+                clause = (pt.c.topic_id == tt.c.topic_id)
+                
+                # post.body ~* '(blog exposure)')
+                brackets = ['(%s)' % k for k in searchTokens.phrases]
+                regularExpression = '|'.join(brackets)
+                clause1 = pt.c.body.op('~*')(regularExpression)
+
+                statement.append_whereclause(sa.and_(clause, clause1))
 
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(self.topicTable.c.last_post_date))        
+
+        print statement
 
         r = statement.execute()
         retval = []
