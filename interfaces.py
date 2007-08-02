@@ -163,12 +163,20 @@ class IGSSearchTextTokens(Interface):
       description=u'The string that is used to delimit phrases',
       required=False,
       default=u'"')
+
+    nonwords = List(title=u'Non Words',
+      description=u'The list of supplied keywords that are also '
+        u'stop-words. They are not returned by "keywords".',
+      value_type=TextLine(title=u'Word'),
+      required=True)
       
     keywords = List(title=u'Keywords',
       description=u'The list of keywords in the search text, ignoring '
         u'phrasing. The text is broken into keywords based on whitespace, '
-        u'with "phraseDelimiter" characters stripped.',
+        u'with "phraseDelimiter" characters stripped. In addition, any'
+        u'word that is a stop word is dropped',
       value_type=TextLine(title=u'Keyword'),
+      max_length=7,
       required=True)
           
     phrases = List(title=u'Phrases',
@@ -176,5 +184,6 @@ class IGSSearchTextTokens(Interface):
         u'up by phrases. The text that is not in a phrase is split '
         u'on whitespace.',
       value_type=TextLine(title=u'Phrase'),
+      max_length=7,
       required=True)
-
+  
