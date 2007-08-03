@@ -7,8 +7,10 @@ import datetime
 class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     """Query the message database"""
 
-    TOPIC_SEARCH = 1
-    POST_SEARCH  = 2
+    TOPIC_SEARCH       = 1
+    TOPIC_SEARCH_COUNT = 2
+    POST_SEARCH        = 4
+    POST_SEARCH_COUNT  = 8
 
     # a cache for the count of keywords across the whole database, keyed
     # by the name of the database, since we might have more than one.
@@ -53,47 +55,11 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             
         return statement
 
-    def __topic_post_keyword_query(self, searchType,
-        searchTokens, site_id, group_ids=[], limit=12, offset=0):
-        """Construct a keyword-search of a topic or post
-        
-        ARGUMENTS
-          "searchTokens"  The tokens to search for.
-          "site_id"       The ID of the site to search
-          "group_ids"     A list of group IDs to search
-          "limit"         The number of items to return
-          "offset"        The offset into the list of items returned.
-          "topicSearch"   The type of search: TOPIC_SEARCH or POST_SEARCH
-        
-        RETURNS
-          An instance of an SQL Alchemy query.
-          
-        SIDE EFFECTS
-          None"""
+    def __add_keyword_search_where_clauses(self, statement, searchTokens):
         tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
 
-        if (searchType == self.TOPIC_SEARCH):
-            cols = [tt.c.topic_id.distinct(), tt.c.last_post_id, 
-              tt.c.first_post_id, tt.c.group_id, tt.c.site_id, 
-              tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts, 
-              sa.select([pt.c.user_id], 
-                tt.c.last_post_id == pt.c.post_id,  
-                scalar=True).label('user_id')]
-        elif (searchType == self.POST_SEARCH):
-            cols = [pt.c.post_id, pt.c.user_id, pt.c.group_id,
-              pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
-        else:
-            assert False, \
-              'Unsupported keyword-search type: %s' % searchType
-        statement = sa.select(cols)
-
-        self.add_standard_where_clauses(statement, self.topicTable, 
-          site_id, group_ids)
-
-        topicIdCol = self.topicTable.c.topic_id
-        
         if searchTokens.phrases:
             # post.topic_id = topic_word_count.topic_id 
             statement.append_whereclause(pt.c.topic_id == wct.c.topic_id)
@@ -114,20 +80,39 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                 clause1 = pt.c.body.op('~*')(regularExpression)
 
                 statement.append_whereclause(sa.and_(clause, clause1))
-
-        statement.limit = limit
-        statement.offset = offset
-        statement.order_by(sa.desc(tt.c.last_post_date))     
+        return statement
         
-        return statement   
-
+    def __add_author_where_clauses(self, statement, author_ids):
+        pt = self.postTable
+        author_ids = author_ids and [a for a in author_ids if a] or []
+        if author_ids:
+            statement.append_whereclause(pt.c.user_id.in_(*author_ids))
+        return statement
+        
     def topic_search_keyword(self, searchTokens, site_id, 
         group_ids=[], limit=12, offset=0):
         """Search for the search text in the content and subject-lines of
         topics"""
+        tt = self.topicTable
+        pt = self.postTable
+        wct = self.topic_word_countTable
 
-        statement = self.__topic_post_keyword_query(self.TOPIC_SEARCH,
-          searchTokens, site_id, group_ids, limit, offset)
+        cols = [tt.c.topic_id.distinct(), tt.c.last_post_id, 
+          tt.c.first_post_id, tt.c.group_id, tt.c.site_id, 
+          tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts, 
+          sa.select([pt.c.user_id], tt.c.last_post_id == pt.c.post_id,  
+            scalar=True).label('user_id')]
+        statement = sa.select(cols)
+
+        statement = self.add_standard_where_clauses(statement, 
+          self.topicTable,  site_id, group_ids)
+        statement = self.__add_keyword_search_where_clauses(statement, 
+          searchTokens)
+        statement.limit = limit
+        statement.offset = offset
+        statement.order_by(sa.desc(tt.c.last_post_date))
+        
+        print statement
 
         r = statement.execute()
         retval = []
@@ -148,30 +133,74 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         group_ids=[]):
         """Search for the search text in the content and subject-lines of
         topics"""
+        tt = self.topicTable
 
-        cols = [sa.func.count(self.topicTable.c.topic_id.distinct())]
+        cols = [sa.func.count(tt.c.topic_id.distinct())]
         statement = sa.select(cols)
+        statement = self.add_standard_where_clauses(statement, 
+          self.topicTable,  site_id, group_ids)
+        statement = self.__add_keyword_search_where_clauses(statement, 
+          searchTokens)
+            
+        r = statement.execute()
+        retval = r.scalar()
+        if retval == None:
+            retval = 0
+        assert retval >= 0
+        return retval
+
+    def post_search_keyword(self, searchTokens, site_id, group_ids=[], 
+        author_ids=[], limit=12, offset=0):
         
+        tt = self.topicTable
+        pt = self.postTable
+        wct = self.topic_word_countTable
+        cols = [pt.c.post_id, pt.c.user_id, pt.c.group_id,
+          pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
+        statement = sa.select(cols)
+        statement = self.add_standard_where_clauses(statement, 
+          self.topicTable,  site_id, group_ids)
+        statement = self.__add_keyword_search_where_clauses(statement, 
+          searchTokens)
+        statement = self.__add_author_where_clauses(statement, author_ids)
+
+        statement.limit = limit
+        statement.offset = offset
+        statement.order_by(sa.desc(pt.c.date))
+        
+        r = statement.execute()
+
+        for x in r:
+            retval = {
+              'post_id':          x['post_id'],
+              'user_id':          x['user_id'],
+              'group_id':         x['group_id'],
+              'subject':          x['subject'],
+              'date':             x['date'],
+              'body':             x['body'],
+              'files_metadata':   x['has_attachments'] 
+                                  and self.files_metadata(x['post_id']) 
+                                  or [],
+              }
+            yield retval
+
+    def count_post_search_keyword(self, searchTokens, 
+        site_id, group_ids=[], author_ids=[]):
+        
+        tt = self.topicTable
+        pt = self.postTable
+        wct = self.topic_word_countTable
+
+        cols = [sa.func.count(pt.c.post_id.distinct())]
+        statement = sa.select(cols)
         self.add_standard_where_clauses(statement, self.topicTable, 
           site_id, group_ids)
-          
-        pt = self.postTable        
-        wct = self.topic_word_countTable
-        topicIdCol = self.topicTable.c.topic_id
-        if (searchTokens.keywords and
-            (len(searchTokens.keywords) != len(searchTokens.phrases))):
-            # Do a phrase search. *shudder*
-            s2 = sa.select([wct.c.topic_id.distinct()], 
-                            wct.c.word.in_(*searchTokens.keywords))
-            brackets = ['(%s)' % k for k in searchTokens.phrases]
-            regularExpression = '|'.join(brackets)
-            s2.append_whereclause(pt.c.body.op('~*')(regularExpression))
-            statement.append_whereclause(topicIdCol.in_(s2))
-        elif searchTokens.keywords:
-            s2 = sa.select([wct.c.topic_id.distinct()], 
-                           wct.c.word.in_(*searchTokens.keywords))
-            statement.append_whereclause(topicIdCol.in_(s2))
-            
+        statement = self.add_standard_where_clauses(statement, 
+          self.topicTable,  site_id, group_ids)
+        statement = self.__add_keyword_search_where_clauses(statement, 
+          searchTokens)
+        statement = self.__add_author_where_clauses(statement, author_ids)
+
         r = statement.execute()
         retval = r.scalar()
         if retval == None:
@@ -288,75 +317,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         if r.rowcount:
             for x in r:
                 retval[x['file_id']] = x['post_id']
-        return retval
-
-    def post_search_keyword(self, searchTokens, site_id, group_ids=[], 
-        author_ids=[], limit=12, offset=0):
-        
-        statement = self.__topic_post_keyword_query(self.POST_SEARCH,
-          searchTokens, site_id, group_ids, limit, offset)
-        
-        r = statement.execute()
-
-        for x in r:
-            retval = {
-              'post_id':          x['post_id'],
-              'user_id':          x['user_id'],
-              'group_id':         x['group_id'],
-              'subject':          x['subject'],
-              'date':             x['date'],
-              'body':             x['body'],
-              'files_metadata':   x['has_attachments'] 
-                                  and self.files_metadata(x['post_id']) 
-                                  or [],
-              }
-            yield retval
-
-    def count_post_search_keyword(self, searchTokens, 
-        site_id, group_ids=[], author_ids=[]):
-        
-        statement = sa.select([sa.func.count(self.postTable.c.post_id)])
-        self.add_standard_where_clauses(statement, self.postTable, 
-          site_id, group_ids)
-                    
-        author_ids = author_ids and [a for a in author_ids if a] or []
-        authorCol = self.postTable.c.user_id
-        if (len(author_ids) == 1):
-            statement.append_whereclause(authorCol == author_ids[0])
-        elif (len(author_ids) > 1):
-            # For each author, construct a regular expression match, and 
-            #   "or" them all together
-            conds = [authorCol == a for a in author_ids]
-            statement.append_whereclause(sa.or_(*conds))
-        else: # (len(authorId) == 0)
-            # We do not need to do anything if there are no authors
-            pass
-
-        if searchTokens.keywords:
-            wct = self.topic_word_countTable
-            s2 = sa.select([wct.c.topic_id.distinct()], 
-                           wct.c.word.in_(*searchTokens.keywords))
-            topicIdCol = self.postTable.c.topic_id
-            statement.append_whereclause(topicIdCol.in_(s2))
-            
-        bodyCol = self.postTable.c.body
-        subjectCol = self.postTable.c.subject
-
-        if (len(searchTokens.phrases) >= 1):
-            # For each keyword, construct a regular expression match that
-            #   will "or" them all together
-            brackets = ['(%s)' % k for k in searchTokens.phrases]
-            regularExpression = '|'.join(brackets)
-            statement.append_whereclause(bodyCol.op('~*')(regularExpression))
-        else: # (len(keywords) == 0)
-            # We do not need to do anything if there are no keywords
-            pass
-
-        r = statement.execute()
-        retval = r.scalar()
-        if retval == None:
-            retval = 0
-        assert retval >= 0
         return retval
 
     def files_metata_topic(self, topic_ids):

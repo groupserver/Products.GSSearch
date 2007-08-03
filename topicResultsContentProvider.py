@@ -216,7 +216,7 @@ class GSTopicResultsContentProvider(object):
           return retval
           
       def show_next(self):
-          retval = (self.topicCount >= (self.i + self.l))
+          retval = (self.topicCount > (self.i + self.l))
           return retval
           
       def next_link(self):
