@@ -60,14 +60,16 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         wct = self.topic_word_countTable
 
         cols = [tt.c.topic_id.distinct(), tt.c.last_post_id, 
-          tt.c.first_post_id,  tt.c.group_id, tt.c.site_id, 
-          tt.c.original_subject,  tt.c.last_post_date, tt.c.num_posts, 
-          pt.c.user_id]
-        statement = sa.select(cols, tt.c.last_post_id == pt.c.post_id)
+          tt.c.first_post_id, tt.c.group_id, tt.c.site_id, 
+          tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts, 
+          sa.select([pt.c.user_id], 
+            tt.c.last_post_id == pt.c.post_id,  scalar=True).label('user_id')]
+          
+        statement = sa.select(cols)
 
         self.add_standard_where_clauses(statement, self.topicTable, 
           site_id, group_ids)
-          
+
         topicIdCol = self.topicTable.c.topic_id
         
         if searchTokens.phrases:
@@ -80,6 +82,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             
             if (len(searchTokens.phrases) != len(searchTokens.keywords)):
                 # Do a phrase search. *Shudder*
+                
                 # post.topic_id=topic.topic_id
                 clause = (pt.c.topic_id == tt.c.topic_id)
                 
