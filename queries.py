@@ -170,16 +170,12 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
     def post_search_keyword(self, searchTokens, site_id, group_ids=[], 
         author_ids=[], limit=12, offset=0):
-        
-        tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
         cols = [pt.c.post_id, pt.c.user_id, pt.c.group_id,
           pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
         statement = sa.select(cols)
-
-        statement = self.add_standard_where_clauses(statement, 
-          pt,  site_id, group_ids)
+        self.add_standard_where_clauses(statement, pt, site_id, group_ids)
         statement = self.__add_author_where_clauses(statement, author_ids)
         statement = self.__add_post_keyword_search_where_clauses(statement, 
           searchTokens)
@@ -188,6 +184,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement.offset = offset
         statement.order_by(sa.desc(pt.c.date))
 
+        print statement
         r = statement.execute()
 
         for x in r:
@@ -206,22 +203,17 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
     def count_post_search_keyword(self, searchTokens, 
         site_id, group_ids=[], author_ids=[]):
-        
-        tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
 
         cols = [sa.func.count(pt.c.post_id.distinct())]
         statement = sa.select(cols)
-        self.add_standard_where_clauses(statement, self.topicTable, 
-          site_id, group_ids)
-        statement = self.add_standard_where_clauses(statement, 
-          self.topicTable,  site_id, group_ids)
+        self.add_standard_where_clauses(statement, pt, site_id, group_ids)
         statement = self.__add_author_where_clauses(statement, author_ids)
         statement = self.__add_post_keyword_search_where_clauses(statement, 
           searchTokens)
 
-
+        print statement
         r = statement.execute()
         retval = r.scalar()
         retval = 0
