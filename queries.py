@@ -184,7 +184,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement.offset = offset
         statement.order_by(sa.desc(pt.c.date))
 
-        print statement
         r = statement.execute()
 
         for x in r:
@@ -213,10 +212,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement = self.__add_post_keyword_search_where_clauses(statement, 
           searchTokens)
 
-        print statement
         r = statement.execute()
         retval = r.scalar()
-        retval = 0
         if retval == None:
             retval = 0
         assert retval >= 0
