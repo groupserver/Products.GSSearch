@@ -55,22 +55,20 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             
         return statement
 
-    def __add_keyword_search_where_clauses(self, statement, searchTokens):
+    def __add_topic_keyword_search_where_clauses(self, statement, searchTokens):
         tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
 
         if searchTokens.phrases:
-            # post.topic_id = topic_word_count.topic_id 
-            statement.append_whereclause(pt.c.topic_id == wct.c.topic_id)
-            
+            statement.append_whereclause(tt.c.topic_id == wct.c.topic_id)
             # topic_word_count.word IN ('blog','exposure') 
             clause = wct.c.word.in_(*searchTokens.keywords)
             statement.append_whereclause(clause)
             
             if (len(searchTokens.phrases) != len(searchTokens.keywords)):
                 # Do a phrase search. *Shudder*
-                
+
                 # post.topic_id=topic.topic_id
                 clause = (pt.c.topic_id == tt.c.topic_id)
                 
@@ -80,6 +78,29 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                 clause1 = pt.c.body.op('~*')(regularExpression)
 
                 statement.append_whereclause(sa.and_(clause, clause1))
+        return statement
+
+    def __add_post_keyword_search_where_clauses(self, statement, 
+      searchTokens):
+        """Post searching is easier than topic searching, as there is no
+          natural join between the topic and post tables."""
+        pt = self.postTable
+        wct = self.topic_word_countTable
+
+        if searchTokens.phrases:
+            statement.append_whereclause(pt.c.topic_id == wct.c.topic_id)
+            # topic_word_count.word IN ('blog','exposure') 
+            clause = wct.c.word.in_(*searchTokens.keywords)
+            statement.append_whereclause(clause)
+            
+            if (len(searchTokens.phrases) != len(searchTokens.keywords)):
+                # Do a phrase search. *Shudder*
+
+                # post.body ~* '(blog exposure)')
+                brackets = ['(%s)' % k for k in searchTokens.phrases]
+                regularExpression = '|'.join(brackets)
+                clause1 = pt.c.body.op('~*')(regularExpression)
+                statement.append_whereclause(clause1)
         return statement
         
     def __add_author_where_clauses(self, statement, author_ids):
@@ -106,14 +127,12 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
         statement = self.add_standard_where_clauses(statement, 
           self.topicTable,  site_id, group_ids)
-        statement = self.__add_keyword_search_where_clauses(statement, 
+        statement = self.__add_topic_keyword_search_where_clauses(statement, 
           searchTokens)
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(tt.c.last_post_date))
         
-        print statement
-
         r = statement.execute()
         retval = []
         for x in r:
@@ -139,7 +158,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement = sa.select(cols)
         statement = self.add_standard_where_clauses(statement, 
           self.topicTable,  site_id, group_ids)
-        statement = self.__add_keyword_search_where_clauses(statement, 
+        statement = self.__add_topic_keyword_search_where_clauses(statement, 
           searchTokens)
             
         r = statement.execute()
@@ -158,16 +177,17 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         cols = [pt.c.post_id, pt.c.user_id, pt.c.group_id,
           pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
         statement = sa.select(cols)
+
         statement = self.add_standard_where_clauses(statement, 
-          self.topicTable,  site_id, group_ids)
-        statement = self.__add_keyword_search_where_clauses(statement, 
-          searchTokens)
+          pt,  site_id, group_ids)
         statement = self.__add_author_where_clauses(statement, author_ids)
+        statement = self.__add_post_keyword_search_where_clauses(statement, 
+          searchTokens)
 
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(pt.c.date))
-        
+
         r = statement.execute()
 
         for x in r:
@@ -197,12 +217,14 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
           site_id, group_ids)
         statement = self.add_standard_where_clauses(statement, 
           self.topicTable,  site_id, group_ids)
-        statement = self.__add_keyword_search_where_clauses(statement, 
-          searchTokens)
         statement = self.__add_author_where_clauses(statement, author_ids)
+        statement = self.__add_post_keyword_search_where_clauses(statement, 
+          searchTokens)
+
 
         r = statement.execute()
         retval = r.scalar()
+        retval = 0
         if retval == None:
             retval = 0
         assert retval >= 0
