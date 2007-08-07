@@ -12,7 +12,8 @@
           <tal:block tal:repeat="file topic/files">
             <a href="#" title="foo"
               tal:attributes="title file/name;
-                href file/url"><img src="#" tal:attributes="src file/icon"/></a>
+                href file/url;
+                class string:fileIcon ${file/icon}">&#160;</a>
           </tal:block>
         </span>
         <div class="groupInfo" tal:condition="not:onlyGroup">

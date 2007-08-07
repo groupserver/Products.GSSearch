@@ -163,11 +163,10 @@ class GSTopicResultsContentProvider(object):
               }
               retval['group'] = groupD
               retval['context'] = groupInfo.groupObj
-                            
+
               files = [{'name': f['file_name'],
                         'url': '/r/topic/%s#post-%s' % (f['post_id'], f['post_id']),
-                        'icon': '/++resource++fileIcons/%s.png' % \
-                          f['mime_type'].replace('/','-')
+                        'icon': f['mime_type'].replace('/','-').replace('.','-'),
                        } for f in self.topicFiles 
                        if f['topic_id'] == topic['topic_id']]
                        
