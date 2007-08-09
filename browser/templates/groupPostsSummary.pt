@@ -24,15 +24,6 @@
       <link rel="bookmark" href="topics.html" title="Topics"/>
       <link rel="help" href="/help" title="Help"/>
     </tal:block>
-        
-    <tal:block metal:fill-slot="javascript">
-      <script type="text/javascript" 
-        src="/++resource++prototype/prototype.js">&#160;</script>
-      <script type="text/javascript" 
-        src="/++resource++scriptaculous/scriptaculous.js">&#160;</script>
-      <script type="text/javascript"
-        src="/++resource++disclosureButton/disclosure_toggle.js">&#160;</script>
-    </tal:block>
     
     <tal:block metal:fill-slot="style">
       <link rel="stylesheet" title="Search Stylesheet"
