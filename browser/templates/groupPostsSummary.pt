@@ -26,8 +26,6 @@
     </tal:block>
     
     <tal:block metal:fill-slot="style">
-      <link rel="stylesheet" title="Search Stylesheet"
-        href="/++resource++search.css"/>
       <style type="text/css">
         table .author, table .group, table .topic, table .files, table .date {
             padding: 5px 20px 5px 0px;

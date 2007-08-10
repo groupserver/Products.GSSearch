@@ -25,12 +25,6 @@
         tal:define="base python:'%s/search.atom' % (view.request.URL1)"
         tal:attributes="href python:view.get_search_url(baseURL=base, startIndex=0)" />
     </tal:block>
-    
-    <tal:block metal:fill-slot="style">
-      <link rel="stylesheet" title="Search Stylesheet"
-        href="/++resource++search.css"/>
-    </tal:block>
-    
   </head>
   <body>
     <tal:block metal:fill-slot="contextnavigation">
