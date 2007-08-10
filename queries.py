@@ -134,7 +134,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         r = statement.execute()
         retval = []
-        for x in retval:
+        for x in r:
             retval.append(
                 {'topic_id': x['topic_id'],
                  'last_post_id': x['last_post_id'], 
