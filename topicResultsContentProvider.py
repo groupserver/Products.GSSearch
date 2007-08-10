@@ -21,11 +21,6 @@ from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
 
 from Products.XWFCore import cache
 
-import logging
-logger = logging.getLogger()
-
-tlog = lambda x: logger.info('topicResultContentProvider: %s' % x)
-
 def tfidf_sort(a, b):
     if a['tfidf'] < b['tfidf']:
         retval = 1
@@ -72,7 +67,6 @@ class GSTopicResultsContentProvider(object):
           self.request = request
           
       def update(self):
-          a = time.time()
           self.__updated = True
 
           self.da = self.context.zsqlalchemy 
@@ -97,24 +91,24 @@ class GSTopicResultsContentProvider(object):
           else:
               groupIds = self.groupsInfo.get_visible_group_ids()
           
-          b = time.time()
-          tlog('setup time: %s' % (b-a))          
-
           self.topics = self.messageQuery.topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), 
             groupIds, limit=self.l, offset=self.i)
 
-          c = time.time()
-          tlog('topic search time: %s' % (c-b))
-
-          self.topicCount = self.messageQuery.count_topic_search_keyword(
-            self.searchTokens, self.siteInfo.get_id(), groupIds)
-
-          d = time.time()
-          tlog('topic search count time: %s' % (d-c))
+          # important: we short circuit here because if we have no matching
+          # topics several of the remaining queries are *very* intensive
+          if not self.topics:
+              self.topicCount = 0
+              self.topicFiles = []
+              self.topicsWordCounts = []
+          else:   
+              tIds = [t['topic_id'] for t in self.topics]
+              self.topicFiles = self.messageQuery.files_metata_topic(tIds)
+              self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
+              self.topicCount = self.messageQuery.count_topic_search_keyword(
+                self.searchTokens, self.siteInfo.get_id(), groupIds)
 
           self.totalNumTopics = self.messageQuery.count_topics()
-          
           self.wordCounts = self.messageQuery.word_counts()
 
           tIds = [t['topic_id'] for t in self.topics]
