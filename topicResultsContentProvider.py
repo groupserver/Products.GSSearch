@@ -91,23 +91,22 @@ class GSTopicResultsContentProvider(object):
           else:
               groupIds = self.groupsInfo.get_visible_group_ids()
           
-          self.topics, self.topicCount, topicBatchCount = \
-            self.messageQuery.topic_search_keyword(
+          self.topics = self.messageQuery.topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), 
             groupIds, limit=self.l, offset=self.i)
 
           # important: we short circuit here because if we have no matching
           # topics several of the remaining queries are *very* intensive
           if not self.topics:
-              #self.topicCount = 0
+              self.topicCount = 0
               self.topicFiles = []
               self.topicsWordCounts = []
           else:   
               tIds = [t['topic_id'] for t in self.topics]
               self.topicFiles = self.messageQuery.files_metata_topic(tIds)
               self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
-              #self.topicCount = self.messageQuery.count_topic_search_keyword(
-              #  self.searchTokens, self.siteInfo.get_id(), groupIds)
+              self.topicCount = self.messageQuery.count_topic_search_keyword(
+                self.searchTokens, self.siteInfo.get_id(), groupIds)
 
           self.totalNumTopics = self.messageQuery.count_topics()
           self.wordCounts = self.messageQuery.word_counts()
