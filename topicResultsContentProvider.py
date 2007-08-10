@@ -21,6 +21,11 @@ from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
 
 from Products.XWFCore import cache
 
+import logging
+logger = logging.getLogger()
+
+tlog = lambda x: logger.info('topicResultContentProvider: %s' % x)
+
 def tfidf_sort(a, b):
     if a['tfidf'] < b['tfidf']:
         retval = 1
@@ -67,6 +72,7 @@ class GSTopicResultsContentProvider(object):
           self.request = request
           
       def update(self):
+          a = time.time()
           self.__updated = True
 
           self.da = self.context.zsqlalchemy 
@@ -90,13 +96,22 @@ class GSTopicResultsContentProvider(object):
               groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
           else:
               groupIds = self.groupsInfo.get_visible_group_ids()
+          
+          b = time.time()
+          tlog('setup time: %s' % (b-a))          
 
           self.topics = self.messageQuery.topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), 
             groupIds, limit=self.l, offset=self.i)
 
+          c = time.time()
+          tlog('topic search time: %s' % (c-b))
+
           self.topicCount = self.messageQuery.count_topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), groupIds)
+
+          d = time.time()
+          tlog('topic search count time: %s' % (d-c))
 
           self.totalNumTopics = self.messageQuery.count_topics()
           
