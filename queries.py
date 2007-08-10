@@ -3,19 +3,6 @@ from sqlalchemy.exceptions import NoSuchTableError
 import sqlalchemy as sa
 from Products.XWFCore import cache
 import datetime
-import md5
-
-from Products.XWFCore import cache
-TSKResultCache = cache.LRUCache()
-TSKCountCache = cache.LRUCache()
-
-def gen_cache_key(*vals):
-    key = md5.new()
-    for val in vals:
-        key.update(str(val))
-        key.update('-')
-    
-    return key.hexdigest()
 
 class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     """Query the message database"""
@@ -27,11 +14,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
     # a cache for the count of keywords across the whole database, keyed
     # by the name of the database, since we might have more than one.
-    # The cache structure is:
-    #
-    # {'object': wordcounts, 'expires': datetime)
     cache_wordCount = cache.SimpleCacheWithExpiry()
-    cache_wordCount.set_expiry_interval(datetime.timedelta(0,3600)) # 1 hour 
+    cache_wordCount.set_expiry_interval(datetime.timedelta(0,86400)) # 1 day 
 
     def __init__(self, context, da):
         super_query = Products.XWFMailingListManager.queries.MessageQuery
@@ -127,13 +111,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         group_ids=[], limit=12, offset=0):
         """Search for the search text in the content and subject-lines of
         topics"""
-        hashkey = gen_cache_key(searchTokens, site_id,
-                                group_ids, limit, offset,
-                                self.dbname, self.count_posts())
-        cached_result = TSKResultCache.get(hashkey)
-        if cached_result:
-            return cached_result
-        
         tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
@@ -167,20 +144,12 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                  'last_post_user_id': x['user_id'],
                  'num_posts': x['num_posts']})
 
-        cached_result = TSKResultCache.add(hashkey, retval)
-
         return retval
     
     def count_topic_search_keyword(self, searchTokens, site_id, 
         group_ids=[]):
         """Search for the search text in the content and subject-lines of
         topics"""
-        hashkey = gen_cache_key(searchTokens, site_id,
-                                group_ids, self.count_posts())
-        cached_result = TSKCountCache.get(hashkey)
-        if cached_result:
-            return cached_result
-        
         tt = self.topicTable
 
         cols = [sa.func.count(tt.c.topic_id.distinct())]
@@ -195,8 +164,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         if retval == None:
             retval = 0
         assert retval >= 0
-
-        TSKCountCache.add(hashkey, retval)
 
         return retval
 
