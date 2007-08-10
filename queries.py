@@ -176,7 +176,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         """Search for the search text in the content and subject-lines of
         topics"""
         hashkey = gen_cache_key(searchTokens, site_id,
-                                group_ids, self.post_count())
+                                group_ids, self.count_posts())
         cached_result = TSKCountCache.get(hashkey)
         if cached_result:
             return cached_result
