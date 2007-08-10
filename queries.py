@@ -109,8 +109,15 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
     def topic_search_keyword(self, searchTokens, site_id, 
         group_ids=[], limit=12, offset=0):
-        """Search for the search text in the content and subject-lines of
-        topics"""
+        """ Search for the search text in the content and subject-lines of
+        topics.
+            
+            Returns: (result_batch, total_count, batch_count)
+            
+            total_count is the count of all results matching the search,
+            regardless of their involvement in the result_batch, batch_count
+            is the count of results in the batch.
+        """
         tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
@@ -126,23 +133,26 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
           self.topicTable,  site_id, group_ids)
         statement = self.__add_topic_keyword_search_where_clauses(statement, 
           searchTokens)
-        statement.limit = limit
-        statement.offset = offset
+        #statement.limit = limit
+        #statement.offset = offset
         statement.order_by(sa.desc(tt.c.last_post_date))
         
         r = statement.execute()
-        retval = []
-        for x in r:
-            retval.append(
-                {'topic_id': x['topic_id'],
-                 'last_post_id': x['last_post_id'], 
-                 'first_post_id': x['first_post_id'], 
-                 'group_id': x['group_id'], 
-                 'site_id': x['site_id'], 
-                 'subject': unicode(x['original_subject'], 'utf-8'), 
-                 'last_post_date': x['last_post_date'], 
-                 'last_post_user_id': x['user_id'],
-                 'num_posts': x['num_posts']})
+        topics = []
+        if r.rowcount:
+            for x in r[offset:offset+limit]:
+                topics.append(
+                    {'topic_id': x['topic_id'],
+                     'last_post_id': x['last_post_id'], 
+                     'first_post_id': x['first_post_id'], 
+                     'group_id': x['group_id'], 
+                     'site_id': x['site_id'], 
+                     'subject': unicode(x['original_subject'], 'utf-8'), 
+                     'last_post_date': x['last_post_date'], 
+                     'last_post_user_id': x['user_id'],
+                     'num_posts': x['num_posts']})
+        
+        retval = (topics, r.rowcount, len(topics))
 
         return retval
     
