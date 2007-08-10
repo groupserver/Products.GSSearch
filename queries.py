@@ -3,6 +3,18 @@ from sqlalchemy.exceptions import NoSuchTableError
 import sqlalchemy as sa
 from Products.XWFCore import cache
 import datetime
+import md5
+
+from Products.XWFCore import cache
+TSKResultCache = cache.LRUCache()
+
+def gen_cache_key(*vals):
+    key = md5.new()
+    for val in vals:
+        key.update(str(var))
+        key.update('-')
+    
+    return key.hexdigest()
 
 class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     """Query the message database"""
@@ -114,6 +126,13 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         group_ids=[], limit=12, offset=0):
         """Search for the search text in the content and subject-lines of
         topics"""
+        hashkey = gen_cache_key(searchTokens, site_id,
+                                group_id, limit, offset,
+                                self.dbname, self.count_posts())
+        cached_result = TSKResultCache.get(hashkey)
+        if cached_result:
+            return cached_result
+        
         tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
@@ -146,6 +165,9 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                  'last_post_date': x['last_post_date'], 
                  'last_post_user_id': x['user_id'],
                  'num_posts': x['num_posts']})
+
+        cached_result = TSKResultCache.add(hashkey, retval)
+
         return retval
     
     def count_topic_search_keyword(self, searchTokens, site_id, 
