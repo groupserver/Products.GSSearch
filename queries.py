@@ -7,6 +7,7 @@ import md5
 
 from Products.XWFCore import cache
 TSKResultCache = cache.LRUCache()
+TSKCountCache = cache.LRUCache()
 
 def gen_cache_key(*vals):
     key = md5.new()
@@ -174,6 +175,12 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         group_ids=[]):
         """Search for the search text in the content and subject-lines of
         topics"""
+        hashkey = gen_cache_key(searchTokens, site_id,
+                                group_ids, self.post_count())
+        cached_result = TSKCountCache.get(hashkey)
+        if cached_result:
+            return cached_result
+        
         tt = self.topicTable
 
         cols = [sa.func.count(tt.c.topic_id.distinct())]
@@ -188,6 +195,9 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         if retval == None:
             retval = 0
         assert retval >= 0
+
+        TSKCountCache.add(hashkey, retval)
+
         return retval
 
     def post_search_keyword(self, searchTokens, site_id, group_ids=[], 
