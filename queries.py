@@ -11,7 +11,7 @@ TSKResultCache = cache.LRUCache()
 def gen_cache_key(*vals):
     key = md5.new()
     for val in vals:
-        key.update(str(var))
+        key.update(str(val))
         key.update('-')
     
     return key.hexdigest()
