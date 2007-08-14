@@ -173,7 +173,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         author_ids=[], limit=12, offset=0):
         pt = self.postTable
         wct = self.topic_word_countTable
-        cols = [pt.c.post_id, pt.c.user_id, pt.c.group_id,
+        cols = [pt.c.post_id.distinct(), pt.c.user_id, pt.c.group_id,
           pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
         statement = sa.select(cols)
         self.add_standard_where_clauses(statement, pt, site_id, group_ids)
