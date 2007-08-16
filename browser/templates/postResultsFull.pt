@@ -55,7 +55,7 @@
           </p>
           <div class="disclosureShowHide" style="display:none;">
             <div>
-              <ul>
+              <ul class="refinement">
                 <li tal:condition="not:onlyGroup">
                   <a title="Show only posts from the same group as this post"
                     tal:attributes="href result/group/onlyURL"

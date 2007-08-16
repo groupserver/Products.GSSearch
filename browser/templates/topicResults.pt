@@ -56,7 +56,7 @@
           </p>
           <div class="disclosureShowHide" style="display:none;">
             <div>
-              <ul>
+              <ul class="refinement">
                 <li tal:condition="not:onlyGroup">
                   <a tal:attributes="href topic/group/onlyURL"
                     href="#">Only search the group
