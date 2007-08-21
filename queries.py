@@ -52,17 +52,21 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             
         return statement
 
-    def __add_topic_keyword_search_where_clauses(self, statement, searchTokens):
+    def __add_topic_keyword_search_where_clauses(self, statement, 
+        searchTokens):
+        
         tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
 
+        
         if searchTokens.phrases:
-            statement.append_whereclause(tt.c.topic_id == wct.c.topic_id)
-            # topic_word_count.word IN ('blog','exposure') 
-            clause = wct.c.word.in_(*searchTokens.keywords)
-            statement.append_whereclause(clause)
-            
+            keywordSearches = [
+              sa.select([wct.c.topic_id], wct.c.word == kw)
+              for kw in searchTokens.keywords]
+            statement.append_whereclause(
+              tt.c.topic_id.in_(sa.intersect(*keywordSearches)))
+
             if (len(searchTokens.phrases) != len(searchTokens.keywords)):
                 # Do a phrase search. *Shudder*
 
@@ -75,6 +79,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                 clause1 = pt.c.body.op('~*')(regularExpression)
 
                 statement.append_whereclause(sa.and_(clause, clause1))
+
         return statement
 
     def __add_post_keyword_search_where_clauses(self, statement, 
