@@ -97,7 +97,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
               for kw in searchTokens.phrases]
             statement.append_whereclause(
               pt.c.post_id.in_(sa.intersect(*keywordSearches)))
-        print statement
+
         return statement
         
     def __add_author_where_clauses(self, statement, author_ids):
