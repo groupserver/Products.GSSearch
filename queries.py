@@ -90,19 +90,14 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         wct = self.topic_word_countTable
 
         if searchTokens.phrases:
-            statement.append_whereclause(pt.c.topic_id == wct.c.topic_id)
-            # topic_word_count.word IN ('blog','exposure') 
-            clause = wct.c.word.in_(*searchTokens.keywords)
-            statement.append_whereclause(clause)
-            
-            if (len(searchTokens.phrases) != len(searchTokens.keywords)):
-                # Do a phrase search. *Shudder*
-
-                # post.body ~* '(blog exposure)')
-                brackets = ['(%s)' % k for k in searchTokens.phrases]
-                regularExpression = '|'.join(brackets)
-                clause1 = pt.c.body.op('~*')(regularExpression)
-                statement.append_whereclause(clause1)
+            keywordSearches = [
+              sa.select([pt.c.post_id], 
+                sa.and_(wct.c.word.in_(*kw.split()),
+                  pt.c.topic_id == wct.c.topic_id, pt.c.body.op('~*')(kw)))
+              for kw in searchTokens.phrases]
+            statement.append_whereclause(
+              pt.c.post_id.in_(sa.intersect(*keywordSearches)))
+        print statement
         return statement
         
     def __add_author_where_clauses(self, statement, author_ids):
