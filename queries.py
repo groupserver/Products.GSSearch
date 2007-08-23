@@ -186,9 +186,10 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         statement.order_by(sa.desc(pt.c.date))
 
         r = statement.execute()
-
+        
+        retval = []
         for x in r:
-            retval = {
+            p = {
               'post_id':          x['post_id'],
               'user_id':          x['user_id'],
               'group_id':         x['group_id'],
@@ -199,7 +200,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                                   and self.files_metadata(x['post_id']) 
                                   or [],
               }
-            yield retval
+            retval.append(p)
+        return retval
 
     def count_post_search_keyword(self, searchTokens, 
         site_id, group_ids=[], author_ids=[]):

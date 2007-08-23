@@ -55,13 +55,12 @@ class GSPostResultsContentProvider(object):
         else:
             self.groupIds = self.groupsInfo.get_visible_group_ids()
 
-        self.posts = self.messageQuery.post_search_keyword(
+        posts = self.messageQuery.post_search_keyword(
           self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
-          self.a, limit=self.l, offset=self.i)
-          
-        self.postCount = self.messageQuery.count_post_search_keyword(
-          self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
-          self.a)
+          self.a, limit=self.l+1, offset=self.i)
+        
+        self.morePosts = (len(posts) == (self.l + 1))
+        self.posts = posts[:self.l]
           
     def render(self):
         if not self.__updated:
@@ -93,8 +92,7 @@ class GSPostResultsContentProvider(object):
         return retval
         
     def show_next(self):
-        assert self.posts
-        retval = (self.postCount >= (self.i + self.l))
+        retval = self.morePosts
         return retval
         
     def next_link(self):
