@@ -97,6 +97,8 @@ class GSTopicResultsContentProvider(object):
           # topics several of the remaining queries are *very* intensive
           if not topics:
               self.moreTopics = False
+              self.topics = []
+              tIds = []
               self.topicFiles = []
               self.topicsWordCounts = []
           else:
