@@ -76,8 +76,6 @@ class GSTopicResultsContentProvider(object):
 
           self.messageQuery = MessageQuery(self.context, self.da)
 
-          postCount = self.messageQuery.count_posts()
-
           self.siteInfo = createObject('groupserver.SiteInfo', 
             self.context)
           self.groupsInfo = createObject('groupserver.GroupsInfo', 
@@ -91,32 +89,28 @@ class GSTopicResultsContentProvider(object):
           else:
               groupIds = self.groupsInfo.get_visible_group_ids()
           
-          self.topics = self.messageQuery.topic_search_keyword(
+          topics = self.messageQuery.topic_search_keyword(
             self.searchTokens, self.siteInfo.get_id(), 
-            groupIds, limit=self.l, offset=self.i)
+            groupIds, limit=self.l+1, offset=self.i)
 
           # important: we short circuit here because if we have no matching
           # topics several of the remaining queries are *very* intensive
-          if not self.topics:
-              self.topicCount = 0
+          if not topics:
+              self.moreTopics = False
               self.topicFiles = []
               self.topicsWordCounts = []
-          else:   
+          else:
+              self.moreTopics = (len(topics) == (self.l + 1))
+              self.topics = topics[:self.l]
               tIds = [t['topic_id'] for t in self.topics]
               self.topicFiles = self.messageQuery.files_metata_topic(tIds)
               self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
-              self.topicCount = self.messageQuery.count_topic_search_keyword(
-                self.searchTokens, self.siteInfo.get_id(), groupIds)
 
           self.totalNumTopics = self.messageQuery.count_topics()
           self.wordCounts = self.messageQuery.word_counts()
 
-          tIds = [t['topic_id'] for t in self.topics]
-          
-          self.topicFiles = self.messageQuery.files_metata_topic(tIds)
-          
           hashkey = sha.new('-'.join(tIds)+dbname).hexdigest()
-          self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
+          postCount = self.messageQuery.count_posts()
           cTopicsWordCounts = {'object': self.topicsWordCounts,
                                'postCount': postCount}
 
@@ -224,7 +218,7 @@ class GSTopicResultsContentProvider(object):
           return retval
           
       def show_next(self):
-          retval = (self.topicCount > (self.i + self.l))
+          retval = self.moreTopics
           return retval
           
       def next_link(self):
