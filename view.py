@@ -206,7 +206,7 @@ class GSSearchView(BrowserView):
         return retval
 
     def all_site_search_link(self):
-        retval = self.get_search_url(groupId='')
+        retval = self.get_search_url(groupId='', startIndex=0)
         return retval
         
     def more_link(self):
@@ -226,7 +226,7 @@ class GSSearchView(BrowserView):
 
     def only_topics_link(self):
         retval = self.get_search_url(viewTopics=True, viewPosts=False,
-          viewFiles=False, viewProfiles=False, authorId='')
+          viewFiles=False, viewProfiles=False, authorId='', startIndex=0)
         return retval
 
     def view_posts(self):
@@ -238,7 +238,7 @@ class GSSearchView(BrowserView):
 
     def only_posts_link(self):
         retval = self.get_search_url(viewTopics=False, viewPosts=True, 
-          viewFiles=False, viewProfiles=False)
+          viewFiles=False, viewProfiles=False, startIndex=0)
         return retval
 
     def view_files(self):
@@ -250,7 +250,7 @@ class GSSearchView(BrowserView):
 
     def only_files_link(self):
         retval = self.get_search_url(viewTopics=False, viewPosts=False,
-          viewFiles=True, viewProfiles=False)
+          viewFiles=True, viewProfiles=False, startIndex=0)
         return retval
 
     def view_profiles(self):
@@ -267,19 +267,19 @@ class GSSearchView(BrowserView):
         return bool(self.groupId)
     
     def only_group_link(self, groupId):
-        return self.get_search_url(groupId=groupId)
+        return self.get_search_url(groupId=groupId, startIndex=0)
     
     def all_groups_link(self):
-        return self.get_search_url(groupId='')
+        return self.get_search_url(groupId='', startIndex=0)
 
     def only_author(self, authorId=None):
         return bool(self.authorId)
         
     def only_author_link(self, authorId):
-        return self.get_search_url(authorId=authorId)
+        return self.get_search_url(authorId=authorId, startIndex=0)
 
     def all_authors_link(self):
-        return self.get_search_url(authorId='')
+        return self.get_search_url(authorId='', startIndex=0)
     
     def process_form(self):
         form = self.context.REQUEST.form

@@ -235,7 +235,8 @@ class GSTopicResultsContentProvider(object):
           return self.view.only_group_link(groupId)
 
       def get_keyword_search_link(self, keywords):
-          return self.view.get_search_url(searchText=keywords)
+          return self.view.get_search_url(searchText=keywords,
+            startIndex=0)
 
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
