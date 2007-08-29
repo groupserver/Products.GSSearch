@@ -59,6 +59,7 @@ class GSFileResultsContentProvider(object):
           else:
              groupIds = self.groups.get_visible_group_ids()
           
+          #--=mpj17=--Site ID!
           self.results = self.search_files(searchKeywords, groupIds)
           self.results = self.remove_non_existant_groups(self.results)
           
@@ -83,7 +84,7 @@ class GSFileResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
 
-      def search_files(self, searchKeywords, groupIds):
+      def search_files(self, searchKeywords, groupIds):#--=mpj17=--Site ID!
 
           retval = []
           postedFiles = []
@@ -95,7 +96,7 @@ class GSFileResultsContentProvider(object):
           fileLibrary = site_root.FileLibrary2
           fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
           postedFiles = self.search_files_in_path(searchKeywords, 
-            groupIds, fileLibraryPath, 'XWF File 2')
+            groupIds, fileLibraryPath, 'XWF File 2') #--=mpj17=-- Site ID!
           postedFiles = [o for o in postedFiles if o]
               
           postedFiles.sort(self.sort_file_results)
@@ -109,21 +110,19 @@ class GSFileResultsContentProvider(object):
           return retval
               
       def search_files_in_path(self, searchKeywords, groupIds=[], 
-        path='', metaType=''):
+        path='', metaType=''): #--=mpj17=-- Site ID!
           retval = []
           
-          searchExpr = ' or '.join(searchKeywords)
-          queries = [{'title': searchExpr}, 
-                     {'indexable_content': searchExpr},
-                     {'tags': searchExpr}]
-          for q in queries:
-              q['path'] = path
-
+          searchExpr = ' and '.join(searchKeywords)
+          queries = [{'title': searchExpr, 'path': path},
+                     {'indexable_content': searchExpr, 'path': path},
+                     {'tags': searchExpr, 'path': path}]
           catalog = self.context.Catalog
           results = []
           if groupIds:
               for query in queries:
-                  r = catalog(query, meta_type=metaType, group_ids=groupIds)
+                  r = catalog(query, meta_type=metaType, 
+                    group_ids=groupIds) #--=mpj17=-- Site ID!
                   results += r
                   
           else:

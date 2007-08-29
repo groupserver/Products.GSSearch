@@ -87,11 +87,11 @@
             The baby's blood type? Human, mostly.</p>
         </div>
         
-        <!--div id="files" tal:condition="view/view_files">
+        <div id="files" tal:condition="view/view_files">
           <h2 tal:condition="not:view/only_files_shown">Posted Files</h2>          
           <p tal:replace="structure provider:groupserver.FileResults">
             The baby's blood type? Human, mostly.</p>
-        </div-->
+        </div>
 
         <div id="posts" tal:condition="view/view_posts">
           <h2 tal:condition="not:view/only_posts_shown">Posts</h2>          
