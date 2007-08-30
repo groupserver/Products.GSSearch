@@ -2,7 +2,7 @@
   onlyGroup options/onlyGroup;
   onlyAuthor options/onlyAuthor;
   munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
-  <ul>
+  <ul class="searchResults">
     <tal:block repeat="result view/get_results">
       <li tal:attributes="id string:post-${result/postId};">
         <a class="topic" tal:condition="result/topicName"
