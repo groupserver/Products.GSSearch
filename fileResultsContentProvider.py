@@ -60,7 +60,6 @@ class GSFileResultsContentProvider(object):
              groupIds = self.groups.get_visible_group_ids()
           
           #--=mpj17=--Site ID!
-          print self.a
           self.results = self.search_files(searchKeywords, groupIds, 
             self.a)
           self.results = self.remove_non_existant_groups(self.results)
@@ -237,7 +236,8 @@ class GSFileResultsContentProvider(object):
                 'group': groupD,
                 'author': authorD,
                 'post': postD,
-                'topic': topicD
+                'topic': topicD,
+                'context': self.context
               }
               assert retval
               yield retval

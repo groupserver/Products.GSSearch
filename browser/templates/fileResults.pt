@@ -1,4 +1,6 @@
-<div id="fileResults" tal:define="view options/view">
+<div id="fileResults" 
+  tal:define="view options/view;
+    munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <ul class="searchResults">
     <tal:block tal:repeat="result view/get_results">
        <li><a title="I am a fish" href="#"
@@ -34,7 +36,10 @@
               tal:content="result/author/name">The User</a>, at
           </span>
           <span class="dateInfo">
-            <span class="date" tal:content="result/file/date">Whenever</span>
+            <span
+              tal:define="ctx result/context"
+              tal:content="python:munge_date(ctx, result['file']['date'])"
+             class="date">Whenever</span>
           </span>
         </div>
         <div class="disclosureWidget" id="#"
