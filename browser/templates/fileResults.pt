@@ -26,7 +26,7 @@
           </ul>
         </div>
         <div class="metadata">
-          <span class="author">
+          <span class="author" tal:condition="not:result/author/only">
             By
             <a class="name" href="#"
               tal:omit-tag="not:result/author/exists"
