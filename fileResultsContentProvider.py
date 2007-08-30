@@ -60,7 +60,9 @@ class GSFileResultsContentProvider(object):
              groupIds = self.groups.get_visible_group_ids()
           
           #--=mpj17=--Site ID!
-          self.results = self.search_files(searchKeywords, groupIds)
+          print self.a
+          self.results = self.search_files(searchKeywords, groupIds, 
+            self.a)
           self.results = self.remove_non_existant_groups(self.results)
           
           start = self.i
@@ -84,7 +86,8 @@ class GSFileResultsContentProvider(object):
       # Non standard methods below this point #
       #########################################
 
-      def search_files(self, searchKeywords, groupIds):#--=mpj17=--Site ID!
+      def search_files(self, searchKeywords, groupIds,
+          authorIds):#--=mpj17=--Site ID!
 
           retval = []
           postedFiles = []
@@ -96,7 +99,8 @@ class GSFileResultsContentProvider(object):
           fileLibrary = site_root.FileLibrary2
           fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
           postedFiles = self.search_files_in_path(searchKeywords, 
-            groupIds, fileLibraryPath, 'XWF File 2') #--=mpj17=-- Site ID!
+            groupIds, fileLibraryPath, 'XWF File 2',
+            authorIds) #--=mpj17=-- Site ID!
           postedFiles = [o for o in postedFiles if o]
               
           postedFiles.sort(self.sort_file_results)
@@ -110,13 +114,17 @@ class GSFileResultsContentProvider(object):
           return retval
               
       def search_files_in_path(self, searchKeywords, groupIds=[], 
-        path='', metaType=''): #--=mpj17=-- Site ID!
+        path='', metaType='', authorIds=[]): #--=mpj17=-- Site ID!
           retval = []
           
           searchExpr = ' and '.join(searchKeywords)
           queries = [{'title': searchExpr, 'path': path},
                      {'indexable_content': searchExpr, 'path': path},
                      {'tags': searchExpr, 'path': path}]
+          if authorIds:
+              authors = ' and '.join(authorIds)
+              for query in queries:
+                  query['dc_creator'] = authors
           catalog = self.context.Catalog
           results = []
           if groupIds:

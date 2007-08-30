@@ -18,15 +18,18 @@
               tal:content="result/group/name">group</a>
           </span>
         </div>
-        <ul tal:condition="result/file/tags" class="keywords">
-          <tal:block tal:repeat="tag result/file/tags">
-            <li tal:content="tag">Tag</li>
-          </tal:block>
-        </ul>
+        <div tal:condition="result/file/tags" class="tags">
+          <ul>
+            <tal:block tal:repeat="tag result/file/tags">
+              <li tal:content="tag">Tag</li>
+            </tal:block>
+          </ul>
+        </div>
         <div class="metadata">
-          <span class="author" tal:condition="result/author/exists">
+          <span class="author">
             By
             <a class="name" href="#"
+              tal:omit-tag="not:result/author/exists"
               tal:attributes="href result/author/url"
               tal:content="result/author/name">The User</a>, at
           </span>
@@ -57,10 +60,6 @@
                     href="#">Only search for files by
                     <cite class="name"
                       tal:content="result/author/name">Name</cite></a>
-                </li>
-                <li tal:condition="result/file/tags">
-                  <a tal:attributes="href result/file/tag_search"
-                    href="#">Search for documents related to this file</a>
                 </li>
               </ul>
             </div>
