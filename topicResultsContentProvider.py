@@ -122,8 +122,10 @@ class GSTopicResultsContentProvider(object):
 
           pageTemplate = PageTemplateFile(self.pageTemplateFileName)
           onlyGroup = self.view.only_group(self)
-          r = pageTemplate(view=self, onlyGroup=onlyGroup)
-         
+          if self.topics:
+              r = pageTemplate(view=self, onlyGroup=onlyGroup)
+          else:
+              r = '<p>No topics found.</p>'     
           return r
           
       #########################################

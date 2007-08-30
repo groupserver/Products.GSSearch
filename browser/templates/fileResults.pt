@@ -73,5 +73,13 @@
       </li>
     </tal:block>
   </ul>
+  <ul class="navigation">
+    <li class="previous"><a href="#" 
+      tal:omit-tag="not:view/show_previous"
+      tal:attributes="href view/previous_link">Later posts</a></li>
+    <li class="next"><a href="#"
+      tal:omit-tag="not:view/show_next"
+      tal:attributes="href view/next_link">Earlier posts</a></li>
+  </ul>
 </div><!--fileResults-->
   

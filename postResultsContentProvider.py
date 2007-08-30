@@ -68,8 +68,11 @@ class GSPostResultsContentProvider(object):
         pageTemplate = PageTemplateFile(self.pageTemplateFileName)
         onlyGroup = self.view.only_group()
         onlyAuthor = self.view.only_author()
-        r = pageTemplate(view=self, 
-          onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
+        if self.posts:
+            r = pageTemplate(view=self, 
+              onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
+        else:
+            r = '<p>No posts found.</p>'
         return r
         
     #########################################
