@@ -18,6 +18,9 @@ from interfaces import IGSFileResultsContentProvider
 from fileSearchResult import GSFileSearchResult
 from queries import MessageQuery
 
+import logging
+logger = logging.getLogger('GSSearch')
+
 class GSFileResultsContentProvider(object):
       """GroupServer File Search-Results Content Provider
       """
@@ -53,17 +56,20 @@ class GSFileResultsContentProvider(object):
           self.catalog = self.context.Catalog
           self.results = []
           
-          self.groupIds = [gId for gId in self.gs if gId]
-          if self.groupIds:
-              groupIds = self.groups.filter_visible_group_ids(self.groupIds)
+          groupIds = [gId for gId in self.gs if gId]
+          if groupIds:
+              groupIds = self.groups.filter_visible_group_ids(self.gs)
+          
+          # if group Ids are not specified now, populate with visible ones
           else:
-             groupIds = self.groups.get_visible_group_ids()
+              groupIds = self.groups.get_visible_group_ids()
           
           #--=mpj17=--Site ID!
-          self.results = self.search_files(searchKeywords, groupIds, 
-            self.a)
-          self.results = self.remove_non_existant_groups(self.results)
-          
+          if groupIds:
+              self.results = self.search_files(searchKeywords, groupIds, self.a)
+          else:
+              self.results = []
+
           start = self.i
           end = start + self.l
           self.resultsCount = len(self.results)
@@ -87,6 +93,9 @@ class GSFileResultsContentProvider(object):
 
       def search_files(self, searchKeywords, groupIds,
           authorIds):#--=mpj17=--Site ID!
+
+          logger.info("Performing search for %s, groups %s, authors %s" %
+                      (searchKeywords, groupIds, authorIds))
 
           retval = []
           postedFiles = []
@@ -114,27 +123,29 @@ class GSFileResultsContentProvider(object):
               
       def search_files_in_path(self, searchKeywords, groupIds=[], 
         path='', metaType='', authorIds=[]): #--=mpj17=-- Site ID!
-          retval = []
-          
-          searchExpr = ' and '.join(searchKeywords)
-          queries = [{'title': searchExpr, 'path': path},
-                     {'indexable_content': searchExpr, 'path': path},
-                     {'tags': searchExpr, 'path': path}]
-          if authorIds:
-              authors = ' and '.join(authorIds)
-              for query in queries:
-                  query['dc_creator'] = authors
           catalog = self.context.Catalog
           results = []
+          
+          # if we don't have any groupIds, don't perform any search, since
+          # we will effectively end up filtering out all the results
           if groupIds:
+              searchExpr = ' and '.join(searchKeywords)
+              queries = [{'title': searchExpr, 'path': path},
+                         {'indexable_content': searchExpr, 'path': path},
+                         {'tags': searchExpr, 'path': path}]
+              if authorIds:
+                  authors = ' and '.join(authorIds)
+                  for query in queries:
+                      query['dc_creator'] = authors
+              
               for query in queries:
-                  r = catalog(query, meta_type=metaType, 
+                  # we do unrestricted searches, since we're
+                  # handling the security
+                  r = catalog.unrestrictedSearchResults(query,
+                    meta_type=metaType, 
                     group_ids=groupIds) #--=mpj17=-- Site ID!
                   results += r
-                  
-          else:
-              for query in queries:
-                  results += catalog(query, meta_type=metaType)
+                            
           return results
       
       def get_post_ids_from_file_ids(self, fileIds):
@@ -153,15 +164,6 @@ class GSFileResultsContentProvider(object):
               retval = -1
           return retval
 
-      def remove_non_existant_groups(self, files):
-          # The reason that we do this is security: Bruce S. cannot
-          #   add a group-id to the search-query and find out Alice and
-          #   Bob's shared secret.
-          groupIds = self.groups.get_visible_group_ids()
-          retval = [f for f in files 
-            if (f['group_ids'] and (f['group_ids'][0] in groupIds))]   
-          return retval
-          
       def get_results(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
