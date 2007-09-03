@@ -193,7 +193,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
               'post_id':          x['post_id'],
               'user_id':          x['user_id'],
               'group_id':         x['group_id'],
-              'subject':          x['subject'],
+              'subject':          unicode(x['subject'], 'utf-8'),
               'date':             x['date'],
               'body':             x['body'],
               'files_metadata':   x['has_attachments'] 
