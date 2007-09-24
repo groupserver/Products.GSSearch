@@ -43,6 +43,12 @@
               tal:attributes="href view/only_posts_link;
                 class python:current and 'current' or 'not-current'">Posts</a>
           </li>
+          <li>
+            <a href="#"
+              tal:define="current view/only_files_shown" 
+              tal:attributes="href view/only_files_link;
+                class python:current and 'current' or 'not-current'">Files</a>
+          </li>
         </ul>
       </div>
     </tal:block>  
