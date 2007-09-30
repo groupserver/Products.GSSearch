@@ -203,9 +203,9 @@ class GSSearchView(BrowserView):
     def get_query(self, rstr, defaultVal, val=None, valType=str):
         retval = ''
         if val != None:
-            retval = rstr % url_quote(valType(val))
+            retval = rstr % valType(val)
         else:
-            retval = rstr % url_quote(valType(defaultVal))
+            retval = rstr % valType(defaultVal)
         return retval
 
     def all_site_search_link(self):
