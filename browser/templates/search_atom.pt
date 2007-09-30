@@ -11,7 +11,9 @@
   </updated>
   <author>
     <name tal:content="view/siteInfo/get_name">OnlineGroups.Net</name>
-    <uri tal:content="view/siteInfo/get_url">http://onlinegroups.net/</uri>
+    <uri tal:content="view/siteInfo/get_url">
+      http://onlinegroups.net/
+    </uri>
   </author>
   
   <id tal:content="view/request/URL">abc123</id>
