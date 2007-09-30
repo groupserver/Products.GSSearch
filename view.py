@@ -166,7 +166,7 @@ class GSSearchView(BrowserView):
         current search based on the values of the arguments.
         """
         if isinstance(searchText, list):
-            searchText = '+'.join(searchText).strip()
+            searchText = ' '.join(searchText).strip()
         searchTextQuery = self.get_query(r's=%s', 
                                          self.searchText, searchText)
                                          
@@ -196,16 +196,14 @@ class GSSearchView(BrowserView):
         if baseURL == None:
             baseURL = self.request.URL
         retval = '%s?%s' % (baseURL, queries)
-        print searchTextQuery
-        print retval
         return retval
         
     def get_query(self, rstr, defaultVal, val=None, valType=str):
         retval = ''
         if val != None:
-            retval = rstr % valType(val)
+            retval = rstr % url_quote(valType(val))
         else:
-            retval = rstr % valType(defaultVal)
+            retval = rstr % url_quote(valType(defaultVal))
         return retval
 
     def all_site_search_link(self):
