@@ -4,6 +4,13 @@ import sqlalchemy as sa
 from Products.XWFCore import cache
 import datetime
 
+
+def topic_sorter_desc(x, y):
+    if x[last_post_date] > y['last_post_date']:
+        return 1
+    else:
+        return -1
+
 class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     """Query the message database"""
 
@@ -16,7 +23,10 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     # by the name of the database, since we might have more than one.
     cache_wordCount = cache.SimpleCacheWithExpiry()
     cache_wordCount.set_expiry_interval(datetime.timedelta(0,86400)) # 1 day 
-
+    
+    cache_topicQuery = cache.SimpleCacheWithExpiry()
+    cache_topicQuery.set_expiry_interval(datetime.timedelta(0,60)) # 60 seconds
+    
     def __init__(self, context, da):
         super_query = Products.XWFMailingListManager.queries.MessageQuery
         super_query.__init__(self, context, da)
@@ -58,7 +68,6 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         tt = self.topicTable
         pt = self.postTable
         wct = self.topic_word_countTable
-
         
         if searchTokens.phrases:
             keywordSearches = [
@@ -106,12 +115,57 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         if author_ids:
             statement.append_whereclause(pt.c.user_id.in_(*author_ids))
         return statement
+    
+    def _cacheable_topic_search_keyword( self, statement, site_id,
+                                         group_ids, limit ):
+        """ If the statement is likely to be highly cacheable, this offers
+        an alternative to much of topic_search_keyword.
+        
+        """
+        retval = []
+        for group_id in group_ids:
+            statement = self.add_standard_where_clauses(statement, 
+                                                        self.topicTable, 
+                                                        site_id, [group_id])
+            
+            cacheKey = 'sid=%s&gid=%s&l=%s' % (site_id, group_id, limit)
+            
+            # lookup the cache key in the cache, and if we have a good cache
+            # result, skip
+            cache_result = self.cache_topicQuery.get(cacheKey)
+            if cache_result != None:
+                retval += cache_result
+                continue
+            
+            statement.limit = limit
+            statement.order_by(sa.desc(tt.c.last_post_date))
+        
+            r = statement.execute()
+            result = []
+            for x in r:
+                result.append({'topic_id': x['topic_id'],
+                               'last_post_id': x['last_post_id'], 
+                               'first_post_id': x['first_post_id'], 
+                               'group_id': x['group_id'], 
+                               'site_id': x['site_id'], 
+                               'subject': unicode(x['original_subject'], 'utf-8'), 
+                               'last_post_date': x['last_post_date'], 
+                               'last_post_user_id': x['user_id'],
+                               'num_posts': x['num_posts']})
+                
+                self.cache_topicQuery.add(cacheKey, result)
+            
+            retval += result
+        
+        retval.sort(topic_sorter_desc)
+        
+        return reval[:limit]
         
     def topic_search_keyword(self, searchTokens, site_id, 
-        group_ids=[], limit=12, offset=0):
+        group_ids=[], limit=12, offset=0, use_cache=True):
         """ Search for the search text in the content and subject-lines of
         topics.
-
+        
         """
         tt = self.topicTable
         pt = self.postTable
@@ -123,29 +177,32 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
           sa.select([pt.c.user_id], tt.c.last_post_id == pt.c.post_id,  
             scalar=True).label('user_id')]
         statement = sa.select(cols)
-
-        statement = self.add_standard_where_clauses(statement, 
-          self.topicTable,  site_id, group_ids)
-        statement = self.__add_topic_keyword_search_where_clauses(statement, 
-          searchTokens)
-        statement.limit = limit
-        statement.offset = offset
-        statement.order_by(sa.desc(tt.c.last_post_date))
         
-        r = statement.execute()
-        retval = []
-        for x in r:
-            retval.append(
-                {'topic_id': x['topic_id'],
-                 'last_post_id': x['last_post_id'], 
-                 'first_post_id': x['first_post_id'], 
-                 'group_id': x['group_id'], 
-                 'site_id': x['site_id'], 
-                 'subject': unicode(x['original_subject'], 'utf-8'), 
-                 'last_post_date': x['last_post_date'], 
-                 'last_post_user_id': x['user_id'],
-                 'num_posts': x['num_posts']})
-
+        if not searchTokens.phrases and not offset and use_cache:
+            retval = self._cacheable_topic_search_keyword(statement, site_id,
+                                                          group_ids, limit)
+        else:
+            statement = self.add_standard_where_clauses(statement, 
+                                                        self.topicTable,  site_id, group_ids)
+            statement = self.__add_topic_keyword_search_where_clauses(statement, 
+                                                                      searchTokens)
+            statement.limit = limit
+            statement.offset = offset
+            statement.order_by(sa.desc(tt.c.last_post_date))
+        
+            r = statement.execute()
+            retval = []
+            for x in r:
+                retval.append({'topic_id': x['topic_id'],
+                               'last_post_id': x['last_post_id'], 
+                               'first_post_id': x['first_post_id'], 
+                               'group_id': x['group_id'], 
+                               'site_id': x['site_id'], 
+                               'subject': unicode(x['original_subject'], 'utf-8'), 
+                               'last_post_date': x['last_post_date'], 
+                               'last_post_user_id': x['user_id'],
+                               'num_posts': x['num_posts']})
+            
         return retval
     
     def count_topic_search_keyword(self, searchTokens, site_id, 
