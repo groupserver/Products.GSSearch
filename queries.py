@@ -122,6 +122,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         an alternative to much of topic_search_keyword.
         
         """
+        tt = self.topicTable
         retval = []
         for group_id in group_ids:
             statement = self.add_standard_where_clauses(statement, 
