@@ -3,7 +3,10 @@ from sqlalchemy.exceptions import NoSuchTableError
 import sqlalchemy as sa
 from Products.XWFCore import cache
 import datetime
-
+import copy
+import time
+import logging
+log = logging.getLogger('GSSearch')
 
 def topic_sorter_desc(x, y):
     if x['last_post_date'] < y['last_post_date']:
@@ -116,7 +119,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             statement.append_whereclause(pt.c.user_id.in_(*author_ids))
         return statement
     
-    def _cacheable_topic_search_keyword( self, statement, site_id,
+    def _cacheable_topic_search_keyword( self, templatestatement, site_id,
                                          group_ids, limit ):
         """ If the statement is likely to be highly cacheable, this offers
         an alternative to much of topic_search_keyword.
@@ -124,11 +127,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         """
         tt = self.topicTable
         retval = []
+        hit = miss = 0
         for group_id in group_ids:
-            statement = self.add_standard_where_clauses(statement, 
-                                                        self.topicTable, 
-                                                        site_id, [group_id])
-            
             cacheKey = 'sid=%s&gid=%s&l=%s' % (site_id, group_id, limit)
             
             # lookup the cache key in the cache, and if we have a good cache
@@ -136,8 +136,15 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             cache_result = self.cache_topicQuery.get(cacheKey)
             if cache_result != None:
                 retval += cache_result
+                hit += 1
                 continue
             
+            miss += 1
+            
+            statement = self.add_standard_where_clauses(
+                                                 copy.copy(templatestatement), 
+                                                 self.topicTable, 
+                                                 site_id, [group_id])
             statement.limit = limit
             statement.order_by(sa.desc(tt.c.last_post_date))
         
@@ -158,12 +165,18 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             
             retval += result
         
+        hit_perc = 0.0
+        if (hit+miss):
+            hit_perc = float(hit)/float(hit+miss)*100.0
+        
+        log.info('cache hit %s (%.1f%%) times, missed %s times' % (hit, hit_perc, miss))
+
         retval.sort(topic_sorter_desc)
                 
         return retval[:limit]
         
     def topic_search_keyword(self, searchTokens, site_id, 
-        group_ids=[], limit=12, offset=0, use_cache=False):
+        group_ids=[], limit=12, offset=0, use_cache=True):
         """ Search for the search text in the content and subject-lines of
         topics.
         
@@ -179,10 +192,13 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             scalar=True).label('user_id')]
         statement = sa.select(cols)
         
+        t = time.time()
         if not searchTokens.phrases and not offset and use_cache:
+            log.info('processing as cacheable')
             retval = self._cacheable_topic_search_keyword(statement, site_id,
                                                           group_ids, limit)
         else:
+            log.info('processing as uncacheable')
             statement = self.add_standard_where_clauses(statement, 
                                                         self.topicTable,  site_id, group_ids)
             statement = self.__add_topic_keyword_search_where_clauses(statement, 
@@ -204,6 +220,9 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                                'last_post_user_id': x['user_id'],
                                'num_posts': x['num_posts']})
             
+        b = time.time()
+        log.info('topic_search_keyword took %.1fms' % ((b-t)*1000.0))
+
         return retval
     
     def count_topic_search_keyword(self, searchTokens, site_id, 
