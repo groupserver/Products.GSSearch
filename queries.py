@@ -6,7 +6,7 @@ import datetime
 
 
 def topic_sorter_desc(x, y):
-    if x[last_post_date] > y['last_post_date']:
+    if x['last_post_date'] > y['last_post_date']:
         return 1
     else:
         return -1
