@@ -26,9 +26,12 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     # by the name of the database, since we might have more than one.
     cache_wordCount = cache.SimpleCacheWithExpiry()
     cache_wordCount.set_expiry_interval(datetime.timedelta(0,86400)) # 1 day 
+
+    cache_topicWordCounts = cache.SimpleCacheWithExpiry()
+    cache_topicWordCounts.set_expiry_interval(datetime.timedelta(0,180)) # 180 seconds
     
     cache_topicQuery = cache.SimpleCacheWithExpiry()
-    cache_topicQuery.set_expiry_interval(datetime.timedelta(0,60)) # 60 seconds
+    cache_topicQuery.set_expiry_interval(datetime.timedelta(0,90)) # 90 seconds
     
     def __init__(self, context, da):
         super_query = Products.XWFMailingListManager.queries.MessageQuery
@@ -129,7 +132,8 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         retval = []
         hit = miss = 0
         for group_id in group_ids:
-            cacheKey = 'sid=%s&gid=%s&l=%s' % (site_id, group_id, limit)
+            cacheKey = 'db=%s&sid=%s&gid=%s&l=%s' % (self.dbname,
+                                                     site_id, group_id, limit)
             
             # lookup the cache key in the cache, and if we have a good cache
             # result, skip
@@ -385,18 +389,29 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             * "count" The count of "word" in the topic (always greater than
               one).
         """
-        countTable = self.topic_word_countTable
-        statement = countTable.select()
-        if topicIds:
-            inStatement = countTable.c.topic_id.in_(*topicIds)
-            statement.append_whereclause(inStatement)
-        statement.append_whereclause(countTable.c.count > 1)
-        r = statement.execute()
         retval = []
-        if r.rowcount:
-            retval = [{'topic_id': x['topic_id'],
-                       'word': x['word'],
-                       'count': x['count']} for x in r]
+        for topicId in topicIds:
+            cacheKey = 'db=%s&tid=%s' % (self.dbname, topicId)
+            cachedCounts = self.cache_topicWordCounts.get(cacheKey):
+            if cachedCounts != None: # no record
+                if cachedCounts != {}: # empty record
+                    retval += cachedCounts
+                continue
+                                
+            countTable = self.topic_word_countTable
+            statement = countTable.select()
+            statement.append_whereclause(countTable.c.topicId == topicId)
+            statement.append_whereclause(countTable.c.count > 1)
+            r = statement.execute()
+            if r.rowcount:
+                result = [{'topic_id': x['topic_id'],
+                           'word': x['word'],
+                           'count': x['count']} for x in r]
+                retval += result
+                self.cache_topicWordCounts.add(cacheKey, result)
+            else:
+                self.cache_topicWordCounts.add(cacheKey, {})
+                
         return retval
 
     def post_ids_from_file_ids(self, fileIds):
