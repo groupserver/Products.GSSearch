@@ -6,7 +6,7 @@ import datetime
 
 
 def topic_sorter_desc(x, y):
-    if x['last_post_date'] > y['last_post_date']:
+    if x['last_post_date'] < y['last_post_date']:
         return 1
     else:
         return -1
@@ -159,11 +159,11 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             retval += result
         
         retval.sort(topic_sorter_desc)
-        
+                
         return retval[:limit]
         
     def topic_search_keyword(self, searchTokens, site_id, 
-        group_ids=[], limit=12, offset=0, use_cache=True):
+        group_ids=[], limit=12, offset=0, use_cache=False):
         """ Search for the search text in the content and subject-lines of
         topics.
         
