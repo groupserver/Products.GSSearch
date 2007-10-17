@@ -160,7 +160,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         
         retval.sort(topic_sorter_desc)
         
-        return reval[:limit]
+        return retval[:limit]
         
     def topic_search_keyword(self, searchTokens, site_id, 
         group_ids=[], limit=12, offset=0, use_cache=True):
