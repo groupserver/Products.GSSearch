@@ -389,18 +389,22 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
             * "count" The count of "word" in the topic (always greater than
               one).
         """
+        hit = miss = 0
         retval = []
         for topicId in topicIds:
             cacheKey = 'db=%s&tid=%s' % (self.dbname, topicId)
-            cachedCounts = self.cache_topicWordCounts.get(cacheKey):
+            cachedCounts = self.cache_topicWordCounts.get(cacheKey)
             if cachedCounts != None: # no record
+                hit += 1
                 if cachedCounts != {}: # empty record
                     retval += cachedCounts
                 continue
-                                
+
+            miss += 1
+               
             countTable = self.topic_word_countTable
             statement = countTable.select()
-            statement.append_whereclause(countTable.c.topicId == topicId)
+            statement.append_whereclause(countTable.c.topic_id == topicId)
             statement.append_whereclause(countTable.c.count > 1)
             r = statement.execute()
             if r.rowcount:
@@ -411,6 +415,12 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                 self.cache_topicWordCounts.add(cacheKey, result)
             else:
                 self.cache_topicWordCounts.add(cacheKey, {})
+
+        hit_perc = 0.0
+        if (hit+miss):
+            hit_perc = float(hit)/float(hit+miss)*100.0
+        
+        log.info('topic word count cache hit %s (%.1f%%) times, missed %s times' % (hit, hit_perc, miss))
                 
         return retval
 
