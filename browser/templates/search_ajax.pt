@@ -12,6 +12,7 @@
   </div>
   
   <div tal:condition="view/view_files"
+    tal:define="pageTemplateFileName string:browser/templates/fileResultsList.pt"
     tal:replace="structure provider:groupserver.FileResults">
       The baby's blood type? Human, mostly.
   </div>

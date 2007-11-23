@@ -1,0 +1,49 @@
+<div id="fileResults" 
+  tal:define="view options/view;
+    munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
+  <ul class="searchResults">
+    <tal:block tal:repeat="result view/get_results">
+       <li><a title="I am a fish" href="#"
+          tal:define="typeClass python:result['file']['type'].replace('/','-');"
+          tal:attributes="title string:View ${result/file/title}; 
+            href result/file/url;
+            class string:fileName ${typeClass}"
+          tal:content="result/file/title">Fish</a>
+        <div class="groupInfo" tal:condition="result/post/id">
+          <a href="#"
+            tal:attributes="href result/topic/url"
+            tal:content="result/topic/name">topic</a>
+          <span tal:condition="not:result/group/only">
+            &mdash;
+            <a href="#" class="group"
+              tal:attributes="href result/group/url"
+              tal:content="result/group/name">group</a>
+          </span>
+        </div>
+        <div tal:condition="result/file/tags" class="tags">
+          <ul>
+            <tal:block tal:repeat="tag result/file/tags">
+              <li tal:content="tag">Tag</li>
+            </tal:block>
+          </ul>
+        </div>
+        <div class="metadata">
+          <span class="author" tal:condition="not:result/author/only">
+            By
+            <a class="name" href="#"
+              tal:omit-tag="not:result/author/exists"
+              tal:attributes="href result/author/url"
+              tal:content="result/author/name">The User</a>, at
+          </span>
+          <span class="dateInfo">
+            <span
+              tal:define="ctx result/context"
+              tal:content="python:munge_date(ctx, result['file']['date'])"
+             class="date">Whenever</span>
+          </span>
+        </div>
+      </li>
+    </tal:block>
+  </ul>
+</div><!--fileResults-->
+  
