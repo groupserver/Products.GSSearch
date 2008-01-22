@@ -105,7 +105,7 @@ class GSTopicResultsContentProvider(object):
               self.moreTopics = (len(topics) == (self.l + 1))
               self.topics = topics[:self.l]
               tIds = [t['topic_id'] for t in self.topics]
-              self.topicFiles = self.messageQuery.files_metata_topic(tIds)
+              self.topicFiles = self.messageQuery.files_metadata_topic(tIds)
               self.topicsWordCounts = self.messageQuery.topics_word_count(tIds)
 
           self.totalNumTopics = self.messageQuery.count_topics()

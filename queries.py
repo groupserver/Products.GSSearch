@@ -435,7 +435,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                 retval[x['file_id']] = x['post_id']
         return retval
 
-    def files_metata_topic(self, topic_ids):
+    def files_metadata_topic(self, topic_ids):
         ft = self.fileTable
         pt = self.postTable
         cols = [
