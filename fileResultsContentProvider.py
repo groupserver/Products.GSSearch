@@ -133,9 +133,8 @@ class GSFileResultsContentProvider(object):
           # we will effectively end up filtering out all the results
           if groupIds:
               searchExpr = ' and '.join(searchKeywords)
-              queries = [{'title': searchExpr, 'path': path},
-                          {'indexable_content': searchExpr, 'path': path},
-                          {'tags': searchExpr, 'path': path}]
+              queries = [{'meta_text': searchExpr, 'path': path},
+                         {'indexable_content': searchExpr, 'path': path}]
               if authorIds:
                   authors = ' and '.join(authorIds)
                   for query in queries:
