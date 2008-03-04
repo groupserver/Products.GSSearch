@@ -28,8 +28,11 @@ class GSSearchView(BrowserView):
         
         self.groupId = self.request.get('g', '')
         if self.groupId:
-            self.groupInfo = createObject('groupserver.GroupInfo', context, 
-               self.groupId)
+            try:
+                self.groupInfo = createObject('groupserver.GroupInfo', 
+                                              context, self.groupId)
+            except AssertionError, e:
+                self.groupInfo = None
         else:
             self.groupInfo = None
            
