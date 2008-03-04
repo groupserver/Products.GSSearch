@@ -3,28 +3,40 @@
     gs python:[view.groupId];
     a python:[view.authorId];
     l python:view.limit;
-    i python:view.startIndex;">
-        
-  <div tal:condition="view/view_topics"
-    tal:define="pageTemplateFileName string:browser/templates/topicResultsList.pt"
-    tal:replace="structure provider:groupserver.TopicResults">
-      The baby's blood type? Human, mostly.
-  </div>
+    i python:view.startIndex;
+    gO python:modules['Products.XWFCore.XWFUtils'].getOption;
+    enabled python:gO(view.context, 'searchEnabled', True);">
   
-  <div tal:condition="view/view_files"
-    tal:define="pageTemplateFileName string:browser/templates/fileResultsList.pt"
-    tal:replace="structure provider:groupserver.FileResults">
-      The baby's blood type? Human, mostly.
-  </div>
+  <p tal:condition="not:enabled">
+      Latest topics and posts have been disabled due to the high
+      load on this server. 
+      It will be enabled again at 
+      <span class="date">2007 Dec 06 23:30:00 UTC</span>.
+      Sorry for the inconvenience.
+  </p>
+  
+  <tal:block condition="enabled">
+    <div tal:condition="view/view_topics"
+      tal:define="pageTemplateFileName string:browser/templates/topicResultsList.pt"
+      tal:replace="structure provider:groupserver.TopicResults">
+        The baby's blood type? Human, mostly.
+    </div>
+    
+    <div tal:condition="view/view_files"
+      tal:define="pageTemplateFileName string:browser/templates/fileResultsList.pt"
+      tal:replace="structure provider:groupserver.FileResults">
+        The baby's blood type? Human, mostly.
+    </div>
 
-  <div tal:condition="view/view_posts"
-    tal:define="pageTemplateFileName string:browser/templates/postResultsList.pt"
-    tal:replace="structure provider:groupserver.PostResults">
-      The baby's blood type? Human, mostly.
-  </div>
-  
-  <!--  div tal:condition="view/view_profiles"
-    tal:replace="structure provider:groupserver.ProfileResults">
-      The baby's blood type? Human, mostly.
-  </div-->
+    <div tal:condition="view/view_posts"
+      tal:define="pageTemplateFileName string:browser/templates/postResultsList.pt"
+      tal:replace="structure provider:groupserver.PostResults">
+        The baby's blood type? Human, mostly.
+    </div>
+    
+    <!--  div tal:condition="view/view_profiles"
+      tal:replace="structure provider:groupserver.ProfileResults">
+        The baby's blood type? Human, mostly.
+    </div-->
+  </tal:block>
 </tal:block>

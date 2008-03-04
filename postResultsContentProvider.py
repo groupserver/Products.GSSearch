@@ -176,7 +176,7 @@ class GSPostResultsContentProvider(object):
             matchingLines = [l for l in noWroteLines 
                               if reduce(lambda a, b: a or b, 
                                         map(lambda w: w in l.lower(),
-                                            self.searchTokens.phrases))]
+                                            self.searchTokens.phrases), False)]
         if matchingLines:                               
             firstLines = matchingLines[:nLines]
             matchingSnippets = []
