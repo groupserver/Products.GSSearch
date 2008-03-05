@@ -81,7 +81,10 @@ class GSSearchView(BrowserView):
             inStr = ', '.join(in_[:-1])
             inStr = '%s and %s' % (inStr, in_[-1])
         else:
-            inStr = in_[0]
+            try:
+                inStr = in_[0]
+            except IndexError, e:
+                inStr = ''
         grp = ''
         if self.groupInfo:
             grp = ': %s' % self.groupInfo.get_name()
@@ -118,7 +121,10 @@ class GSSearchView(BrowserView):
             inStr = ', '.join(in_[:-1])
             inStr = '%s and %s' % (inStr, in_[-1])
         else:
-            inStr = in_[0]
+            try:
+                inStr = in_[0]
+            except IndexError, e:
+                inStr = ''
 
         auth = ''
         if self.authorInfo:
