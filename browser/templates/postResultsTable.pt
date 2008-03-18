@@ -37,12 +37,11 @@
         </td>
         <td class="files">
           <tal:block tal:repeat="file result/files">
-            <a href="#" 
+            <a href="#" title="foo"
+              tal:define="icon python:file['mime_type'].replace('/','-').replace('.','-')"
               tal:attributes="title file/file_name;
-                href string:/r/post/${result/postId}"
-                title="foo"><img src="#" 
-                  tal:define="iconName python:file['mime_type'].replace('/','-');"
-                  tal:attributes="src string:/++resource++fileIcons/${iconName}.png"/></a>
+                href string:/r/post/${result/postId};
+                class string:fileIcon ${icon}">&#160;</a>
           </tal:block>
         </td>
         <td class="date" 
