@@ -20,7 +20,7 @@
           class class;">
         <td class="author" tal:condition="not:options/onlyAuthor">
           <a tal:omit-tag="not:result/author/exists" class="name"
-            tal:attributes="href string:/contacts/${result/author/id};
+            tal:attributes="href result/author/url;
             title string:Profile of ${result/author/name};"
             tal:content="result/author/name">Me!</a>
         </td>

@@ -122,7 +122,6 @@ class GSPostResultsContentProvider(object):
                   self.context, post['user_id'])
                 authorCache[post['user_id']] = authorInfo
             authorId = authorInfo.id
-            print authorId
             authorD = {
               'id': authorInfo.id,
               'exists': not authorInfo.anonymous,
