@@ -1,3 +1,4 @@
+# coding=utf-8
 import sys, re, datetime, time, types, string
 from sets import Set
 import Products.Five, DateTime, Globals
@@ -14,6 +15,7 @@ import Products.XWFMailingListManager.view
 
 import Products.GSContent, Products.XWFCore.XWFUtils
 from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
+from Products.CustomUserFolder.interfaces import IGSUserInfo
 from interfaces import IGSFileResultsContentProvider
 from fileSearchResult import GSFileSearchResult
 from queries import MessageQuery
@@ -178,15 +180,15 @@ class GSFileResultsContentProvider(object):
               
               authorInfo = authorCache.get(r.get_owner_id(), None)
               if not authorInfo:
-                  authorInfo = createObject('groupserver.AuthorInfo', 
+                  authorInfo = createObject('groupserver.UserFromId', 
                     self.context, r.get_owner_id())
                   authorCache[r.get_owner_id()] = authorInfo
-              authorId = authorInfo.get_id()
+              authorId = authorInfo.id
               authorD = {
-                'exists': authorInfo.exists(),
-                'id': authorId,
-                'name': authorInfo.get_realnames(),
-                'url': authorInfo.get_url(),
+                'id': authorInfo.id,
+                'exists': not authorInfo.anonymous,
+                'url': authorInfo.url,
+                'name': authorInfo.name,
                 'only': self.view.only_author(authorId),
                 'onlyURL': self.view.only_author_link(authorId)
               }

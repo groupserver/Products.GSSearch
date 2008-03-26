@@ -18,7 +18,7 @@
       <author>
         <name tal:content="result/author/name">Me!</name>
         <uri tal:condition="result/author/exists"
-          tal:content="string:/contacts/${result/author/id};"/>
+          tal:content="result/author/url"/>
       </author>
       <updated tal:define="d result/date"
         tal:content="python:change_timezone(d, 'UTC').strftime('%Y-%m-%dT%H:%M:%SZ')">

@@ -1,3 +1,4 @@
+# coding=utf-8
 import sys, re, datetime, time, types, string, math, sha, difflib, copy
 from sets import Set
 import Products.Five, DateTime, Globals
@@ -144,15 +145,15 @@ class GSTopicResultsContentProvider(object):
               
               authorInfo = authorCache.get(retval['last_post_user_id'], None)
               if not authorInfo:
-                  authorInfo = createObject('groupserver.AuthorInfo', 
+                  authorInfo = createObject('groupserver.UserFromId', 
                     self.context, retval['last_post_user_id'])
                   authorCache[retval['last_post_user_id']] = authorInfo
-              authorId = authorInfo.get_id()
+              authorId = authorInfo.id
               authorD = {
-                'exists': authorInfo.exists(),
-                'id': authorId,
-                'name': authorInfo.get_realnames(),
-                'url': authorInfo.get_url(),
+                'id': authorInfo.id,
+                'exists': not authorInfo.anonymous,
+                'url': authorInfo.url,
+                'name': authorInfo.name,
                 'onlyURL': self.view.only_author_link(authorId)
               }
               retval['last_author'] = authorD
