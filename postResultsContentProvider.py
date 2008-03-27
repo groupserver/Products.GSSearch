@@ -32,12 +32,10 @@ class GSPostResultsContentProvider(object):
         self.context = context
         self.request = request
         self.view = view
-        
         self.posts = []
         
     def update(self):
         self.__updated = True
-
         self.da = self.context.zsqlalchemy 
         assert self.da, 'No data-adaptor found'
         self.messageQuery = MessageQuery(self.context, self.da)
@@ -62,6 +60,7 @@ class GSPostResultsContentProvider(object):
         
         self.morePosts = (len(posts) == (self.l + 1))
         self.posts = posts[:self.l]
+
           
     def render(self):
         if not self.__updated:

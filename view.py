@@ -38,7 +38,7 @@ class GSSearchView(BrowserView):
            
         self.authorId = self.request.get('a', '')
         if self.authorId:
-            self.authorInfo = createObject('groupserver.AuthorInfo', 
+            self.authorInfo = createObject('groupserver.UserFromId', 
                                            self.context, self.authorId)
         else:
             self.authorInfo = None
@@ -91,7 +91,7 @@ class GSSearchView(BrowserView):
 
         auth = ''
         if self.authorInfo:
-            auth = u' by %s' % self.authorInfo.get_realnames()
+            auth = u' by %s' % self.authorInfo.name
 
         r = r'%s %s%s%s: %s'
         retval = r % (s, inStr, auth, grp, self.siteInfo.get_name())
@@ -129,7 +129,7 @@ class GSSearchView(BrowserView):
         auth = ''
         if self.authorInfo:
             link= '<a class="name" href="%s">%s</a>' % \
-              (self.authorInfo.get_url(), self.authorInfo.get_realnames())
+              (self.authorInfo.url, self.authorInfo.name)
             auth = u' by %s' % link
             
         grp = ''
