@@ -16,6 +16,7 @@ import Products.XWFMailingListManager.view
 import Products.GSContent, Products.XWFCore.XWFUtils
 from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
 from Products.CustomUserFolder.interfaces import IGSUserInfo
+from Products.ZCTextIndex.ParseTree import ParseError
 from interfaces import IGSFileResultsContentProvider
 from fileSearchResult import GSFileSearchResult
 from queries import MessageQuery
@@ -145,9 +146,16 @@ class GSFileResultsContentProvider(object):
               for query in queries:
                   # we do unrestricted searches, since we're
                   # handling the security
-                  r = catalog.unrestrictedSearchResults(query,
-                    meta_type=metaType, 
-                    group_ids=groupIds) #--=mpj17=-- Site ID!
+                  try:
+                      r = catalog.unrestrictedSearchResults(query,
+                        meta_type=metaType, 
+                        group_ids=groupIds) #--=mpj17=-- Site ID!
+                  except ParseError, e:
+                      if len(searchKeywords) == 1:
+                          results = []
+                          break
+                      else:
+                          r = []
                   results += r
                             
           return results
