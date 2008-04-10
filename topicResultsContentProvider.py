@@ -8,6 +8,7 @@ import zope.app.pagetemplate.viewpagetemplatefile
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.viewlet.interfaces, zope.contentprovider.interfaces 
+from sqlalchemy.exceptions import SQLError
 
 from Products.XWFMailingListManager.stopwords import en as STOP_WORDS
 
@@ -63,6 +64,7 @@ class GSTopicResultsContentProvider(object):
       def __init__(self, context, request, view):
           self.__parent__ = self.view = view
           self.__updated = False
+          self.__searchFailed = True
       
           self.context = context
           self.request = request
@@ -90,10 +92,15 @@ class GSTopicResultsContentProvider(object):
           else:
               groupIds = self.groupsInfo.get_visible_group_ids()
           
-          topics = self.messageQuery.topic_search_keyword(
-            self.searchTokens, self.siteInfo.get_id(), 
-            groupIds, limit=self.l+1, offset=self.i)
-
+          try:
+              topics = self.messageQuery.topic_search_keyword(
+                self.searchTokens, self.siteInfo.get_id(), 
+                groupIds, limit=self.l+1, offset=self.i)
+          except SQLError, e:
+              self.__searchFailed = True
+              return
+          else:
+              self.__searchFailed = False
           # important: we short circuit here because if we have no matching
           # topics several of the remaining queries are *very* intensive
           if not topics:
@@ -120,13 +127,22 @@ class GSTopicResultsContentProvider(object):
       def render(self):
           if not self.__updated:
               raise interfaces.UpdateNotCalled
-
-          pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-          onlyGroup = self.view.only_group(self)
-          if self.topics:
-              r = pageTemplate(view=self, onlyGroup=onlyGroup)
+          
+          if self.__searchFailed:
+              r = u'''<div class="error">
+                  <p><strong>Topics Failed to Load</strong></p>
+                  <p>Sorry, the topics failed to load, because the server
+                    took too long to respond.
+                    <em>Please try again later.</em>
+                  </p>
+                </div>'''
           else:
-              r = '<p>No topics found.</p>'     
+              pageTemplate = PageTemplateFile(self.pageTemplateFileName)
+              onlyGroup = self.view.only_group(self)
+              if self.topics:
+                  r = pageTemplate(view=self, onlyGroup=onlyGroup)
+              else:
+                  r = u'<p>No topics found.</p>'
           return r
           
       #########################################

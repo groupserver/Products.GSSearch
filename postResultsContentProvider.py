@@ -7,6 +7,7 @@ import zope.app.pagetemplate.viewpagetemplatefile
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.viewlet.interfaces, zope.contentprovider.interfaces 
+from sqlalchemy.exceptions import SQLError
 
 import DocumentTemplate
 import Products.XWFMailingListManager.view
@@ -29,6 +30,7 @@ class GSPostResultsContentProvider(object):
     def __init__(self, context, request, view):
         self.__parent = view
         self.__updated = False
+        self.__searchFailed = True
         self.context = context
         self.request = request
         self.view = view
@@ -53,26 +55,40 @@ class GSPostResultsContentProvider(object):
             self.groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
         else:
             self.groupIds = self.groupsInfo.get_visible_group_ids()
-
-        posts = self.messageQuery.post_search_keyword(
-          self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
-          self.a, limit=self.l+1, offset=self.i)
+        try:
+            posts = self.messageQuery.post_search_keyword(
+              self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
+              self.a, limit=self.l+1, offset=self.i)
+        except SQLError, e:
+            self.__searchFailed = True
+            return
+        else:
+            self.__searchFailed = False
         
         self.morePosts = (len(posts) == (self.l + 1))
         self.posts = posts[:self.l]
 
           
     def render(self):
-        if not self.__updated:
-            raise interfaces.UpdateNotCalled
-        pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-        onlyGroup = self.view.only_group()
-        onlyAuthor = self.view.only_author()
-        if self.posts:
-            r = pageTemplate(view=self, 
-              onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
+        if self.__searchFailed:
+            r = u'''<div class="error">
+                <p><strong>Posts Failed to Load</strong></p>
+                <p>Sorry, the posts failed to load, because the server
+                  took too long to respond.
+                  <em>Please try again later.</em>
+                </p>
+              </div>'''
         else:
-            r = '<p>No posts found.</p>'
+            if not self.__updated:
+                raise interfaces.UpdateNotCalled
+            pageTemplate = PageTemplateFile(self.pageTemplateFileName)
+            onlyGroup = self.view.only_group()
+            onlyAuthor = self.view.only_author()
+            if self.posts:
+                r = pageTemplate(view=self, 
+                  onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
+            else:
+                r = '<p>No posts found.</p>'
         return r
         
     #########################################
