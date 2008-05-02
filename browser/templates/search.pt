@@ -20,10 +20,11 @@
     <meta name="date" content="2007-04-26"/>
 
     <tal:block metal:fill-slot="metadata" 
-      tal:condition="view/only_posts_shown">
+      condition="python:view.only_posts_shown() or view.only_files_shown()">
       <link rel="alternate" type="application/atom+xml" href="#"
-        tal:define="base python:'%s/search.atom' % (view.request.URL1)"
-        tal:attributes="href python:view.get_search_url(baseURL=base, startIndex=0)" />
+        tal:define="base python:'%s/search.atom' % (view.request.URL1);
+          url python:view.get_search_url(baseURL=base, startIndex=0)"
+        tal:attributes="href url" />
     </tal:block>
   </head>
   <body>
@@ -65,8 +66,16 @@
           gO python:modules['Products.XWFCore.XWFUtils'].getOption;
           enabled python:gO(view.context, 'searchEnabled', True);">
         
-        <p tal:content="structure view/search_description">
-          The baby's blood type? Human, mostly.
+        <p>
+          <span tal:content="structure view/search_description">
+            The baby's blood type? Human, mostly.
+          </span>
+          <a class="alternateATOM" href="#" 
+            style="margin-left: 1.4em;"
+            tal:condition="python:view.only_posts_shown() or view.only_files_shown()"
+            tal:define="base python:'%s/search.atom' % (view.request.URL1);
+              url python:view.get_search_url(baseURL=base, startIndex=0)"
+            tal:attributes="href url">Web feed</a>
         </p>
 
         <tal:block condition="not:enabled">
