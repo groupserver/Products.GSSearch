@@ -71,7 +71,7 @@ class GSPostResultsContentProvider(object):
           
     def render(self):
         if self.__searchFailed:
-            r = u'''<div class="error">
+            r = u'''<div class="error" id="post-search-timeout">
                 <p><strong>Posts Failed to Load</strong></p>
                 <p>Sorry, the posts failed to load, because the server
                   took too long to respond.
@@ -88,7 +88,7 @@ class GSPostResultsContentProvider(object):
                 r = pageTemplate(view=self, 
                   onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
             else:
-                r = '<p>No posts found.</p>'
+              r = '<p id="post-search-none">No posts found.</p>'
         return r
         
     #########################################

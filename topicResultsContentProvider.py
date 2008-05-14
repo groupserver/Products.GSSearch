@@ -129,7 +129,7 @@ class GSTopicResultsContentProvider(object):
               raise interfaces.UpdateNotCalled
           
           if self.__searchFailed:
-              r = u'''<div class="error">
+              r = u'''<div class="error" id="topic-serch-timeout">
                   <p><strong>Topics Failed to Load</strong></p>
                   <p>Sorry, the topics failed to load, because the server
                     took too long to respond.
@@ -142,7 +142,7 @@ class GSTopicResultsContentProvider(object):
               if self.topics:
                   r = pageTemplate(view=self, onlyGroup=onlyGroup)
               else:
-                  r = u'<p>No topics found.</p>'
+                  r = u'<p id="topic-search-none">No topics found.</p>'
           return r
           
       #########################################

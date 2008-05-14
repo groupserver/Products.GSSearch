@@ -89,7 +89,7 @@ class GSFileResultsContentProvider(object):
               pageTemplate = PageTemplateFile(self.pageTemplateFileName)
               r = pageTemplate(view=self)
           else:
-              r = '<p>No files found.</p>'
+              r = '<p id="file-search-none">No files found.</p>'
           
           return r
           
