@@ -218,7 +218,7 @@ class GSFileResultsContentProvider(object):
               tagSearch = self.view.get_search_url(searchText=tags)
               
               postId = self.filePostMap.get(r.get_id(), '')
-              fileURL = 'r/file/%s' % r.get_id()
+              fileURL = '/r/file/%s' % r.get_id()
               
               fileD = {
                 'id': r.get_id(),
@@ -233,7 +233,7 @@ class GSFileResultsContentProvider(object):
                 'url': ''.join((self.siteInfo.get_url(), r.get_url())),
               }
               
-              topicURL = 'r/topic/%s' % postId
+              topicURL = '/r/topic/%s' % postId
               topicD = {
                 'name': r.get_topic_name(),
                 'url': topicURL,
