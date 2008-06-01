@@ -24,13 +24,13 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
 
     # a cache for the count of keywords across the whole database, keyed
     # by the name of the database, since we might have more than one.
-    cache_wordCount = cache.SimpleCacheWithExpiry()
+    cache_wordCount = cache.SimpleCacheWithExpiry("cache_wordCount")
     cache_wordCount.set_expiry_interval(datetime.timedelta(0,86400)) # 1 day 
 
-    cache_topicWordCounts = cache.SimpleCacheWithExpiry()
+    cache_topicWordCounts = cache.SimpleCacheWithExpiry("cache_topicWordCounts")
     cache_topicWordCounts.set_expiry_interval(datetime.timedelta(0,180)) # 180 seconds
     
-    cache_topicQuery = cache.SimpleCacheWithExpiry()
+    cache_topicQuery = cache.SimpleCacheWithExpiry("cache_topicQuery")
     cache_topicQuery.set_expiry_interval(datetime.timedelta(0,90)) # 90 seconds
     
     def __init__(self, context, da):
@@ -165,7 +165,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
                                'last_post_user_id': x['user_id'],
                                'num_posts': x['num_posts']})
                 
-                self.cache_topicQuery.add(cacheKey, result)
+            self.cache_topicQuery.add(cacheKey, result)
             
             retval += result
         
