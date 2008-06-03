@@ -37,13 +37,16 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
         super_query = Products.XWFMailingListManager.queries.MessageQuery
         super_query.__init__(self, context, da)
 
-        session = da.getSession()
-        metadata = session.getMetaData()
-
-        self.word_countTable = da.createMapper('word_count')[1]
+#        session = da.getSession()
+#        metadata = session.getMetaData()
+        engine = da.engine
+#      	session = sa.create_session(bind_to=engine)
+#        self.session = session
+        metadata = sa.BoundMetaData(engine)
+        self.word_countTable = sa.Table('word_count', metadata, autoload=True)
 
         try:
-            self.rowcountTable = da.createMapper('rowcount')[1]
+            self.rowcountTable = sa.Table('rowcount', metadata, autoload=True)
         except NoSuchTableError:
             self.rowcountTable = None    
 
