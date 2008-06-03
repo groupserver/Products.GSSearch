@@ -81,9 +81,7 @@
         <tal:block condition="not:enabled">
             <p>Search has been disabled, to reduce the high load on
               this site.
-              It will be enabled again at 
-              <span class="date">2007 Dec 06 23:30:00 UTC</span>.
-              Sorry for the inconvenience.
+              It will be enabled again later today.
             </p>
         </tal:block>
         <tal:block condition="enabled">
