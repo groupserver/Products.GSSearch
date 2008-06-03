@@ -10,9 +10,7 @@
   <p tal:condition="not:enabled">
       Latest topics and posts have been disabled due to the high
       load on this server. 
-      It will be enabled again at 
-      <span class="date">2007 Dec 06 23:30:00 UTC</span>.
-      Sorry for the inconvenience.
+      It will be enabled again later today.
   </p>
   
   <tal:block condition="enabled">
