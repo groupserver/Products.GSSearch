@@ -1,4 +1,6 @@
-import Products.XWFMailingListManager.queries
+# coding=utf-8
+from Products.XWFMailingListManager.queries import MessageQuery\
+  as MailingListQuery
 from sqlalchemy.exceptions import NoSuchTableError
 import sqlalchemy as sa
 from Products.XWFCore import cache
@@ -14,7 +16,7 @@ def topic_sorter_desc(x, y):
     else:
         return -1
 
-class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
+class MessageQuery(MailingListQuery):
     """Query the message database"""
 
     TOPIC_SEARCH       = 1
@@ -34,7 +36,7 @@ class MessageQuery(Products.XWFMailingListManager.queries.MessageQuery):
     cache_topicQuery.set_expiry_interval(datetime.timedelta(0,90)) # 90 seconds
     
     def __init__(self, context, da):
-        super_query = Products.XWFMailingListManager.queries.MessageQuery
+        super_query = MailingListQuery
         super_query.__init__(self, context, da)
 
 #        session = da.getSession()
