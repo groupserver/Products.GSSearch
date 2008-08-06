@@ -26,8 +26,15 @@ class TopicDigestView(BrowserView):
         for topic in self.digest_query():
             topic['date'] = munge_date(self.groupInfo.groupObj, 
                                        topic['last_post_date'])
-            t = '%(original_subject)s\n    %(num_posts_day)s of '\
-              u'%(num_posts)s -- latest at %(date)s' % topic
+            lastAuthor = createObject('groupserver.UserFromId', 
+                                      self.context, 
+                                      topic['last_author_id'])
+            topic['last_author_name'] = lastAuthor.name
+            topic['link'] = u'%s/r/%s' % (self.siteInfo.url, 
+                                          topic['last_post_id'])
+            t = '%(original_subject)s\n    %(link)s\n    '\
+              u'%(num_posts_day)s of %(num_posts)s posts since yesterday '\
+              u'-- latest at %(date)s by %(last_author_name)s' % topic
             retval = u'%s%s\n' % (retval, t)
         
         assert type(retval) == unicode
