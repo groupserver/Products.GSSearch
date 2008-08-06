@@ -4,7 +4,7 @@ from Products.XWFMailingListManager.queries import MessageQuery\
 from sqlalchemy.exceptions import NoSuchTableError
 import sqlalchemy as sa
 from Products.XWFCore import cache
-import datetime
+from datetime import datetime, timedelta
 import copy
 import time
 import logging
@@ -27,13 +27,13 @@ class MessageQuery(MailingListQuery):
     # a cache for the count of keywords across the whole database, keyed
     # by the name of the database, since we might have more than one.
     cache_wordCount = cache.SimpleCacheWithExpiry("cache_wordCount")
-    cache_wordCount.set_expiry_interval(datetime.timedelta(0,86400)) # 1 day 
+    cache_wordCount.set_expiry_interval(timedelta(0,86400)) # 1 day 
 
     cache_topicWordCounts = cache.SimpleCacheWithExpiry("cache_topicWordCounts")
-    cache_topicWordCounts.set_expiry_interval(datetime.timedelta(0,180)) # 180 seconds
+    cache_topicWordCounts.set_expiry_interval(timedelta(0,180)) # 180 seconds
     
     cache_topicQuery = cache.SimpleCacheWithExpiry("cache_topicQuery")
-    cache_topicQuery.set_expiry_interval(datetime.timedelta(0,90)) # 90 seconds
+    cache_topicQuery.set_expiry_interval(timedelta(0,90)) # 90 seconds
     
     def __init__(self, context, da):
         super_query = MailingListQuery
@@ -54,7 +54,7 @@ class MessageQuery(MailingListQuery):
 
         # useful for cache
         self.dbname = da.getProperty('database')
-        self.now = datetime.datetime.now()
+        self.now = datetime.now()
 
     def add_standard_where_clauses(self, statement, table, 
                                    site_id, group_ids):
@@ -468,24 +468,43 @@ class MessageQuery(MailingListQuery):
         return retval
 
 class DigestQuery(MessageQuery):
-    def topics_sinse_yesterday(self, siteId, groupId):
+    def topics_sinse_yesterday(self, siteId, groupIds):
         tt = self.topicTable
         pt = self.postTable
-        #cos = [tt.c.topic_id, tt.c.original_subject, tt.c.last_post_id,
-        #       tt.c.last_post_date, tt.c.num_posts,
-        #       sa.select([pt.c.user_id], tt.c.last_post_id == pt.c.post_id,  
-        #   scalar=True).label('user_id')]]
-        #sa.func.count(tt.c.topic_id.distinct())            
+        yesterday = datetime.now() - timedelta(days=1)
+        
         #SELECT topic.topic_id, topic.original_subject, topic.last_post_id, 
         #  topic.last_post_date, topic.num_posts,
+        cols = [tt.c.topic_id, tt.c.original_subject, tt.c.last_post_id,
+                tt.c.last_post_date, tt.c.num_posts,
         #  (SELECT COUNT(*) 
         #    FROM post 
         #    WHERE (post.topic_id = topic.topic_id) 
         #      AND post.date > timestamp 'yesterday') 
         #  AS num_posts_day
+               sa.select([sa.func.count(pt.c.post_id.distinct())], 
+                         pt.c.date > yesterday,  
+                         scalar=True).label('num_posts_day')]
+        s = sa.select(cols)
         #  FROM topic 
         #  WHERE topic.site_id = 'main' 
         #    AND topic.group_id = 'mpls' 
+        s = self.add_standard_where_clauses(s, tt, siteId, groupIds)
         #    AND topic.last_post_date > timestamp 'yesterday'
+        s.append_whereclause(tt.c.last_post_date > yesterday) 
         #  ORDER BY topic.last_post_date DESC;
+        s.order_by(sa.desc(tt.c.last_post_date))
+        
+        r = s.execute()
+        
+        retval = [{
+                  'topic_id':         x['topic_id'],
+                  'original_subject': x['original_subject'],
+                  'last_post_id':     x['last_post_id'],
+                  'last_post_date':   x['last_post_date'],
+                  'num_posts':        x['num_posts'],
+                  'num_posts_day':    x['num_posts_day'],
+                  } for x in r]
+
+        return retval
 

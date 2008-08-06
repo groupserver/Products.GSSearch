@@ -3,9 +3,10 @@ from zope.interface import implements, providedBy, Interface
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.component import createObject, adapts, provideAdapter
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
-from queries import MessageQuery
+from queries import DigestQuery
 import Globals
 from Products.Five import BrowserView
+from Products.XWFCore.XWFUtils import munge_date
 
 class TopicDigestView(BrowserView):
 
@@ -15,27 +16,24 @@ class TopicDigestView(BrowserView):
         
         self.da = da = self.context.zsqlalchemy 
         assert da, 'No data-adaptor found'
-        self.messageQuery = MessageQuery(context, da)
-    
-        self.stats = None
+        self.messageQuery = DigestQuery(context, da)
+        
+        self.siteInfo = createObject('groupserver.SiteInfo', context)
+        self.groupInfo = createObject('groupserver.GroupInfo', context)
         
     def __call__(self):
         retval = u''
+        for topic in self.digest_query():
+            topic['date'] = munge_date(self.groupInfo.groupObj, 
+                                       topic['last_post_date'])
+            t = '%(original_subject)s\n    %(num_posts_day)s of '\
+              u'%(num_posts)s -- latest at %(date)s' % topic
+            retval = u'%s%s\n' % (retval, t)
         
         assert type(retval) == unicode
         return retval
 
-    def digest_query(self):    
-        #SELECT topic.topic_id, topic.original_subject, topic.last_post_id, 
-        #  topic.last_post_date, topic.num_posts,
-        #  (SELECT COUNT(*) 
-        #    FROM post 
-        #    WHERE (post.topic_id = topic.topic_id) 
-        #      AND post.date > timestamp 'yesterday') 
-        #  AS num_posts_day
-        #  FROM topic 
-        #  WHERE topic.site_id = 'main' 
-        #    AND topic.group_id = 'mpls' 
-        #    AND topic.last_post_date > timestamp 'yesterday'
-        #  ORDER BY topic.last_post_date DESC;
+    def digest_query(self):
+        return self.messageQuery.topics_sinse_yesterday(self.siteInfo.id,
+                                                        [self.groupInfo.id])
 

@@ -78,6 +78,13 @@
   <five:implements 
     class=".searchTextTokens.SearchTextTokens"
     interface=".interfaces.IGSSearchTextTokens" />
+
+
+  <browser:page
+    for="Products.XWFChat.interfaces.IGSGroupFolder"
+    name="digest.txt"
+    class=".topicdigestview.TopicDigestView"
+    permission="zope2.View" />
       
 </configure>
 
