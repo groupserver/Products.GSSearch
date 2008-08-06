@@ -30,13 +30,13 @@ class TopicDigestView(BrowserView):
                                       self.context, 
                                       topic['last_author_id'])
             topic['last_author_name'] = lastAuthor.name
-            topic['link'] = u'%s/r/%s' % (self.siteInfo.url, 
+            topic['link'] = u'%s/r/topic/%s' % (self.siteInfo.url, 
                                           topic['last_post_id'])
-            t = '%(original_subject)s\n    %(link)s\n    '\
-              u'%(num_posts_day)s of %(num_posts)s posts since yesterday '\
-              u'-- latest at %(date)s by %(last_author_name)s' % topic
+            t = '* %(original_subject)s\n    '\
+              u'o %(num_posts_day)s of %(num_posts)s posts since yesterday '\
+              u'-- latest at %(date)s by %(last_author_name)s\n    '\
+              u'o %(link)s\n\n' % topic
             retval = u'%s%s\n' % (retval, t)
-        
         assert type(retval) == unicode
         return retval
 
