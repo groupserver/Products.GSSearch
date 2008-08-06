@@ -467,3 +467,25 @@ class MessageQuery(MailingListQuery):
                   } for x in r]
         return retval
 
+class DigestQuery(MessageQuery):
+    def topics_sinse_yesterday(self, siteId, groupId):
+        tt = self.topicTable
+        pt = self.postTable
+        #cos = [tt.c.topic_id, tt.c.original_subject, tt.c.last_post_id,
+        #       tt.c.last_post_date, tt.c.num_posts,
+        #       sa.select([pt.c.user_id], tt.c.last_post_id == pt.c.post_id,  
+        #   scalar=True).label('user_id')]]
+        #sa.func.count(tt.c.topic_id.distinct())            
+        #SELECT topic.topic_id, topic.original_subject, topic.last_post_id, 
+        #  topic.last_post_date, topic.num_posts,
+        #  (SELECT COUNT(*) 
+        #    FROM post 
+        #    WHERE (post.topic_id = topic.topic_id) 
+        #      AND post.date > timestamp 'yesterday') 
+        #  AS num_posts_day
+        #  FROM topic 
+        #  WHERE topic.site_id = 'main' 
+        #    AND topic.group_id = 'mpls' 
+        #    AND topic.last_post_date > timestamp 'yesterday'
+        #  ORDER BY topic.last_post_date DESC;
+
