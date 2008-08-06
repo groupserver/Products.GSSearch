@@ -35,7 +35,7 @@ class TopicDigestView(BrowserView):
             t = '* %(original_subject)s\n    '\
               u'o %(num_posts_day)s of %(num_posts)s posts since yesterday '\
               u'-- latest at %(date)s by %(last_author_name)s\n    '\
-              u'o %(link)s\n\n' % topic
+              u'o %(link)s\n' % topic
             retval = u'%s%s\n' % (retval, t)
         assert type(retval) == unicode
         return retval
