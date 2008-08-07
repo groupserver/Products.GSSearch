@@ -1,4 +1,5 @@
 #coding: utf-8
+from textwrap import TextWrapper
 from zope.interface import implements, providedBy, Interface
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.component import createObject, adapts, provideAdapter
@@ -21,22 +22,52 @@ class TopicDigestView(BrowserView):
         self.siteInfo = createObject('groupserver.SiteInfo', context)
         self.groupInfo = createObject('groupserver.GroupInfo', context)
         
+        self.topics = self.digest_query()
+        
+    def post_stats(self):
+        retval = {'newTopics': 0,
+                  'existingTopics': 0,
+                  'newPosts':  0}
+        
+        for topic in self.topics:
+            if topic['num_posts_day'] == topic['num_posts']:
+                retval['newTopics'] = retval['newTopics'] + 1
+            else:
+                retval['existingTopics'] = retval['existingTopics'] + 1
+            retval['newPosts'] = retval['newPosts'] + topic['num_posts_day']
+
+        assert type(retval) == dict
+        assert retval.haskey('newTopics')
+        assert retval.haskey('newPosts')
+        return retval
+        
     def __call__(self):
         retval = u''
-        for topic in self.digest_query():
-            topic['date'] = munge_date(self.groupInfo.groupObj, 
-                                       topic['last_post_date'])
+        subjectWrap = TextWrapper(initial_indent     = u'* ', 
+                                  subsequent_indent  = u'  ')
+        metadataWrap = TextWrapper(initial_indent    = u'  o ',
+                                   subsequent_indent = u'    ')
+        for topic in self.topics:
             lastAuthor = createObject('groupserver.UserFromId', 
                                       self.context, 
                                       topic['last_author_id'])
             topic['last_author_name'] = lastAuthor.name
-            topic['link'] = u'%s/r/topic/%s' % (self.siteInfo.url, 
-                                          topic['last_post_id'])
-            t = '* %(original_subject)s\n    '\
-              u'o %(num_posts_day)s of %(num_posts)s posts since yesterday '\
-              u'-- latest at %(date)s by %(last_author_name)s\n    '\
-              u'o %(link)s\n' % topic
-            retval = u'%s%s\n' % (retval, t)
+            subjectLine = subjectWrap.fill(topic['original_subject'])
+
+            url = u'%s/r/topic/%s' % (self.siteInfo.url, 
+                                       topic['last_post_id'])
+            linkLine = metadataWrap.fill(url)
+
+            topic['date'] = munge_date(self.groupInfo.groupObj, 
+                                       topic['last_post_date'])
+            metadata = u'%(num_posts_day)s of %(num_posts)s posts since '\
+              u'yesterday — latest at %(date)s by %(last_author_name)s' %\
+              topic
+            metadataLine = metadataWrap.fill(metadata)
+            
+            t = u'\n'.join((subjectLine, linkLine, metadataLine))
+            retval = u'%s%s\n\n' % (retval, t)
+            
         assert type(retval) == unicode
         return retval
 
