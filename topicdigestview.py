@@ -7,7 +7,7 @@ from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 from queries import DigestQuery
 import Globals
 from Products.Five import BrowserView
-from Products.XWFCore.XWFUtils import munge_date
+from Products.XWFCore.XWFUtils import date_format_by_age, change_timezone
 
 class TopicDigestView(BrowserView):
 
@@ -28,17 +28,16 @@ class TopicDigestView(BrowserView):
         retval = {'newTopics': 0,
                   'existingTopics': 0,
                   'newPosts':  0}
-        
         for topic in self.topics:
             if topic['num_posts_day'] == topic['num_posts']:
                 retval['newTopics'] = retval['newTopics'] + 1
             else:
                 retval['existingTopics'] = retval['existingTopics'] + 1
             retval['newPosts'] = retval['newPosts'] + topic['num_posts_day']
-
-        assert type(retval) == dict
-        assert retval.haskey('newTopics')
-        assert retval.haskey('newPosts')
+        assert type(retval) == dict, 'Not a dict'
+        assert 'newTopics'       in retval.keys()
+        assert 'existingTopics'  in retval.keys()
+        assert 'newPosts'        in retval.keys()
         return retval
         
     def __call__(self):
@@ -47,6 +46,7 @@ class TopicDigestView(BrowserView):
                                   subsequent_indent  = u'  ')
         metadataWrap = TextWrapper(initial_indent    = u'  o ',
                                    subsequent_indent = u'    ')
+        groupTz = self.groupInfo.get_property('group_tz', 'UTC')
         for topic in self.topics:
             lastAuthor = createObject('groupserver.UserFromId', 
                                       self.context, 
@@ -57,9 +57,9 @@ class TopicDigestView(BrowserView):
             url = u'%s/r/topic/%s' % (self.siteInfo.url, 
                                        topic['last_post_id'])
             linkLine = metadataWrap.fill(url)
-
-            topic['date'] = munge_date(self.groupInfo.groupObj, 
-                                       topic['last_post_date'])
+            
+            dt = change_timezone(topic['last_post_date'], groupTz)
+            topic['date'] = dt.strftime(date_format_by_age(dt))
             metadata = u'%(num_posts_day)s of %(num_posts)s posts since '\
               u'yesterday — latest at %(date)s by %(last_author_name)s' %\
               topic
