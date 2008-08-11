@@ -59,6 +59,12 @@ class TopicDigestView(BrowserView):
         assert type(retval) == unicode
         return retval
 
+    @property
+    def showDigest(self):
+        retval = self.show_daily_digest() or self.show_weekly_digest()
+        assert type(retval) == bool
+        return retval
+
     def show_daily_digest(self):
         '''Show the daily digest of topics. 
         
@@ -109,28 +115,26 @@ class TopicDigestView(BrowserView):
 
     def weekly_digest(self):
         retval = u''
-        topics = self.weeklyTopics
         lastWeek = datetime.now(pytz.UTC) - timedelta(days=7)
-        if topics and (topics[0]['last_post_date'] <   lastWeek):
-            for topic in topics:
-                lastAuthor = createObject('groupserver.UserFromId', 
-                                          self.context, 
-                                          topic['last_post_user_id'])
-                topic['last_author_name'] = lastAuthor.name
-                subjectLine = self.subjectWrap.fill(topic['subject'])
+        for topic in self.weeklyTopics:
+            lastAuthor = createObject('groupserver.UserFromId', 
+                                      self.context, 
+                                      topic['last_post_user_id'])
+            topic['last_author_name'] = lastAuthor.name
+            subjectLine = self.subjectWrap.fill(topic['subject'])
 
-                url = u'%s/r/topic/%s' % (self.siteInfo.url, 
-                                           topic['last_post_id'])
-                linkLine = self.metadataWrap.fill(url)
-                
-                dt = change_timezone(topic['last_post_date'], self.groupTz)
-                topic['date'] = dt.strftime(date_format_by_age(dt))
-                metadata = u'Latest post at %(date)s by '\
-                  u'%(last_author_name)s' % topic
-                metadataLine = self.metadataWrap.fill(metadata)
+            url = u'%s/r/topic/%s' % (self.siteInfo.url, 
+                                        topic['last_post_id'])
+            linkLine = self.metadataWrap.fill(url)
+            
+            dt = change_timezone(topic['last_post_date'], self.groupTz)
+            topic['date'] = dt.strftime(date_format_by_age(dt))
+            metadata = u'Latest post at %(date)s by '\
+              u'%(last_author_name)s' % topic
+            metadataLine = self.metadataWrap.fill(metadata)
 
-                t = u'\n'.join((subjectLine, linkLine, metadataLine))
-                retval = u'%s%s\n\n' % (retval, t)
+            t = u'\n'.join((subjectLine, linkLine, metadataLine))
+            retval = u'%s%s\n\n' % (retval, t)
             
         assert type(retval) == unicode
         return retval
