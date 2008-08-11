@@ -231,7 +231,6 @@ class MessageQuery(MailingListQuery):
             
         b = time.time()
         log.info('topic_search_keyword took %.1fms' % ((b-t)*1000.0))
-
         return retval
     
     def count_topic_search_keyword(self, searchTokens, site_id, 
