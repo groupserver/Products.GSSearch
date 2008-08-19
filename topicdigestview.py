@@ -103,9 +103,9 @@ class TopicDigestView(BrowserView):
             
             dt = change_timezone(topic['last_post_date'], self.groupTz)
             topic['date'] = dt.strftime(date_format_by_age(dt))
-            metadata = u'%(num_posts_day)s of %(num_posts)s posts since '\
-              u'yesterday — latest at %(date)s by %(last_author_name)s' %\
-              topic
+            # o 2 new posts, 2 total — latest at 20:04 CDT by Jon Gorder
+            metadata = u'%(num_posts_day)s new posts, %(num_posts)s total '\
+              u' — latest at %(date)s by %(last_author_name)s' % topic
             metadataLine = self.metadataWrap.fill(metadata)
             
             t = u'\n'.join((subjectLine, linkLine, metadataLine))
