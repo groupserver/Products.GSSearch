@@ -114,7 +114,7 @@ class GSFileResultsContentProvider(object):
           fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
           postedFiles = self.search_files_in_path(searchKeywords, 
             groupIds, fileLibraryPath, 'XWF File 2',
-            authorIds) #--=mpj17=-- Site ID!
+            authorIds) #--=mpj17=-- TODO: Site ID!
           postedFiles = [o for o in postedFiles if o]
               
           postedFiles.sort(self.sort_file_results)
@@ -128,7 +128,7 @@ class GSFileResultsContentProvider(object):
           return retval
               
       def search_files_in_path(self, searchKeywords, groupIds=[], 
-        path='', metaType='', authorIds=[]): #--=mpj17=-- Site ID!
+        path='', metaType='', authorIds=[]): #--=mpj17=-- TODO: Site ID!
           catalog = self.context.Catalog
           results = []
           

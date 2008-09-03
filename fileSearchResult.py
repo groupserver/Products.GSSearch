@@ -39,7 +39,10 @@ class GSFileSearchResult(object):
         return retval
 
     def get_url(self):
-        retval = '/r/file/%s' % self.result['id']
+        if 'image' in self.get_type():
+            retval = '/r/img/%s' % self.get_id()
+        else:
+            retval = '/r/file/%s/%s' % (self.get_id(), self.get_title())
         return retval
 
     def get_title(self):
