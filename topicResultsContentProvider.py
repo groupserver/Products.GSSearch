@@ -21,7 +21,7 @@ from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
 from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
 
-from Products.XWFCore import cache
+from Products.XWFCore.cache import SimpleCache
 
 def tfidf_sort(a, b):
     if a['tfidf'] < b['tfidf']:
@@ -61,6 +61,8 @@ class GSTopicResultsContentProvider(object):
           zope.publisher.interfaces.browser.IDefaultBrowserLayer,
           zope.interface.Interface)
 
+      topicKeywords = SimpleCache("TopicKeywords")
+  
       def __init__(self, context, request, view):
           self.__parent__ = self.view = view
           self.__updated = False
@@ -206,6 +208,13 @@ class GSTopicResultsContentProvider(object):
               yield retval
 
       def get_keywords_for_topic(self, topic):
+          words = self.topicKeywords.get(topic['last_post_id'])
+          if not words:
+              words = self.generate_keywords_for_topic(topic)
+              self.topicKeywords.add(topic['last_post_id'], words)
+          return words
+          
+      def generate_keywords_for_topic(self, topic):
           tId = topic['topic_id']
           topicWords = [tw for tw in self.topicsWordCounts 
             if tw['topic_id'] == tId]
