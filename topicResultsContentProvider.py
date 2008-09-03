@@ -21,7 +21,7 @@ from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
 from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
 
-from Products.XWFCore.cache import SimpleCache
+from Products.XWFCore.cache import LRUCache
 
 def tfidf_sort(a, b):
     if a['tfidf'] < b['tfidf']:
@@ -61,7 +61,7 @@ class GSTopicResultsContentProvider(object):
           zope.publisher.interfaces.browser.IDefaultBrowserLayer,
           zope.interface.Interface)
 
-      topicKeywords = SimpleCache("TopicKeywords")
+      topicKeywords = LRUCache("TopicKeywords")
   
       def __init__(self, context, request, view):
           self.__parent__ = self.view = view
