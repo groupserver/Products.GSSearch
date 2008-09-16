@@ -168,7 +168,7 @@ class GSPostResultsContentProvider(object):
               'timezone': 'foo',
               'postSummary': self.get_summary(post['body']),
               'postBody': post['body'],
-              'postIntro': get_email_intro_and_remainder(post['body'])[0],
+              'postIntro': get_email_intro_and_remainder(self.context, post['body'])[0],
               'files': post['files_metadata']
             }
             yield retval
