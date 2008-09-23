@@ -1,0 +1,28 @@
+<tal:block define="view options/view; 
+  ctz python:modules['Products.XWFCore.XWFUtils'].change_timezone">
+  <tal:block repeat="topic view/get_results">
+    <entry tal:define="uri string:${view/siteInfo/url}/r/topic/${topic/last_post_id}">
+      <author>
+        <name tal:content="topic/last_author/name">Me!</name>
+        <uri tal:condition="topic/last_author/exists"
+          tal:content="string:${view/siteInfo/url}${topic/last_author/url}" />
+      </author>
+      <content type="text/html" src="#"
+        tal:attributes="src uri" />
+      <id tal:content="string:${view/siteInfo/url}/r/topic/${topic/first_post_id}">http://sutff/</id>
+      <link href="#" rel="alternate" type="text/html" 
+        title="All posts in Stuff"
+        tal:attributes="href uri; title string:All posts in ${topic/subject}" />
+      <!--published tal:define="d topic/"
+        tal:content="python:ctz(d, 'UTC').strftime('%Y-%m-%dT%H:%M:%SZ')"/-->
+      <summary 
+        tal:content="python:', '.join(topic['keywords'])">Stuff</summary>
+      <title tal:content="topic/subject">Things</title>
+      <updated tal:define="d topic/last_post_date"
+        tal:content="python:ctz(d, 'UTC').strftime('%Y-%m-%dT%H:%M:%SZ')">
+        Today, Tomorrow, Timaru
+      </updated>
+    </entry>
+  </tal:block>
+</tal:block>
+

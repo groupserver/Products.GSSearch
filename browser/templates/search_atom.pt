@@ -26,6 +26,11 @@
     gs python:[view.groupId];
     a python:[view.authorId];
     l view/limit;">
+    <tal:block tal:condition="view/view_topics"
+      tal:define="pageTemplateFileName string:browser/templates/topicResultsATOM.pt">
+      <p tal:replace="structure provider:groupserver.TopicResults">
+        The baby's blood type? Human, mostly.</p>
+    </tal:block>
     <tal:block tal:condition="view/view_posts"
       tal:define="pageTemplateFileName string:browser/templates/postResultsFullATOM.pt;">
       <p tal:replace="structure provider:groupserver.PostResults">
