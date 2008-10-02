@@ -38,13 +38,7 @@ class MessageQuery(MailingListQuery):
     def __init__(self, context, da):
         super_query = MailingListQuery
         super_query.__init__(self, context, da)
-
-#        session = da.getSession()
-#        metadata = session.getMetaData()
-        engine = da.engine
-#      	session = sa.create_session(bind_to=engine)
-#        self.session = session
-        metadata = sa.BoundMetaData(engine)
+        
         self.word_countTable = da.createTable('word_count')
 
         try:
