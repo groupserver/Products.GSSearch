@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import copy
 import time
 import logging
-log = logging.getLogger('GSSearch')
+log = logging.getLogger('GSSearch') #@UndefinedVariable
 
 def topic_sorter_desc(x, y):
     if x['last_post_date'] < y['last_post_date']:
@@ -45,10 +45,10 @@ class MessageQuery(MailingListQuery):
 #      	session = sa.create_session(bind_to=engine)
 #        self.session = session
         metadata = sa.BoundMetaData(engine)
-        self.word_countTable = sa.Table('word_count', metadata, autoload=True)
+        self.word_countTable = da.createTable('word_count')
 
         try:
-            self.rowcountTable = sa.Table('rowcount', metadata, autoload=True)
+            self.rowcountTable = da.createTable('rowcount')
         except NoSuchTableError:
             self.rowcountTable = None    
 
@@ -192,7 +192,6 @@ class MessageQuery(MailingListQuery):
         """
         tt = self.topicTable
         pt = self.postTable
-        wct = self.topic_word_countTable
 
         cols = [tt.c.topic_id.distinct(), tt.c.last_post_id, 
           tt.c.first_post_id, tt.c.group_id, tt.c.site_id, 
@@ -257,7 +256,6 @@ class MessageQuery(MailingListQuery):
     def post_search_keyword(self, searchTokens, site_id, group_ids=[], 
         author_ids=[], limit=12, offset=0):
         pt = self.postTable
-        wct = self.topic_word_countTable
         cols = [pt.c.post_id.distinct(), pt.c.user_id, pt.c.group_id,
           pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
         statement = sa.select(cols)
@@ -291,8 +289,7 @@ class MessageQuery(MailingListQuery):
     def count_post_search_keyword(self, searchTokens, 
         site_id, group_ids=[], author_ids=[]):
         pt = self.postTable
-        wct = self.topic_word_countTable
-
+        
         cols = [sa.func.count(pt.c.post_id.distinct())]
         statement = sa.select(cols)
         self.add_standard_where_clauses(statement, pt, site_id, group_ids)
@@ -361,7 +358,8 @@ class MessageQuery(MailingListQuery):
 
     def count_words(self):
         countTable = self.word_countTable
-        statement = sa.select([sa.func.sum(countTable.c.count)])
+        statement = sa.select(
+                    [sa.func.sum(countTable.c.count)]) #@UndefinedVariable
         r = statement.execute()
         return r.scalar()
         
