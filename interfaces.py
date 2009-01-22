@@ -139,14 +139,9 @@ class IGSFileResultsContentProvider(IContentProvider, IGSSearchResults):
 
 class IGSProfileResultsContentProvider(IContentProvider, IGSSearchResults):
       """The GroupServer Profile Results Content Provider"""
-      
-      foo = Text(
-          title=u"I am a fish", 
-          required=False, 
-          default=u"bar")
 
 class IGSFileSearchResult(Interface):
-    "I am a fish"
+    pass
 
 
 class IGSSearchTextTokens(Interface):
