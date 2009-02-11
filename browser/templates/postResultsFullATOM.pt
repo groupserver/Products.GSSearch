@@ -25,15 +25,12 @@
         2003-12-13T18:30:02Z
       </updated>
       <summary type="xhtml" 
-        tal:define="pi result/postIntro;words python:pi.split()">
-        <tal:block
-          replace="structure python:' '.join(words[:12])">
-          Words
-        </tal:block>
-        <tal:block 
-          condition="python:len(words)&gt;12">
-          &#8230;
-        </tal:block>
+        tal:define="pb result/postIntro;words python:pb.split()">
+        <div tal:define="s python:' '.join(words[:12]).strip()"
+          xmlns="http://www.w3.org/1999/xhtml">
+          <tal:block replace="structure s">Words</tal:block><tal:block 
+            condition="python:len(words)&gt;12">&#8230;</tal:block>
+        </div>
       </summary>
       <content type="xhtml" xml:space="preserve">
         <div xmlns="http://www.w3.org/1999/xhtml">
