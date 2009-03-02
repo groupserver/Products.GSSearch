@@ -34,7 +34,7 @@
       </summary>
       <content type="xhtml" xml:space="preserve">
         <div xmlns="http://www.w3.org/1999/xhtml">
-          <pre tal:content="result/postIntro">
+          <pre tal:content="structure result/postIntro">
             This is the body of the document.
           </pre>
         </div>
