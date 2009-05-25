@@ -26,10 +26,9 @@
       </updated>
       <summary type="xhtml" 
         tal:define="pb result/postBody;
-          words python:' '.join(view.get_summary(pb, 4, 80).split())">
+          words python:pb.split()[:42]">
         <div xmlns="http://www.w3.org/1999/xhtml">
-          <tal:block replace="structure words">Words</tal:block><tal:block 
-            condition="python:len(words)&gt;12">&#8230;</tal:block>
+          <tal:block replace="python:' '.join(words)">Words</tal:block><tal:block condition="python:len(words)==42">&#8230;</tal:block>
         </div>
       </summary>
       <content type="xhtml" xml:space="preserve">
