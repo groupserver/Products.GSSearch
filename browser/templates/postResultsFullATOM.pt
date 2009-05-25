@@ -25,7 +25,7 @@
         2003-12-13T18:30:02Z
       </updated>
       <summary type="xhtml" 
-        tal:define="pb result/postIntro;
+        tal:define="pb result/postBody;
           words python:' '.join(view.get_summary(pb, 4, 80).split())">
         <div xmlns="http://www.w3.org/1999/xhtml">
           <tal:block replace="structure words">Words</tal:block><tal:block 
