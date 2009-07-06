@@ -471,10 +471,10 @@ class DigestQuery(MessageQuery):
         #  (SELECT COUNT(*) 
         #    FROM post 
         #    WHERE (post.topic_id = topic.topic_id) 
-        #      AND post.date > timestamp 'yesterday') 
+        #      AND post.date >= timestamp 'yesterday') 
         #  AS num_posts_day
                sa.select([sa.func.count(pt.c.post_id.distinct())], 
-                         sa.and_(pt.c.date > yesterday, 
+                         sa.and_(pt.c.date >= yesterday, 
                          pt.c.topic_id == tt.c.topic_id),
                          scalar=True).label('num_posts_day'),
                sa.select([pt.c.user_id], 
@@ -485,8 +485,8 @@ class DigestQuery(MessageQuery):
         #  WHERE topic.site_id = 'main' 
         #    AND topic.group_id = 'mpls' 
         s = self.add_standard_where_clauses(s, tt, siteId, groupIds)
-        #    AND topic.last_post_date > timestamp 'yesterday'
-        s.append_whereclause(tt.c.last_post_date > yesterday) 
+        #    AND topic.last_post_date >= timestamp 'yesterday'
+        s.append_whereclause(tt.c.last_post_date >= yesterday) 
         #  ORDER BY topic.last_post_date DESC;
         s.order_by(sa.desc(tt.c.last_post_date))
         
