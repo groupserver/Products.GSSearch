@@ -95,10 +95,16 @@ class TopicDigestView(BrowserView):
                                       self.context, 
                                       topic['last_author_id'])
             topic['last_author_name'] = lastAuthor.name
-            subjectLine = self.subjectWrap.fill(
-                              topic['original_subject'].encode('utf-8','ignore'))
-            subjectLine = subjectLine.decode('utf-8')
             
+            subject = topic['original_subject']
+            if isinstance(subject, unicode):
+                subject = subject.encode('utf-8','ignore')
+            
+            subjectLine = self.subjectWrap.fill(subject)
+            
+            if not isinstance(subjectLine, unicode):
+                subjectLine = unicode(subjectLine, 'utf-8')
+
             url = u'%s/r/topic/%s' % (self.siteInfo.url, 
                                        topic['last_post_id'])
             linkLine = self.metadataWrap.fill(url)
@@ -123,9 +129,15 @@ class TopicDigestView(BrowserView):
                                       self.context, 
                                       topic['last_post_user_id'])
             topic['last_author_name'] = lastAuthor.name
-            subjectLine = self.subjectWrap.fill(
-                              topic['subject'].encode('utf-8','ignore'))
-            subjectLine = subjectLine.decode('utf-8')
+
+            subject = topic['subject']
+            if isinstance(subject, unicode):
+                subject = subject.encode('utf-8','ignore')
+
+            subjectLine = self.subjectWrap.fill(subject)
+            
+            if not isinstance(subjectLine, unicode):
+                subjectLine = unicode(subjectLine, 'utf-8')
 
             url = u'%s/r/topic/%s' % (self.siteInfo.url, 
                                         topic['last_post_id'])
