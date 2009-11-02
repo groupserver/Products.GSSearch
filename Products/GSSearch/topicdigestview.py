@@ -23,11 +23,17 @@ class TopicDigestView(BrowserView):
         
         self.siteInfo = createObject('groupserver.SiteInfo', context)
         self.groupInfo = createObject('groupserver.GroupInfo', context)
-
+        
+        # --=mpj17=-- RRW, should the following wrappers be class
+        #   instances?
         self.subjectWrap = TextWrapper(initial_indent     = u'* ', 
                                        subsequent_indent  = u'  ')
         self.metadataWrap = TextWrapper(initial_indent    = u'  o ',
-                                        subsequent_indent = u'    ')
+                                        subsequent_indent = u'    ',
+                                        break_long_words = False)
+        # --=mpj17=-- TODO: When Python 2.6 is introduced we can add
+        #   "break_on_hyphens = False" to the above TextWrapper.
+        
         self.groupTz = self.groupInfo.get_property('group_tz', 'UTC')
         
         self.__dailyDigestQuery = self.__weeklyDigestQuery = None
