@@ -8,9 +8,8 @@
     enabled python:gO(view.context, 'searchEnabled', True);">
   
   <p tal:condition="not:enabled">
-      Latest topics and posts have been disabled due to the high
-      load on this server. 
-      It will be enabled again later today.
+      Latest topics and posts are currently down for 
+      maintenance. They will be enabled again later today.
   </p>
   
   <tal:block condition="enabled">

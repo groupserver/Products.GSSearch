@@ -76,8 +76,8 @@
         </p>
 
         <tal:block condition="not:enabled">
-            <p>Search has been disabled, to reduce the high load on
-              this site.
+            <p>
+              Search is currently down for maintenance.
               It will be enabled again later today.
             </p>
         </tal:block>
