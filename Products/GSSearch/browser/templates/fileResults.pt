@@ -42,11 +42,11 @@
              class="date">Whenever</span>
           </span>
         </div><!--metadata-->
-        <div class="figure" tal:condition="result/thumbnail_url">
+        <div class="figure" tal:condition="result/file/thumbnail_url">
           <a title="I am a fish" href="#"
             tal:attributes="title string:View ${result/file/title}; 
               href result/file/url">
-            <img src="#" tal:attributes="src result/thumbnail_url" />
+            <img src="#" tal:attributes="src result/file/thumbnail_url" />
           </a>
         </div><!--figure-->
         <div class="disclosureWidget" id="#"
