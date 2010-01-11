@@ -44,7 +44,9 @@ class GSSearchView(BrowserView):
                                            self.context, self.authorId)
         else:
             self.authorInfo = None
-           
+        
+        self.mimeType = self.request.get('m', '')
+        
         try:
             self.startIndex = int(self.request.get('i', 0))
         except ValueError, e:

@@ -57,6 +57,7 @@
         action="." tal:attributes="action request/URL"
         tal:define="s view/searchText;
           gs python:[view.groupId];
+          ms python:[view.mimeType];
           a python:[view.authorId];
           l view/limit;
           i view/startIndex;

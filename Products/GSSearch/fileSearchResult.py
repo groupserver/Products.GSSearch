@@ -2,6 +2,7 @@ from zope.component import createObject
 from zope.interface import implements
 from interfaces import IGSFileSearchResult
 from Products.XWFCore.XWFUtils import get_user, get_user_realnames
+from gs.image.interfaces import IGSImageView
 
 class GSFileSearchResult(object):
     implements(IGSFileSearchResult)
@@ -84,4 +85,13 @@ class GSFileSearchResult(object):
             self.view.__author_object_cache = author_cache
             
         return user
+
+    @property
+    def thumbnail_url(self):
+        retval = ''
+        typePart = self.get_type().split('/')[0]
+        if typePart == 'image':
+              retval = '/r/file/%s/resize/198/198/%s' % (self.get_id(), self.get_title())
+        assert type(retval) == str
+        return retval
 

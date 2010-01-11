@@ -81,6 +81,19 @@ class IGSSearchResults(Interface):
         required=False,
         default=True
     )
+    m = ASCIILine(
+        title=u"MIME Type",
+        description=u"MIME Type of the returned file (file search only).",
+        required=False
+    )
+    ms = List(
+        title=u'MIME Types',
+        description=u"The file types to search for (file search only).",
+        required=False,
+        default=[],
+        value_type=m,
+        unique=True,
+    )
 
 class IGSTopicResultsContentProvider(IContentProvider, IGSSearchResults):
     """The GroupServer Topic Results Content Provider"""

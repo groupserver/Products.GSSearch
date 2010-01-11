@@ -19,14 +19,14 @@
               tal:attributes="href result/group/url"
               tal:content="result/group/name">group</a>
           </span>
-        </div>
+        </div><!--groupInfo-->
         <div tal:condition="result/file/tags" class="tags">
           <ul>
             <tal:block tal:repeat="tag result/file/tags">
               <li tal:content="tag">Tag</li>
             </tal:block>
           </ul>
-        </div>
+        </div><!--tags-->
         <div class="metadata">
           <span class="author" tal:condition="not:result/author/only">
             By
@@ -41,7 +41,14 @@
               tal:content="python:munge_date(ctx, result['file']['date'])"
              class="date">Whenever</span>
           </span>
-        </div>
+        </div><!--metadata-->
+        <div class="figure" tal:condition="result/thumbnail_url">
+          <a title="I am a fish" href="#"
+            tal:attributes="title string:View ${result/file/title}; 
+              href result/file/url">
+            <img src="#" tal:atrributes="src result/thumbnail_url" />
+          </a>
+        </div><!--figure-->
         <div class="disclosureWidget" id="#"
           tal:define="widgetId string:refinement-${result/file/id}"
           tal:attributes="id widgetId"
@@ -69,7 +76,7 @@
               </ul>
             </div>
           </div>
-        </div>
+        </div><!--disclosureWidget-->
       </li>
     </tal:block>
   </ul>
