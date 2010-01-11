@@ -46,7 +46,7 @@
           <a title="I am a fish" href="#"
             tal:attributes="title string:View ${result/file/title}; 
               href result/file/url">
-            <img src="#" tal:atrributes="src result/thumbnail_url" />
+            <img src="#" tal:attributes="src result/thumbnail_url" />
           </a>
         </div><!--figure-->
         <div class="disclosureWidget" id="#"
