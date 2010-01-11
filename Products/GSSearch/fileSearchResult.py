@@ -92,6 +92,5 @@ class GSFileSearchResult(object):
         typePart = self.get_type().split('/')[0]
         if typePart == 'image':
               retval = '/r/file/%s/resize/198/198/%s' % (self.get_id(), self.get_title())
-        assert type(retval) == str
         return retval
 
