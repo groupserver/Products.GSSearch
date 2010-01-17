@@ -1,0 +1,12 @@
+<div class="imageSearch" tal:define="s view/searchText;
+    gs python:[view.groupId];
+    a python:[view.authorId];
+    l view/limit;">
+    <tal:block tal:condition="view/view_files"
+      tal:define="pageTemplateFileName string:browser/templates/imageResults.pt;">
+      <p tal:replace="structure provider:groupserver.FileResults">
+        The baby's blood type? Human, mostly.</p>
+    </tal:block>
+  </tal:block>
+</div><!--imageSearch-->
+
