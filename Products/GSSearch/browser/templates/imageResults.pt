@@ -6,7 +6,7 @@
         <a href="#" tal:attributes="href result/file/url">
           <img src="#" title="An image"
             tal:attributes="src result/file/thumbnail_url;
-              title string:By ${result/author/name} in ${result/group/name}"/>
+              title string:By ${result/author/name}, in ${result/group/name}."/>
         </a>
       </li>
     </tal:block>
