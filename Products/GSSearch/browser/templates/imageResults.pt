@@ -1,16 +1,15 @@
-<div class="imagegallery" 
-  tal:define="view options/view">
+<div class="imagegallery" tal:define="view options/view">
   <ul class="images">
     <tal:block tal:repeat="result view/get_results">
       <li id="image" tal:condition="result/file/thumbnail_url"
         tal:attributes="id string:image-${result/file/id}">
-        <a href="#" 
-          tal:attributes="href result/file/url">
-          <img src="#" title="An image" 
+        <a href="#" tal:attributes="href result/file/url">
+          <img src="#" title="An image"
             tal:attributes="src result/file/thumbnail_url;
-              title string:${result/file/title}: ${result/group/name}"/>
+              title string:By ${result/author/name} in ${result/group/name}"/>
         </a>
       </li>
     </tal:block>
-  </ul>
-</div>
+  </ul><!--images-->
+</div><!--imagegallery-->
+
