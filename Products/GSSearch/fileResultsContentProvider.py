@@ -14,7 +14,7 @@ import DocumentTemplate
 import Products.XWFMailingListManager.view
 
 import Products.GSContent, Products.XWFCore.XWFUtils
-from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
+from Products.GSContent.interfaces import IGSGroupsInfo
 from Products.CustomUserFolder.interfaces import IGSUserInfo
 from Products.ZCTextIndex.ParseTree import ParseError
 from interfaces import IGSFileResultsContentProvider
@@ -49,7 +49,6 @@ class GSFileResultsContentProvider(object):
         self.messageQuery = MessageQuery(self.context, self.da)
         
         # Both of the following should be aquired from adapters.
-        self.siteInfo = IGSSiteInfo(self.context)
         self.groups = IGSGroupsInfo(self.context)
         
         searchKeywords = self.s.split()
@@ -226,19 +225,16 @@ class GSFileResultsContentProvider(object):
             postId = self.filePostMap.get(r.get_id(), '')
             fileURL = '/r/file/%s' % r.get_id()
             
-            fileD = {
-            'id': r.get_id(),
-            'file': fileURL,
-            'type': r.get_type(),
-            'size': r.get_size(),
-            'icon': r.get_icon(),
-            'title': r.get_title(),
-            'tags': r.get_tags(),
-            'tag_search': tagSearch,
-            'date': r.get_date(),
-            'url': ''.join((self.siteInfo.get_url(), r.get_url())),
-            'thumbnail_url': r.thumbnail_url,
-            }
+            fileD = {'id': r.get_id(),
+                'file': fileURL,
+                'type': r.get_type(),
+                'size': r.get_size(),
+                'title': r.get_title(),
+                'tags': r.get_tags(),
+                'tag_search': tagSearch,
+                'date': r.get_date(),
+                'url': r.get_url(),
+                'thumbnail_url': r.thumbnail_url,}
             
             topicURL = '/r/topic/%s' % postId
             topicD = {

@@ -24,12 +24,6 @@ class GSFileSearchResult(object):
         retval = self.result['content_type']
         return retval
     
-    def get_icon(self):
-        mimeType = self.result['content_type']
-        fileName = mimeType.replace('/','-')
-        retval = '/++resource++fileIcons/%s.png' % fileName
-        return retval
-
     def get_date(self):
         d = self.result['modification_time']
         retval = str(d)
@@ -91,6 +85,9 @@ class GSFileSearchResult(object):
         retval = ''
         typePart = self.get_type().split('/')[0]
         if typePart == 'image':
-              retval = '/r/file/%s/resize/405/303/%s' % (self.get_id(), self.get_title())
+            d = {'group', self.get_group_info().url,
+                'fileId', self.get_id(),
+                'name', self.get_title()}
+            retval = '%(group)s/files/f/%(fileId)s/resize/405/303/%(name)s' % d
         return retval
 
