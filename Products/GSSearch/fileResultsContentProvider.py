@@ -233,6 +233,7 @@ class GSFileResultsContentProvider(object):
                 'tags': r.get_tags(),
                 'tag_search': tagSearch,
                 'date': r.get_date(),
+                'rfc3339_date': r.rfc3339_date,
                 'url': r.get_url(),
                 'thumbnail_url': r.thumbnail_url,}
             

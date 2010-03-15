@@ -1,7 +1,8 @@
 from zope.component import createObject
 from zope.interface import implements
 from interfaces import IGSFileSearchResult
-from Products.XWFCore.XWFUtils import get_user, get_user_realnames
+from Products.XWFCore.XWFUtils import get_user, get_user_realnames, \
+    change_timezone
 from gs.image.interfaces import IGSImageView
 
 class GSFileSearchResult(object):
@@ -29,6 +30,14 @@ class GSFileSearchResult(object):
         retval = str(d)
         return retval
 
+    @property
+    def rfc3339_date(self):
+        dt = self.result['modification_time']
+        utcD = change_timezone(dt, 'UTC')
+        retval = utcD.strftime('%Y-%m-%dT%H:%M:%SZ')
+        assert retval
+        return retval
+
     def get_size(self):
         retval = self.result['size']
         return retval
@@ -38,6 +47,7 @@ class GSFileSearchResult(object):
             retval = '/r/img/%s' % self.get_id()
         else:
             retval = '/r/file/%s/%s' % (self.get_id(), self.get_title())
+        retval = '%s%s' % (self.groupInfo.siteInfo.url, retval)
         return retval
 
     def get_title(self):

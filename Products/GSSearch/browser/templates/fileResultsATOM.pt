@@ -1,4 +1,5 @@
-<tal:block define="view options/view">
+<tal:block define="view options/view;
+  munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <tal:block repeat="result view/get_results">
     <entry>
       <title tal:content="result/file/title">Atom-Powered Robots File</title>
@@ -16,8 +17,7 @@
         <uri tal:condition="result/author/exists"
           tal:content="result/author/url"/>
       </author>
-      <updated tal:define="d result/file/date"
-        tal:content="result/file/date">
+      <updated tal:content="result/file/rfc3339_date">
         2003-12-13T18:30:02Z
       </updated>
       <content type="xhtml">
