@@ -23,6 +23,15 @@ class GSFileSearchResult(object):
     def get_type(self):
         retval = self.result['content_type']
         return retval
+
+    def get_icon(self):
+        # The Web pages use CSS to provide icons (because they use a
+        #   sprite-based system for speed), but seperate file-icon files
+        #   are still used for the ATOM feed.
+        mimeType = self.get_type()
+        fileName = mimeType.replace('/','-')
+        retval = '/++resource++fileIcons/%s.png' % fileName
+        return retval
     
     def get_date(self):
         d = self.result['modification_time']

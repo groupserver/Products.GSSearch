@@ -229,6 +229,7 @@ class GSFileResultsContentProvider(object):
                 'file': fileURL,
                 'type': r.get_type(),
                 'size': r.get_size(),
+                'icon': r.get_icon(),
                 'title': r.get_title(),
                 'tags': r.get_tags(),
                 'tag_search': tagSearch,
