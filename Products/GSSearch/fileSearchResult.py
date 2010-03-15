@@ -23,7 +23,7 @@ class GSFileSearchResult(object):
     def get_type(self):
         retval = self.result['content_type']
         return retval
-    
+
     def get_date(self):
         d = self.result['modification_time']
         retval = str(d)
