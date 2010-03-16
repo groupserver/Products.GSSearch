@@ -1,3 +1,5 @@
+# coding=utf-8
+from urllib import quote
 from zope.component import createObject
 from zope.interface import implements
 from interfaces import IGSFileSearchResult
@@ -46,7 +48,7 @@ class GSFileSearchResult(object):
         if 'image' in self.get_type():
             retval = '/r/img/%s' % self.get_id()
         else:
-            retval = '/r/file/%s/%s' % (self.get_id(), self.get_title())
+            retval = '/r/file/%s/%s' % (self.get_id(), quote(self.get_title()))
         retval = '%s%s' % (self.groupInfo.siteInfo.url, retval)
         return retval
 
