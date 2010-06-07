@@ -48,12 +48,16 @@ class GSFileSearchResult(object):
         if 'image' in self.get_type():
             retval = '/r/img/%s' % self.get_id()
         else:
-            retval = '/r/file/%s/%s' % (self.get_id(), quote(self.get_title()))
+            t = self.get_title().encode('ascii', 'ignore')
+            retval = '/r/file/%s/%s' % (self.get_id(), quote(t))
         retval = '%s%s' % (self.groupInfo.siteInfo.url, retval)
         return retval
 
     def get_title(self):
-        retval = self.result['title']
+        retval = self.result['title'].strip()
+        if not retval:
+            retval = 'unknown'
+        assert retval
         return retval
         
     def get_group_info(self):
