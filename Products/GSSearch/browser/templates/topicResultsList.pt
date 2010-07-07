@@ -18,6 +18,7 @@
         </tal:block>
       </span>
       <div class="groupInfo" tal:condition="not:onlyGroup">
+        in
         <a class="group" href="#" 
           tal:attributes="href topic/group/url;"
           tal:content="topic/group/name"/>
