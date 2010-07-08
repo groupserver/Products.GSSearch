@@ -5,11 +5,21 @@
   xmlns:sqlos="http://namespaces.sqlobject.org/sqlos"
   xmlns:five="http://namespaces.zope.org/five">
 
-  <!-- declare a marker interface on the Folder class to allow us 
-    to add marker Interfaces, views and adaptation -->
-  <five:implements 
-    class="OFS.Folder.Folder"
-    interface="zope.app.folder.interfaces.IFolder" />
+  <class class="OFS.Folder.Folder">
+      <implements interface="zope.app.folder.interfaces.IFolder" />
+  </class>
+
+  <class class=".view.GSSearchView">
+      <implements interface=".interfaces.IGSSearchResults" />
+  </class>
+
+  <class class=".view.GSSearchATOMView">
+      <implements interface=".interfaces.IGSSearchResults" />
+  </class>
+
+  <class class=".searchTextTokens.SearchTextTokens">
+      <implements interface=".interfaces.IGSSearchTextTokens" />
+  </class>
   
   <!--View of the index-page -->
   <browser:page 
@@ -19,20 +29,12 @@
     template="browser/templates/search.pt" 
     permission="zope2.View" />
     
-  <five:implements 
-    class=".view.GSSearchView"
-    interface=".interfaces.IGSSearchResults" />
-
   <browser:page 
     for=".interfaces.IGSSearchFolder" 
     name="search.atom"
     class=".view.GSSearchATOMView"
     template="browser/templates/search_atom.pt" 
     permission="zope2.View" />
-
-  <five:implements 
-    class=".view.GSSearchATOMView"
-    interface=".interfaces.IGSSearchResults" />
 
   <browser:page 
     for="Products.XWFMailingListManager.interfaces.IGSMessagesFolder"
@@ -78,11 +80,6 @@
   <utility factory=".searchTextTokens.GSSearchTextTokensFactory"
     name="groupserver.SearchTextTokens"
     permission="zope.Public"/>
-    
-  <five:implements 
-    class=".searchTextTokens.SearchTextTokens"
-    interface=".interfaces.IGSSearchTextTokens" />
-
 
   <browser:page
     for="Products.XWFChat.interfaces.IGSGroupFolder"
