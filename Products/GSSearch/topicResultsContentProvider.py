@@ -125,7 +125,7 @@ class GSTopicResultsContentProvider(object):
           self.totalNumTopics = self.messageQuery.count_topics()
           self.wordCounts = self.messageQuery.word_counts()
 
-          hashkey = new('-'.join(tIds)+dbname).hexdigest()
+          hashkey = sha('-'.join(tIds)+dbname).hexdigest()
           postCount = self.messageQuery.count_posts()
           cTopicsWordCounts = {'object': self.topicsWordCounts,
                                'postCount': postCount}
