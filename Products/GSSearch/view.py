@@ -2,7 +2,7 @@
 
 import sys, re, datetime, time
 import DateTime
-from AccessControl.class_init import InitializeClass
+from App.class_init import InitializeClass
 
 from zope.component import createObject
 from zope.interface import implements
