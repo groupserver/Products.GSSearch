@@ -1,7 +1,8 @@
 # coding=utf-8
 
 import sys, re, datetime, time
-import DateTime, Globals
+import DateTime
+from AccessControl.class_init import InitializeClass
 
 from zope.component import createObject
 from zope.interface import implements
@@ -368,7 +369,7 @@ class GSSearchGroupView(GSSearchView):
         """By definition, only the group is being searched."""
         return True
         
-Globals.InitializeClass( GSSearchView )
-Globals.InitializeClass( GSSearchATOMView )
-Globals.InitializeClass( GSSearchGroupView )
+InitializeClass( GSSearchView )
+InitializeClass( GSSearchATOMView )
+InitializeClass( GSSearchGroupView )
 

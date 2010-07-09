@@ -1,5 +1,9 @@
 # coding=utf-8
-import sys, re, datetime, time, types, string, math, sha, difflib, copy
+try:
+    from hashlib import sha1 as sha
+except:
+    import sha
+import sys, re, datetime, time, types, string, math, difflib, copy
 from sets import Set
 import Products.Five, DateTime, Globals
 import zope.schema
