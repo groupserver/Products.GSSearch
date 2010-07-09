@@ -2,7 +2,7 @@
 try:
     from hashlib import sha1 as sha
 except:
-    import sha
+    from sha import sha
 import sys, re, datetime, time, types, string, math, difflib, copy
 from sets import Set
 import Products.Five, DateTime, Globals
