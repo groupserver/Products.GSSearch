@@ -14,7 +14,7 @@ import DocumentTemplate
 import Products.XWFMailingListManager.view
 
 import Products.GSContent, Products.XWFCore.XWFUtils
-from Products.GSContent.interfaces import IGSGroupsInfo
+from gs.groups.interfaces import IGSGroupsInfo
 from Products.CustomUserFolder.interfaces import IGSUserInfo
 from Products.ZCTextIndex.ParseTree import ParseError
 from interfaces import IGSFileResultsContentProvider

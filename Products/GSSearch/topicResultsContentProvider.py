@@ -23,7 +23,8 @@ import Products.XWFMailingListManager.view
 import Products.GSContent, Products.XWFCore.XWFUtils
 from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
-from Products.GSContent.interfaces import IGSSiteInfo, IGSGroupsInfo
+from Products.GSContent.interfaces import IGSSiteInfo
+from gs.groups.interfaces import IGSGroupsInfo
 
 from Products.XWFCore.cache import LRUCache
 
