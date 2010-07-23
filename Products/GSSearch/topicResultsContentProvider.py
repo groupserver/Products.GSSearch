@@ -17,14 +17,8 @@ from sqlalchemy.exceptions import SQLError
 from Products.XWFMailingListManager.stopwords import en as STOP_WORDS
 
 from Products.PythonScripts.standard import html_quote
-import DocumentTemplate
-
-import Products.XWFMailingListManager.view
-import Products.GSContent, Products.XWFCore.XWFUtils
 from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
-from Products.GSContent.interfaces import IGSSiteInfo
-from gs.groups.interfaces import IGSGroupsInfo
 
 from Products.XWFCore.cache import LRUCache
 
@@ -76,6 +70,7 @@ class GSTopicResultsContentProvider(object):
           self.context = context
           self.request = request
           
+          
       def update(self):
           self.__updated = True
 
@@ -86,12 +81,16 @@ class GSTopicResultsContentProvider(object):
 
           self.messageQuery = MessageQuery(self.context, self.da)
 
+          # --=mpj17=-- Ask me no questions, I tell you no lies.
+          #     For some reason self.context has no aq_self, so my 
+          #     normal trick of breaking out of the Five jail
+          #     (self.context.aq_self) does not work
           self.siteInfo = createObject('groupserver.SiteInfo', 
-            self.context)
+                            self.view.context.aq_self)
           self.groupsInfo = createObject('groupserver.GroupsInfo', 
-            self.context)
+                                self.view.context.aq_self)
           self.searchTokens = createObject('groupserver.SearchTextTokens',
-            self.s)
+                                self.s)
           
           self.groupIds = [gId for gId in self.gs if gId]
           if self.groupIds:
@@ -274,3 +273,4 @@ class GSTopicResultsContentProvider(object):
 zope.component.provideAdapter(GSTopicResultsContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
     name="groupserver.TopicResults")
+
