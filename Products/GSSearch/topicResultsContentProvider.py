@@ -1,26 +1,24 @@
 # coding=utf-8
 try:
+    # Import sha1 from haslib (where it lives in Python 2.6)
     from hashlib import sha1 as sha
 except:
+    # Import sha from from sha (where it lives in Python 2.4)
     from sha import sha
-import sys, re, datetime, time, types, string, math, difflib, copy
-from sets import Set
-import Products.Five, DateTime, Globals
-import zope.schema
-from zope.component import createObject
-import zope.app.pagetemplate.viewpagetemplatefile
-from zope.pagetemplate.pagetemplatefile import PageTemplateFile
-import zope.interface, zope.component, zope.publisher.interfaces
-import zope.viewlet.interfaces, zope.contentprovider.interfaces 
+from math import log10
+from difflib import get_close_matches
+from copy import copy
 from sqlalchemy.exceptions import SQLError
-
+from zope.component import createObject, adapts, provideAdapter
+from zope.pagetemplate.pagetemplatefile import PageTemplateFile
+from zope.interface import implements, Interface
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
+from zope.contentprovider.interfaces import IContentProvider
 from Products.XWFMailingListManager.stopwords import en as STOP_WORDS
-
-from Products.PythonScripts.standard import html_quote
+from Products.XWFCore.XWFUtils import get_the_actual_instance_from_zope
+from Products.XWFCore.cache import LRUCache
 from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
-
-from Products.XWFCore.cache import LRUCache
 
 def tfidf_sort(a, b):
     if a['tfidf'] < b['tfidf']:
@@ -33,9 +31,9 @@ def tfidf_sort(a, b):
 
 def remove_plurals(tags):
     # --=mpj17=-- Warning, this modifies "tags" INPLACE
-    for tag in copy.copy(tags):
+    for tag in copy(tags):
         # find the closest match to the tag
-        matches = difflib.get_close_matches(tag, tags, n=10, cutoff=0.85)
+        matches = get_close_matches(tag, tags, n=10, cutoff=0.85)
         if not matches:
             continue
         
@@ -55,10 +53,8 @@ class GSTopicResultsContentProvider(object):
       """GroupServer Topic Search-Results Content Provider
       """
 
-      zope.interface.implements( IGSTopicResultsContentProvider )
-      zope.component.adapts(zope.interface.Interface,
-          zope.publisher.interfaces.browser.IDefaultBrowserLayer,
-          zope.interface.Interface)
+      implements( IGSTopicResultsContentProvider )
+      adapts(Interface, IDefaultBrowserLayer, Interface)
 
       topicKeywords = LRUCache("TopicKeywords")
   
@@ -80,15 +76,9 @@ class GSTopicResultsContentProvider(object):
           dbname = self.da.getProperty('database')
 
           self.messageQuery = MessageQuery(self.context, self.da)
-
-          # --=mpj17=-- Ask me no questions, I tell you no lies.
-          #     For some reason self.context has no aq_self, so my 
-          #     normal trick of breaking out of the Five jail
-          #     (self.context.aq_self) does not work
-          self.siteInfo = createObject('groupserver.SiteInfo', 
-                            self.view.context.aq_self)
-          self.groupsInfo = createObject('groupserver.GroupsInfo', 
-                                self.view.context.aq_self)
+          ctx = get_the_actual_instance_from_zope(self.view.context)
+          self.siteInfo = createObject('groupserver.SiteInfo', ctx)
+          self.groupsInfo = createObject('groupserver.GroupsInfo', ctx)
           self.searchTokens = createObject('groupserver.SearchTextTokens',
                                 self.s)
           
@@ -226,8 +216,8 @@ class GSTopicResultsContentProvider(object):
           wc = self.wordCounts
           words = [{'word':  w['word'],
                     'tfidf': (w['count']/twc)*\
-                              math.log10(self.totalNumTopics/\
-                                         float(wc.get('word', 1)))}
+                              log10(self.totalNumTopics/\
+                                    float(wc.get('word', 1)))}
                     for w in topicWords
                     if ((len(w['word']) > 3) and 
                          (w['word'] not in STOP_WORDS))]
@@ -270,7 +260,7 @@ class GSTopicResultsContentProvider(object):
           return self.view.get_search_url(searchText=keywords,
             startIndex=0)
 
-zope.component.provideAdapter(GSTopicResultsContentProvider,
-    provides=zope.contentprovider.interfaces.IContentProvider,
+provideAdapter(GSTopicResultsContentProvider,
+    provides=IContentProvider,
     name="groupserver.TopicResults")
 
