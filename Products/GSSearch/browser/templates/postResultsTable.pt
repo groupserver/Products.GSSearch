@@ -1,5 +1,33 @@
 <tal:block tal:define="view options/view;
+  laterURL python:view.show_previous() and view.previous_link() or '';
+  earlierURL python:view.show_next() and view.next_link() or '';
+  chunkLength view/l;
   munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
+
+      <div class="messages-nl" id="postsNavigation">
+        <p class="label">Posts Navigation</p>
+        <ul>
+          <li class="prev">
+            <a href="#" tal:condition="laterURL"
+              tal:attributes="href laterURL;
+              title string:The ${chunkLength} more recent posts;">Later 
+              <span tal:replace="chunkLength">-1</span> posts</a>
+            <span tal:condition="not:laterURL">Later
+              <span tal:replace="chunkLength">-1</span> posts
+            </span>
+          </li>
+          <li class="next">
+            <a href="#" tal:condition="earlierURL"
+              tal:attributes="href earlierURL;
+              title string:The ${chunkLength} older posts;">Earlier
+              <span tal:replace="chunkLength">-1</span> posts</a>
+            <span tal:condition="not:earlierURL">Earlier
+              <span tal:replace="chunkLength">-1</span> posts
+            </span>
+          </li>
+        </ul>
+      </div>
+
   <table>
   <thead>
     <tr>
@@ -53,14 +81,29 @@
     </tal:block>
   </tbody>
 </table>
-  <ul class="navigation">
-    <li class="previous"><a href="#" 
-      tal:omit-tag="not:view/show_previous"
-      tal:attributes="href view/previous_link">More recent 
-      <span class="n" tal:content="view/l"/> posts</a></li>
-    <li class="next"><a href="#"
-      tal:omit-tag="not:view/show_next"
-      tal:attributes="href view/next_link">Older
-      <span class="n" tal:content="view/l"/> posts</a></li>
-  </ul>
+
+      <div class="messages-nl below-nl" id="postsNavigation">
+        <p class="label">Posts Navigation</p>
+        <ul>
+          <li class="prev">
+            <a href="#" tal:condition="laterURL"
+              tal:attributes="href laterURL;
+              title string:The ${chunkLength} more recent posts;">Later 
+              <span tal:replace="chunkLength">-1</span> posts</a>
+            <span tal:condition="not:laterURL">Later
+              <span tal:replace="chunkLength">-1</span> posts
+            </span>
+          </li>
+          <li class="next">
+            <a href="#" tal:condition="earlierURL"
+              tal:attributes="href earlierURL;
+              title string:The ${chunkLength} older posts;">Earlier
+              <span tal:replace="chunkLength">-1</span> posts</a>
+            <span tal:condition="not:earlierURL">Earlier
+              <span tal:replace="chunkLength">-1</span> posts
+            </span>
+          </li>
+        </ul>
+      </div>
+
 </tal:block>
