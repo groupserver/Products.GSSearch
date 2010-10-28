@@ -124,7 +124,6 @@ class GSFileResultsContentProvider(object):
             if o['id'] not in fileIds:
                 fileIds.append(o['id'])
                 retval.append(o)
-
         return retval
             
     def search_files_in_path(self, searchKeywords, groupIds=[], 
@@ -140,21 +139,23 @@ class GSFileResultsContentProvider(object):
                         {'indexable_content': searchExpr, 'path': path}]
             if authorIds:
                 authors = ' and '.join(authorIds)
-                for query in queries:
-                    query['dc_creator'] = authors
-
             if mimeTypes:
                 mimeQuery = ' and '.join(mimeTypes)
-                for query in queries:
-                    query['content_type'] = mimeQuery
-                
             for query in queries:
-                # we do unrestricted searches, since we're
-                # handling the security
+                query['meta_type'] = metaType
+                query['group_ids'] = groupIds #TODO: Site ID!
+                if authorIds:
+                    query['dc_creator'] = authors
+                if mimeTypes:
+                    query['content_type'] = mimeQuery
+
+                for k in query.keys():
+                  if not query[k]:
+                    del(query[k])
                 try:
-                    r = catalog.unrestrictedSearchResults(query,
-                    meta_type=metaType, 
-                    group_ids=groupIds) #--=mpj17=-- Site ID!
+                    # we do unrestricted searches, since we're
+                    # handling the security
+                    r = catalog.unrestrictedSearchResults(None, **query)
                 except ParseError, e:
                     if len(searchKeywords) == 1:
                         results = []
