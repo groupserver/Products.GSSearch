@@ -13,7 +13,7 @@ from fileSearchResult import GSFileSearchResult
 from queries import MessageQuery
 
 import logging
-logger = logging.getLogger('GSSearch')
+log = logging.getLogger('GSSearch')
 
 class GSFileResultsContentProvider(object):
     """GroupServer File Search-Results Content Provider
@@ -102,7 +102,7 @@ class GSFileResultsContentProvider(object):
     def search_files(self, searchKeywords, groupIds,
         authorIds, mimeTypes):#--=mpj17=--TODO: Site ID!
 
-        logger.info("Performing search for %s, groups %s, authors %s" %
+        log.info("Performing search for %s, groups %s, authors %s" %
                     (searchKeywords, groupIds, authorIds))
         
         site_root = self.context.site_root()
@@ -153,7 +153,8 @@ class GSFileResultsContentProvider(object):
                     # we do unrestricted searches, since we're
                     # handling the security
                     r = catalog.unrestrictedSearchResults(None, **query)
-                except ParseError, e:
+                except ParseError:
+                    log.exception("Error while parsing search keywords:")
                     if len(searchKeywords) == 1:
                         results = []
                         break

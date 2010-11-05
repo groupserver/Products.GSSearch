@@ -3,9 +3,7 @@ from urllib import quote
 from zope.component import createObject
 from zope.interface import implements
 from interfaces import IGSFileSearchResult
-from Products.XWFCore.XWFUtils import get_user, get_user_realnames, \
-    change_timezone
-from gs.image.interfaces import IGSImageView
+from Products.XWFCore.XWFUtils import get_user, change_timezone
 
 class GSFileSearchResult(object):
     implements(IGSFileSearchResult)

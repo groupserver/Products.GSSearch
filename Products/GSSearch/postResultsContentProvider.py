@@ -67,7 +67,8 @@ class GSPostResultsContentProvider(object):
             posts = self.messageQuery.post_search_keyword(
               self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
               self.a, limit=self.l+1, offset=self.i)
-        except SQLError, e:
+        except SQLError:
+            log.exception("A problem occurred with a messageQuery:")
             self.__searchFailed = True
             return
         else:

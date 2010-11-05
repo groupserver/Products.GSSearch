@@ -1,8 +1,6 @@
-import zope.component
-import zope.viewlet.interfaces
 from zope.contentprovider.interfaces import IContentProvider
-from zope.schema import *
 from zope.interface import Interface
+from zope.schema import TextLine, List, Bool, Int, ASCIILine, Text
 
 class IGSSearchFolder(Interface):
     pass
@@ -168,7 +166,7 @@ class IGSFileResultsContentProvider(IContentProvider, IGSSearchResults):
       default=True)
 
 class IGSProfileResultsContentProvider(IContentProvider, IGSSearchResults):
-      """The GroupServer Profile Results Content Provider"""
+    """The GroupServer Profile Results Content Provider"""
 
 class IGSFileSearchResult(Interface):
     pass

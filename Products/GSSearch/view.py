@@ -1,7 +1,5 @@
 # coding=utf-8
 
-import sys, re, datetime, time
-import DateTime
 from App.class_init import InitializeClass
 
 from zope.component import createObject
@@ -54,12 +52,12 @@ class GSSearchView(BrowserView):
         
         try:
             self.startIndex = int(self.request.get('i', 0))
-        except ValueError, e:
+        except ValueError:
             self.startIndex = 0
 
         try:
             self.limit = int(self.request.get('l', 6))
-        except ValueError, e:
+        except ValueError:
             self.limit = 6
         
         self.viewTopics = self.__get_boolean('t', True)
@@ -90,7 +88,7 @@ class GSSearchView(BrowserView):
         else:
             try:
                 inStr = in_[0]
-            except IndexError, e:
+            except IndexError:
                 inStr = ''
         grp = ''
         if len(self.groupIds) == 1:
@@ -133,7 +131,7 @@ class GSSearchView(BrowserView):
         else:
             try:
                 inStr = in_[0]
-            except IndexError, e:
+            except IndexError:
                 inStr = ''
 
         auth = ''

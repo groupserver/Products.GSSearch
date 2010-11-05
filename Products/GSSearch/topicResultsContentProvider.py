@@ -98,7 +98,8 @@ class GSTopicResultsContentProvider(object):
             topics = self.messageQuery.topic_search_keyword(
               self.searchTokens, self.siteInfo.get_id(), 
               groupIds, limit=self.l+1, offset=self.i)
-        except SQLError, e:
+        except SQLError:
+            log.exception("A problem occurred with a message query:")
             self.__searchFailed = True
             return
         else:
