@@ -1,7 +1,8 @@
 <tal:block define="s view/searchText;
-    gs python:[view.groupId];
-    a python:[view.authorId];
-    ms python:[view.mimeType];
+    g python:view.groupIds;
+    a python:view.authorIds;
+    m python:view.mimeTypes;
+    mg python:view.memberGroupsOnly;
     l view/limit;">
     <tal:block condition="view/view_files"
       define="pageTemplateFileName string:browser/templates/imageResults.pt;">

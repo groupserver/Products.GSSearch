@@ -17,25 +17,34 @@ class IGSSearchResults(Interface):
         default=u""
     )
     
-    g = TextLine(
+    gs = TextLine(
         title=u"Group Identifier",
         description=u"Unique Identifier for a group",
         required=False
     )
     
-    gs = List(
+    g = List(
         title=u"Group IDs",
         description=u"The groups to search in; defaults to all visible groups",
         required=False,
         default=[],
-        value_type=g,
+        value_type=gs,
         unique=True,
     )
 
-    a = TextLine(
+    ais = TextLine(
       title=u'Author ID',
       description=u'Unique Identifier of an author',
       required=False
+    )
+    
+    a = List(
+        title=u"Author IDs",
+        description=u"The author to search with; defaults to any",
+        required=False,
+        default=[],
+        value_type=ais,
+        unique=True,
     )
 
     l = Int(
@@ -81,17 +90,25 @@ class IGSSearchResults(Interface):
         required=False,
         default=True
     )
-    m = ASCIILine(
+    
+    mg = Bool(
+        title=u"Member groups only",
+        description=u"Limit the search to groups in which the user is a member only",
+        required=False,
+        default=False
+    )
+    
+    ms = ASCIILine(
         title=u"MIME Type",
         description=u"MIME Type of the returned file (file search only).",
         required=False
     )
-    ms = List(
+    m = List(
         title=u'MIME Types',
         description=u"The file types to search for (file search only).",
         required=False,
         default=[],
-        value_type=m,
+        value_type=ms,
         unique=True,
     )
 

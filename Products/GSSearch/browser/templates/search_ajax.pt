@@ -1,9 +1,11 @@
 <tal:block 
   tal:define="s python:view.searchText;
-    gs python:[view.groupId];
-    a python:[view.authorId];
+    g python:view.groupIds;
+    a python:view.authorIds;
+    m python:view.mimeTypes;
     l python:view.limit;
     i python:view.startIndex;
+    mg python:view.memberGroupsOnly;
     gO python:modules['Products.XWFCore.XWFUtils'].getOption;
     enabled python:gO(view.context, 'searchEnabled', True);">
   

@@ -29,24 +29,28 @@ class GSSearchView(BrowserView):
         self.searchTokens = createObject('groupserver.SearchTextTokens', 
             self.searchText)
         
-        self.groupId = self.request.get('g', '')
-        if self.groupId:
-            try:
-                self.groupInfo = createObject('groupserver.GroupInfo', 
-                                              context, self.groupId)
-            except AssertionError, e:
-                self.groupInfo = None
-        else:
-            self.groupInfo = None
-           
-        self.authorId = self.request.get('a', '')
-        if self.authorId:
-            self.authorInfo = createObject('groupserver.UserFromId', 
-                                           self.context, self.authorId)
-        else:
-            self.authorInfo = None
+        self.memberGroupsOnly = self.request.get('mg', False) or False
         
-        self.mimeType = self.request.get('m', '')
+        self.groupIds = self.request.get('g', []) or []
+        if not isinstance(self.groupIds, list):
+            self.groupIds = [self.groupIds]
+        
+        assert isinstance(self.groupIds, list), "groupIds were not in a list: %s" % self.groupIds
+        self.groupIds = filter(None, self.groupIds)
+        
+        self.authorIds = self.request.get('a', []) or []
+        if not isinstance(self.authorIds, list):
+            self.authorIds = [self.authorIds]
+        
+        assert isinstance(self.authorIds, list), "authorIds were not in a list: %s" % self.authorIds
+        self.authorIds = filter(None, self.authorIds)
+        
+        self.mimeTypes = self.request.get('m', []) or []
+        if not isinstance(self.mimeTypes, list):
+            self.mimeTypes = [self.mimeTypes]
+        
+        assert isinstance(self.mimeTypes, list), "mimeTypes were not in a list: %s" % self.mimeTypes
+        self.mimeTypes = filter(None, self.mimeTypes)
         
         try:
             self.startIndex = int(self.request.get('i', 0))
@@ -64,8 +68,6 @@ class GSSearchView(BrowserView):
         self.viewProfiles = self.__get_boolean('r', False)
 
     def get_title(self):
-        retval = ''
-
         if self.searchText:
             s = ', '.join(self.searchTokens.phrases)
             s = 'Results for "%s" in' % s
@@ -91,12 +93,17 @@ class GSSearchView(BrowserView):
             except IndexError, e:
                 inStr = ''
         grp = ''
-        if self.groupInfo:
-            grp = ': %s' % self.groupInfo.get_name()
+        if len(self.groupIds) == 1:
+            groupInfo = createObject('groupserver.GroupInfo', 
+                         self.context, self.groupIds[0])
+            grp = ': %s' % groupInfo.get_name()
 
         auth = ''
-        if self.authorInfo:
-            auth = u' by %s' % self.authorInfo.name
+        if len(self.authorIds) == 1:
+            authorInfo = createObject('groupserver.UserFromId', 
+                                      self.context, self.authorIds[0])
+            if authorInfo:
+                auth = u' by %s' % authorInfo.name
 
         r = r'%s %s%s%s: %s'
         retval = r % (s, inStr, auth, grp, self.siteInfo.get_name())
@@ -104,8 +111,6 @@ class GSSearchView(BrowserView):
         return retval
 
     def search_description(self):
-        retval = ''
-
         if self.searchText:
             s = ', '.join(self.searchTokens.phrases)
             s = 'Results for <q>%s</q> in' % s
@@ -132,15 +137,20 @@ class GSSearchView(BrowserView):
                 inStr = ''
 
         auth = ''
-        if self.authorInfo:
-            link= '<a class="name" href="%s">%s</a>' % \
-              (self.authorInfo.url, self.authorInfo.name)
-            auth = u' by %s' % link
+        if len(self.authorIds) == 1:
+            authorInfo = createObject('groupserver.UserFromId', 
+                                      self.context, self.authorIds[0])
+            if authorInfo:
+                link= '<a class="name" href="%s">%s</a>' % \
+                    (authorInfo.url, authorInfo.name)
+                auth = u' by %s' % link
             
         grp = ''
-        if self.groupInfo:
+        if len(self.groupIds) == 1:
+            groupInfo = createObject('groupserver.GroupInfo', 
+                         self.context, self.groupIds[0])
             link = '<a class="group" href="%s">%s</a>' % \
-              (self.groupInfo.get_url(), self.groupInfo.get_name())
+              (groupInfo.get_url(), groupInfo.get_name())
             grp = u' in the group %s' % link
         else:
             grp = u' in the site %s' % self.siteInfo.get_name()
@@ -181,35 +191,52 @@ class GSSearchView(BrowserView):
         """
         if isinstance(searchText, list):
             searchText = ' '.join(searchText).strip()
-        searchTextQuery = self.get_query(r's=%s', 
-                                         self.searchText, searchText)
-                                         
-        groupIdQuery = self.get_query(r'g=%s', 
-                                      self.groupId, groupId)
         
-        authorIdQuery = self.get_query(r'a=%s', 
-                                       self.authorId, authorId)
+        queries = []
+        queries.append(self.get_query(r's=%s', 
+                                      self.searchText, searchText))
+        if self.memberGroupsOnly:
+            queries.append('mg=1')
         
-        viewTopicsQuery = self.get_query(r't=%s',
-          self.viewTopics, viewTopics, valType=int)
-        viewPostsQuery = self.get_query(r'p=%s', 
-          self.viewPosts, viewPosts, valType=int)
-        viewFilesQuery = self.get_query(r'f=%s', 
-          self.viewFiles, viewFiles, valType=int)
-        viewProfilesQuery = self.get_query(r'r=%s', 
-          self.viewProfiles, viewProfiles, valType=int)
+        if self.groupIds:
+            for groupId in self.groupIds:
+                queries.append(self.get_query(r'g=%s', 
+                                              groupId, groupId))
+        else:
+            queries.append('g=')
+        
+        if self.authorIds:
+            for authorId in self.authorIds:
+                queries.append(self.get_query(r'a=%s', 
+                                              authorId, authorId))
+        else:
+            queries.append('a=')
+            
+        if self.mimeTypes:
+            for mimeType in self.mimeTypes:
+                queries.append(self.get_query(r'm=%s', 
+                                              mimeType, mimeType))
+        else:
+            queries.append('m=')
+        
+        queries.append(self.get_query(r't=%s',
+          self.viewTopics, viewTopics, valType=int))
+        queries.append(self.get_query(r'p=%s', 
+          self.viewPosts, viewPosts, valType=int))
+        queries.append(self.get_query(r'f=%s', 
+          self.viewFiles, viewFiles, valType=int))
+        queries.append(self.get_query(r'r=%s', 
+          self.viewProfiles, viewProfiles, valType=int))
           
-        si = self.get_query(r'i=%s', self.startIndex, 
-          startIndex, valType=int)
-        li = self.get_query(r'l=%s', self.limit, limit, 
-          valType=int)
+        queries.append(self.get_query(r'i=%s', self.startIndex, 
+          startIndex, valType=int))
+        queries.append(self.get_query(r'l=%s', self.limit, limit, 
+          valType=int))
 
-        queries = '&'.join([searchTextQuery, groupIdQuery, authorIdQuery,
-                            viewTopicsQuery, viewPostsQuery, viewFilesQuery, 
-                            viewProfilesQuery, si, li])
+        query_string = '&'.join(queries)
         if baseURL == None:
             baseURL = self.request.URL
-        retval = '%s?%s' % (baseURL, queries)
+        retval = '%s?%s' % (baseURL, query_string)
         return retval
         
     def get_query(self, rstr, defaultVal, val=None, valType=str):
@@ -278,8 +305,11 @@ class GSSearchView(BrowserView):
     def searching_group(self, groupId):
         return groupId == self.groupId
     
-    def only_group(self, groupId=None):
-        return bool(self.groupId)
+    def group_count(self):
+        """ A count of the number of groupIds that we are processing.
+        
+        """
+        return len(self.groupIds)
     
     def only_group_link(self, groupId):
         return self.get_search_url(groupId=groupId, startIndex=0)
@@ -287,8 +317,8 @@ class GSSearchView(BrowserView):
     def all_groups_link(self):
         return self.get_search_url(groupId='', startIndex=0)
 
-    def only_author(self, authorId=None):
-        return bool(self.authorId)
+    def author_count(self):
+        return len(self.authorIds)
         
     def only_author_link(self, authorId):
         return self.get_search_url(authorId=authorId, startIndex=0)
@@ -297,12 +327,11 @@ class GSSearchView(BrowserView):
         return self.get_search_url(authorId='', startIndex=0)
     
     def process_form(self):
-        form = self.context.REQUEST.form
         result = {}
 
         # Unlike the process_form method of GSContent, there is only
-        #   one possible form, and the content providers do all the 
-        #   work!
+        # one possible form, and the content providers do all the 
+        # work!
         
         result['error'] = False
         result['message'] = 'Form processed successfully'
@@ -334,8 +363,8 @@ class GSSearchATOMView(GSSearchView):
         self.siteInfo = siteInfo
         groupsInfo = createObject('groupserver.GroupsInfo', context)            
 
-        if self.groupId:
-            self.groupIds = groupsInfo.filter_visible_group_ids([self.groupId])
+        if self.groupIds:
+            self.groupIds = groupsInfo.filter_visible_group_ids(self.groupIds)
         else:
             self.groupIds = groupsInfo.get_visible_group_ids()
 
@@ -361,8 +390,8 @@ class GSSearchGroupView(GSSearchView):
     """
     def __init__(self, context, request):
         GSSearchView.__init__(self, context, request)
-        self.groupInfo = createObject('groupserver.GroupInfo', context)
-        self.groupId = self.groupInfo.get_id()
+        self.groupInfos = [createObject('groupserver.GroupInfo', context)]
+        self.groupIds = [self.groupInfo.get_id()]
         assert self.groupId, "Search outside a group"
 
     def only_group(self, groupId=None):

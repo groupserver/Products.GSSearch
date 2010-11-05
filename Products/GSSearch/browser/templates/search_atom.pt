@@ -23,8 +23,9 @@
     tal:attributes="href view/get_search_url"/>
 
   <tal:block tal:define="s view/searchText;
-    gs python:[view.groupId];
-    a python:[view.authorId];
+    g python:view.groupIds;
+    a python:view.authorIds;
+    m python:view.mimeTypes;
     l view/limit;">
     <tal:block tal:condition="view/view_topics"
       tal:define="pageTemplateFileName string:browser/templates/topicResultsATOM.pt">

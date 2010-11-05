@@ -1,22 +1,16 @@
 # coding=utf-8
-import sys, re, datetime, time, types, string
-import Products.Five, DateTime, Globals
-import zope.schema
 from zope.component import createObject
-import zope.app.pagetemplate.viewpagetemplatefile
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import zope.interface, zope.component, zope.publisher.interfaces
-import zope.viewlet.interfaces, zope.contentprovider.interfaces 
+import zope.contentprovider.interfaces
 from sqlalchemy.exceptions import SQLError
 
-import DocumentTemplate
-import Products.XWFMailingListManager.view
 from Products.XWFMailingListManager.emailbody import get_email_intro_and_remainder
-
-import Products.GSContent, Products.XWFCore.XWFUtils
 
 from interfaces import IGSPostResultsContentProvider
 from queries import MessageQuery
+
+import AccessControl
 
 class GSPostResultsContentProvider(object):
     """GroupServer Post Search-Results Content Provider
@@ -47,14 +41,28 @@ class GSPostResultsContentProvider(object):
         self.groupsInfo = createObject('groupserver.GroupsInfo', 
           self.context)
 
+        user = AccessControl.getSecurityManager().getUser()
+        
         self.searchTokens = createObject('groupserver.SearchTextTokens',
           self.s)
         
-        self.groupIds = [gId for gId in self.gs if gId]
+        self.groupIds = [gId for gId in self.g if gId]
+        
+        memberGroupIds = []
+        if self.mg and user.getId():
+            memberGroupIds = [g.getId() for g in self.groupsInfo.get_member_groups_for_user(user, user)]
+            
         if self.groupIds:
-            self.groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
+            if memberGroupIds:
+                self.groupIds = [gId for gId in self.groupIds if gId in memberGroupIds]
+            else:
+                self.groupIds = self.groupsInfo.filter_visible_group_ids(self.groupIds)
         else:
-            self.groupIds = self.groupsInfo.get_visible_group_ids()
+            if memberGroupIds:
+                self.groupIds = memberGroupIds
+            else:
+                self.groupIds = self.groupsInfo.get_visible_group_ids()
+            
         try:
             posts = self.messageQuery.post_search_keyword(
               self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
@@ -67,8 +75,7 @@ class GSPostResultsContentProvider(object):
         
         self.morePosts = (len(posts) == (self.l + 1))
         self.posts = posts[:self.l]
-
-          
+        
     def render(self):
         if self.__searchFailed:
             r = u'''<div class="error" id="post-search-timeout">
@@ -82,13 +89,20 @@ class GSPostResultsContentProvider(object):
             if not self.__updated:
                 raise interfaces.UpdateNotCalled
             pageTemplate = PageTemplateFile(self.pageTemplateFileName)
-            onlyGroup = self.view.only_group()
-            onlyAuthor = self.view.only_author()
+            
+            onlyGroup = False
+            if self.view.group_count() == 1:
+                onlyGroup = self.view.group_count()
+            
+            onlyAuthor = False
+            if self.view.author_count() == 1:
+                onlyAuthor = self.view.author_count()
+                
             if self.posts:
                 r = pageTemplate(view=self, 
                   onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
             else:
-              r = '<p id="post-search-none">No posts found.</p>'
+                r = '<p id="post-search-none">No posts found.</p>'
         return r
         
     #########################################

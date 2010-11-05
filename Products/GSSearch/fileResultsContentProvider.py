@@ -1,21 +1,12 @@
 # coding=utf-8
-import sys, re, datetime, time, types, string
-from sets import Set
-import Products.Five, DateTime, Globals
-import zope.schema
-import zope.app.pagetemplate.viewpagetemplatefile
 from zope.component import createObject
-import zope.pagetemplate.pagetemplatefile
 import zope.interface, zope.component, zope.publisher.interfaces
-import zope.viewlet.interfaces, zope.contentprovider.interfaces 
+import zope.contentprovider.interfaces 
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 
-import DocumentTemplate
-import Products.XWFMailingListManager.view
+import AccessControl
 
-import Products.GSContent, Products.XWFCore.XWFUtils
 from gs.groups.interfaces import IGSGroupsInfo
-from Products.CustomUserFolder.interfaces import IGSUserInfo
 from Products.ZCTextIndex.ParseTree import ParseError
 from interfaces import IGSFileResultsContentProvider
 from fileSearchResult import GSFileSearchResult
@@ -48,8 +39,10 @@ class GSFileResultsContentProvider(object):
         assert self.da, 'No data-adaptor found'
         self.messageQuery = MessageQuery(self.context, self.da)
         
-        # Both of the following should be aquired from adapters.
-        self.groups = IGSGroupsInfo(self.context)
+        # Both of the following should be acquired from adapters.
+        self.groupsInfo = IGSGroupsInfo(self.context)
+        
+        user = AccessControl.getSecurityManager().getUser()
         
         searchKeywords = self.s.split()
 
@@ -58,18 +51,27 @@ class GSFileResultsContentProvider(object):
         self.catalog = self.context.Catalog
         self.results = []
         
-        groupIds = [gId for gId in self.gs if gId]
+        groupIds = [gId for gId in self.g if gId]
+        
+        memberGroupIds = []
+        if self.mg and user.getId():
+            memberGroupIds = [g.getId() for g in self.groupsInfo.get_member_groups_for_user(user, user)]
+            
         if groupIds:
-            groupIds = self.groups.filter_visible_group_ids(self.gs)
-        
-        # if group Ids are not specified now, populate with visible ones
+            if memberGroupIds:
+                groupIds = [gId for gId in self.groupIds if gId in memberGroupIds]
+            else:
+                groupIds = self.groupsInfo.filter_visible_group_ids(groupIds)
         else:
-            groupIds = self.groups.get_visible_group_ids()
-        
+            if memberGroupIds:
+                groupIds = memberGroupIds
+            else:
+                groupIds = self.groupsInfo.get_visible_group_ids()
+                
         #--=mpj17=--Site ID!
         if groupIds:
             self.results = self.search_files(searchKeywords, groupIds, 
-                self.a, self.ms) # TODO: Site ID
+                self.a, self.m) # TODO: Site ID
         else:
             self.results = []
 
@@ -102,12 +104,9 @@ class GSFileResultsContentProvider(object):
 
         logger.info("Performing search for %s, groups %s, authors %s" %
                     (searchKeywords, groupIds, authorIds))
-
-        retval = []
-        postedFiles = []
-        siteFiles = []
+        
         site_root = self.context.site_root()
-
+        
         assert hasattr(site_root, 'FileLibrary2'), \
         'Cannot search: file library not found'
         fileLibrary = site_root.FileLibrary2
@@ -116,7 +115,7 @@ class GSFileResultsContentProvider(object):
             groupIds, fileLibraryPath, 'XWF File 2',
             authorIds, mimeTypes) #--=mpj17=-- TODO: Site ID!
         postedFiles = [o for o in postedFiles if o]
-            
+        
         postedFiles.sort(self.sort_file_results)
         fileIds = []
         retval = []
@@ -124,6 +123,7 @@ class GSFileResultsContentProvider(object):
             if o['id'] not in fileIds:
                 fileIds.append(o['id'])
                 retval.append(o)
+        
         return retval
             
     def search_files_in_path(self, searchKeywords, groupIds=[], 
@@ -137,21 +137,18 @@ class GSFileResultsContentProvider(object):
             searchExpr = ' and '.join(searchKeywords)
             queries = [{'meta_text': searchExpr, 'path': path},
                         {'indexable_content': searchExpr, 'path': path}]
-            if authorIds:
-                authors = ' and '.join(authorIds)
-            if mimeTypes:
-                mimeQuery = ' and '.join(mimeTypes)
+            
             for query in queries:
                 query['meta_type'] = metaType
                 query['group_ids'] = groupIds #TODO: Site ID!
                 if authorIds:
-                    query['dc_creator'] = authors
+                    query['dc_creator'] = authorIds
                 if mimeTypes:
-                    query['content_type'] = mimeQuery
+                    query['content_type'] = mimeTypes
 
                 for k in query.keys():
-                  if not query[k]:
-                    del(query[k])
+                    if not query[k]:
+                        del(query[k])
                 try:
                     # we do unrestricted searches, since we're
                     # handling the security
@@ -198,12 +195,15 @@ class GSFileResultsContentProvider(object):
                 self.context, r.get_owner_id())
                 authorCache[r.get_owner_id()] = authorInfo
             authorId = authorInfo.id
+            only = False
+            if self.view.author_count() == 1:
+                only = True
             authorD = {
             'id': authorInfo.id,
             'exists': not authorInfo.anonymous,
             'url': authorInfo.url,
             'name': authorInfo.name,
-            'only': self.view.only_author(authorId),
+            'only': only,
             'onlyURL': self.view.only_author_link(authorId)
             }
 
@@ -212,11 +212,17 @@ class GSFileResultsContentProvider(object):
                 groupInfo = createObject('groupserver.GroupInfo', 
                 self.context, r.get_group_info().get_id())
                 groupCache[r.get_group_info().get_id()] = groupInfo
+            group_count = self.view.group_count()
+            
+            only_group = False
+            if group_count == 1:
+                only_group = True
+                
             groupD = {
             'id': groupInfo.get_id(),
             'name': groupInfo.get_name(),
             'url': groupInfo.get_url(),
-            'only': self.view.only_group(groupInfo.get_id()),
+            'only': only_group,
             'onlyURL': self.view.only_group_link(groupInfo.get_id())
             }
             

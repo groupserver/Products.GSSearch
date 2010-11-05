@@ -4,9 +4,9 @@
   metal:use-macro="context/@@groupserver_layout/page">
   <head>
     <title metal:fill-slot="title">
-      <span tal:replace="python:view.get_title()">
+      <tal:block tal:replace="python:view.get_title()">
         I am a fish
-      </span>
+      </tal:block>
     </title>      
 
     <meta name="title" content="Standard Template for Search"/>
@@ -56,9 +56,10 @@
       <form enctype="multipart/form-data" method="get"
         action="." tal:attributes="action request/URL"
         tal:define="s view/searchText;
-          gs python:[view.groupId];
-          ms python:[view.mimeType];
-          a python:[view.authorId];
+          g python:view.groupIds;
+          m python:view.mimeTypes;
+          a python:view.authorIds;
+          mg python:view.memberGroupsOnly;
           l view/limit;
           i view/startIndex;
           gO python:modules['Products.XWFCore.XWFUtils'].getOption;
@@ -92,12 +93,12 @@
           </fieldset>
           
           <ul class="navigation" id="widenSearch">
-            <li tal:condition="view/groupId">
+            <li tal:condition="view/groupIds">
               <a href="#" 
                 tal:attributes="href view/all_site_search_link">Search
                 all groups.</a>
             </li>
-            <li tal:condition="view/only_author">
+            <li tal:condition="python:view.author_count() >= 1">
               <a href="#" title="View All Authors"
                  tal:attributes="href view/all_authors_link">Show 
                  all authors</a>
@@ -135,12 +136,20 @@
               tal:attributes="value python: '%d' % view.view_files()"/>
             <input type="hidden" name="r" value="#"
               tal:attributes="value python: '%d' % view.view_profiles()"/>
-            <input type="hidden" name="gs" value="#"
-              tal:attributes="value gs"/> 
             <input type="hidden" name="g" value="#"
-              tal:attributes="value view/groupId" />
-            <input type="hidden" name="a" value="#"
-              tal:attributes="value view/authorId"/>
+              tal:attributes="value g"/>
+            <tal:block tal:repeat="groupId view/groupIds">
+            	<input type="hidden" name="g" value="#"
+              		   tal:attributes="value groupId" />
+            </tal:block>
+            <tal:block tal:repeat="authorId view/authorIds">
+            	<input type="hidden" name="a" value="#"
+              		   tal:attributes="value authorId" />
+            </tal:block>
+            <tal:block tal:repeat="mimeType view/mimeTypes">
+            	<input type="hidden" name="m" value="#"
+              		   tal:attributes="value mimeType" />
+            </tal:block>
           </fieldset> 
         </tal:block>
       </form>
