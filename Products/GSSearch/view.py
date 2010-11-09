@@ -391,10 +391,9 @@ class GSSearchGroupView(GSSearchView):
     """
     def __init__(self, context, request):
         GSSearchView.__init__(self, context, request)
-        self.groupInfos = [createObject('groupserver.GroupInfo', context)]
+        self.groupInfo = createObject('groupserver.GroupInfo', context)
         self.groupIds = [self.groupInfo.get_id()]
-        assert self.groupId, "Search outside a group"
-
+        
     def only_group(self, groupId=None):
         """By definition, only the group is being searched."""
         return True
@@ -402,4 +401,3 @@ class GSSearchGroupView(GSSearchView):
 InitializeClass( GSSearchView )
 InitializeClass( GSSearchATOMView )
 InitializeClass( GSSearchGroupView )
-

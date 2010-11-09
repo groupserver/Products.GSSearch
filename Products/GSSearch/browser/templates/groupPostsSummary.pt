@@ -36,9 +36,8 @@
     <tal:block metal:fill-slot="body">
       <div id="posts" tal:define="l view/limit;
           i view/startIndex;
-          group context/Scripts/get/group_object;
-          gs python:[group.getId()];
-          a python:[view.authorId];
+          g view/groupIds;
+          a view/authorIds;
           pageTemplateFileName string:browser/templates/postResultsTable.pt;">
           
         <h2>Summary of Posts in 
