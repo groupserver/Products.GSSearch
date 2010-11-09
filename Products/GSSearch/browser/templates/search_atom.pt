@@ -23,10 +23,12 @@
     tal:attributes="href view/get_search_url"/>
 
   <tal:block tal:define="s view/searchText;
-    g python:view.groupIds;
-    a python:view.authorIds;
-    m python:view.mimeTypes;
-    l view/limit;">
+          g python:view.groupIds;
+          m python:view.mimeTypes;
+          a python:view.authorIds;
+          mg python:view.memberGroupsOnly;
+          l view/limit;
+          i view/startIndex">
     <tal:block tal:condition="view/view_topics"
       tal:define="pageTemplateFileName string:browser/templates/topicResultsATOM.pt">
       <p tal:replace="structure provider:groupserver.TopicResults">

@@ -76,7 +76,7 @@ class GSTopicResultsContentProvider(object):
         self.groupsInfo = createObject('groupserver.GroupsInfo', ctx)
         self.searchTokens = createObject('groupserver.SearchTextTokens',
                                 self.s)
-        
+
         groupIds = [gId for gId in self.g if gId]
         
         memberGroupIds = []
@@ -93,7 +93,7 @@ class GSTopicResultsContentProvider(object):
                 groupIds = memberGroupIds
             else:
                 groupIds = self.groupsInfo.get_visible_group_ids()
-                
+
         try:
             topics = self.messageQuery.topic_search_keyword(
               self.searchTokens, self.siteInfo.get_id(), 

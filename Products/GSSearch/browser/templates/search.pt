@@ -136,8 +136,6 @@
               tal:attributes="value python: '%d' % view.view_files()"/>
             <input type="hidden" name="r" value="#"
               tal:attributes="value python: '%d' % view.view_profiles()"/>
-            <input type="hidden" name="g" value="#"
-              tal:attributes="value g"/>
             <tal:block tal:repeat="groupId view/groupIds">
             	<input type="hidden" name="g" value="#"
               		   tal:attributes="value groupId" />

@@ -12,6 +12,9 @@ from queries import MessageQuery
 
 import AccessControl
 
+import logging
+log = logging.getLogger('GSSearch') #@UndefinedVariable
+
 class GSPostResultsContentProvider(object):
     """GroupServer Post Search-Results Content Provider
     """

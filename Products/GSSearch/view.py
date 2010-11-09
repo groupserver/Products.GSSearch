@@ -29,7 +29,7 @@ class GSSearchView(BrowserView):
         
         self.memberGroupsOnly = self.request.get('mg', False) or False
         
-        self.groupIds = self.request.get('g', []) or []
+        self.groupIds = self.request.get('g', None) or []
         if not isinstance(self.groupIds, list):
             self.groupIds = [self.groupIds]
         
@@ -193,13 +193,17 @@ class GSSearchView(BrowserView):
         queries = []
         queries.append(self.get_query(r's=%s', 
                                       self.searchText, searchText))
-        if self.memberGroupsOnly:
-            queries.append('mg=1')
+
+        if groupId != '':
+            if self.memberGroupsOnly:
+                queries.append('mg=1')
         
-        if self.groupIds:
-            for groupId in self.groupIds:
-                queries.append(self.get_query(r'g=%s', 
-                                              groupId, groupId))
+            if self.groupIds:
+                for groupId in self.groupIds:
+                    queries.append(self.get_query(r'g=%s', 
+                                                  groupId, groupId))
+            else:
+                queries.append('g=')
         else:
             queries.append('g=')
         
@@ -354,25 +358,24 @@ class GSSearchATOMView(GSSearchView):
         assert da, 'No data-adaptor found'
         messageQuery = MessageQuery(self.context, da)
         
-        searchTokens = createObject('groupserver.SearchTextTokens',
-            self.searchText)
+        #searchTokens = createObject('groupserver.SearchTextTokens',
+        #    self.searchText)
 
-        siteInfo = createObject('groupserver.SiteInfo', context)
-        self.siteInfo = siteInfo
-        groupsInfo = createObject('groupserver.GroupsInfo', context)            
+        #siteInfo = createObject('groupserver.SiteInfo', context)
+        #self.siteInfo = siteInfo
+        #groupsInfo = createObject('groupserver.GroupsInfo', context)
+        #if self.groupIds:
+        #    self.groupIds = groupsInfo.filter_visible_group_ids(self.groupIds)
+        #else:
+        #    self.groupIds = groupsInfo.get_visible_group_ids()
 
-        if self.groupIds:
-            self.groupIds = groupsInfo.filter_visible_group_ids(self.groupIds)
-        else:
-            self.groupIds = groupsInfo.get_visible_group_ids()
-
-        posts = messageQuery.post_search_keyword(searchTokens, 
-          siteInfo.get_id(), self.groupIds, [self.authorId], 
+        posts = messageQuery.post_search_keyword(self.searchTokens, 
+          self.siteInfo.get_id(), self.groupIds, self.authorIds, 
           limit=1, offset=0)
-        
+
         self.post = None
-        for post in posts:
-            self.post = post
+        if posts:
+            self.post = posts[-1]
                 
     def most_recent_post_date(self):
         retval = '1970-1-1T00:00:01'
