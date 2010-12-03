@@ -22,7 +22,7 @@
             tal:content="topic/group/name"/>
         </div>
         <div class="tags" tal:condition="topic/keywords">
-          <ul>
+          <ul class="inline-list">
             <tal:block tal:repeat="keyword topic/keywords">
               <li tal:content="keyword"/>
             </tal:block>
@@ -49,11 +49,11 @@
         <div class="disclosureWidget" id="#"
           tal:define="widgetId string:refinement-${topic/last_post_id}"
           tal:attributes="id widgetId">
-          <p>
+          <div class="refineButton">
             <a class="disclosureButton"
               tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
               href="#">Refine</a>
-          </p>
+          </div>
           <div class="disclosureShowHide" style="display:none;">
             <div>
               <ul class="refinement">

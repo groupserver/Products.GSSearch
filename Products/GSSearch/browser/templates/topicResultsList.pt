@@ -24,7 +24,7 @@
           tal:content="topic/group/name"/>
       </div>
       <div class="tags" tal:condition="topic/keywords">
-        <ul>
+        <ul class="inline-list">
           <tal:block tal:repeat="keyword topic/keywords">
             <li tal:content="keyword"/>
           </tal:block>

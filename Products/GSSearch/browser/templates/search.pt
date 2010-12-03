@@ -86,7 +86,7 @@
         <tal:block condition="enabled">
           
           <fieldset id="searchInput">
-            <input type="text" class="text" name="s"
+            <input type="text" class="textType" name="s"
               id="searchText" title="Text to search for"
               tal:attributes="value view/searchText | nothing"/>
             <input type="submit" class="button" value="Search"/>
