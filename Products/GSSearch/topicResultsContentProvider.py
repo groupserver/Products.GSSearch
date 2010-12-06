@@ -15,6 +15,9 @@ from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
 import AccessControl
 
+import logging
+log = logging.getLogger('GSSearch') #@UndefinedVariable
+
 def tfidf_sort(a, b):
     if a['tfidf'] < b['tfidf']:
         retval = 1
