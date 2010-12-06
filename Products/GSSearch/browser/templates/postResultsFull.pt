@@ -47,11 +47,11 @@
           tal:condition="python:not(onlyGroup and onlyAuthor)"
           tal:define="widgetId string:refinement-${result/postId}"
           tal:attributes="id widgetId">
-          <p>
+          <div class="refineButton">
             <a class="disclosureButton"
               tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
               href="#">Refine</a>
-          </p>
+          </div>
           <div class="disclosureShowHide" style="display:none;">
             <div>
               <ul class="refinement">

@@ -3,7 +3,8 @@
     munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <ul class="searchResults">
     <tal:block tal:repeat="result view/get_results">
-       <li><a title="I am a fish" href="#"
+       <li class="result">
+        <a title="I am a fish" href="#"
           tal:define="typeClass python:result['file']['type'].replace('/','-');"
           tal:attributes="title string:View ${result/file/title}; 
             href result/file/url;
@@ -53,11 +54,11 @@
           tal:define="widgetId string:refinement-${result/file/id}"
           tal:attributes="id widgetId"
           tal:condition="python:not(result['group']['only'] and result['author']['only'])">
-          <p>
+          <div class="refineButton">
             <a class="disclosureButton"
               tal:attributes="href string:javascript:showHideDisclosure('${widgetId}')"
               href="#">Refine</a>
-          </p>
+          </div>
           <div class="disclosureShowHide" style="display:none;">
             <div>
               <ul class="refinement">
