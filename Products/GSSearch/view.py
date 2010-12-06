@@ -194,20 +194,24 @@ class GSSearchView(BrowserView):
         queries.append(self.get_query(r's=%s', 
                                       self.searchText, searchText))
 
-        if groupId != '':
-            if self.memberGroupsOnly:
-                queries.append('mg=1')
-        
-            if self.groupIds:
-                for groupId in self.groupIds:
-                    queries.append(self.get_query(r'g=%s', 
-                                                  groupId, groupId))
-            else:
-                queries.append('g=')
+        if self.memberGroupsOnly:
+            queries.append('mg=1')
+
+
+        if groupId != None:
+            queries.append(self.get_query(r'g=%s', 
+                                          groupId, groupId))
+        elif groupId == None and self.groupIds:    
+            for groupId in self.groupIds:
+                queries.append(self.get_query(r'g=%s', 
+                                              groupId, groupId))
         else:
             queries.append('g=')
         
-        if self.authorIds:
+        if authorId != None:
+            queries.append(self.get_query(r'a=%s', 
+                                          authorId, authorId))
+        elif self.authorIds:    
             for authorId in self.authorIds:
                 queries.append(self.get_query(r'a=%s', 
                                               authorId, authorId))
