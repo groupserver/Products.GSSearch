@@ -9,7 +9,7 @@
           tal:content="topic/subject"/>
         <!--Files go here-->
         <span class="files" tal:condition="topic/files">
-          <tal:block tal:repeat="file topic/files">
+          <tal:block tal:repeat="file python:topic['files'][-7:]">
             <a href="#" title="foo"
               tal:attributes="title file/name;
                 href file/url;
@@ -75,12 +75,18 @@
       </li>
     </tal:block>
   </ul>
-  <ul class="navigation">
-    <li class="previous"><a href="#" 
-      tal:omit-tag="not:view/show_previous"
-      tal:attributes="href view/previous_link">Later topics</a></li>
-    <li class="next"><a href="#"
-      tal:omit-tag="not:view/show_next"
-      tal:attributes="href view/next_link">Earlier topics</a></li>
+  <ul class="inline-list navlinks">
+    <li>
+      <a href="#" class="prev"
+        tal:condition="view/show_previous"
+        tal:attributes="href view/previous_link">Later topics</a>
+      <span tal:condition="not:view/show_previous"
+        class="prev">Later topics</span></li>
+    <li>
+      <a href="#" class="next"
+        tal:condition="view/show_next"
+        tal:attributes="href view/next_link">Earlier topics</a>
+      <span class="next"
+        tal:condition="not:view/show_next">Earlier topics</span></li>
   </ul>
 </tal:block>

@@ -8,29 +8,11 @@
         I am a fish
       </span>
     </title>      
-
-    <meta name="title" content="Standard Template for Search"/>
-    <meta name="author" content="Michael JasonSmith" />
-    <meta name="description" 
-      content="This template is used to render the search page on GroupServer" 
-    />
-    <meta name="date" content="2007-04-26"/>
-        
     <tal:block metal:fill-slot="metadata"> 
       <link rel="up" href="posts.html" title="Posts" />
       <link rel="bookmark" href="topics.html" title="Topics"/>
       <link rel="help" href="/help" title="Help"/>
     </tal:block>
-    
-    <tal:block metal:fill-slot="style">
-      <style type="text/css">
-        table .author, table .group, table .topic, table .files, table .date {
-            padding: 5px 20px 5px 0px;
-        }
-        
-      </style>
-    </tal:block>
-    
   </head>
   <body>
     <tal:block metal:fill-slot="body">
@@ -39,9 +21,9 @@
           g view/groupIds;
           a view/authorIds;
           pageTemplateFileName string:browser/templates/postResultsTable.pt;">
-          
         <h2>Summary of Posts in 
-          <span tal:content="view/groupInfo/get_name" class="group">the Group</span></h2>
+          <span tal:content="view/groupInfo/name" 
+            class="group">This Group</span></h2>
         <p tal:replace="structure provider:groupserver.PostResults">
           The baby's blood type? Human, mostly.</p>
       </div>

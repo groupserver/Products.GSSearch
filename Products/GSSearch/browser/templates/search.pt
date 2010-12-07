@@ -76,35 +76,29 @@
               url python:view.get_search_url(baseURL=base, startIndex=0)"
             tal:attributes="href url">Web feed</a>
         </p>
-
-        <tal:block condition="not:enabled">
-            <p>
-              Search is currently down for maintenance.
-              It will be enabled again later today.
-            </p>
-        </tal:block>
+        <ul class="inline-list" id="widenSearch">
+          <li tal:condition="python:view.author_count() >= 1">
+            <a href="#" title="View All Authors"
+               tal:attributes="href view/all_authors_link">Show 
+               all authors</a>
+          </li>
+          <li tal:condition="view/groupIds">
+            <a href="#" 
+              tal:attributes="href view/all_site_search_link">Search
+              all groups</a>
+          </li>
+        </ul>
+        <p tal:condition="not:enabled">
+          Search is currently down for maintenance.
+          It will be enabled again later today.
+        </p>
         <tal:block condition="enabled">
-          
           <fieldset id="searchInput">
             <input type="text" class="textType" name="s"
               id="searchText" title="Text to search for"
               tal:attributes="value view/searchText | nothing"/>
             <input type="submit" class="button" value="Search"/>
           </fieldset>
-          
-          <ul class="navigation" id="widenSearch">
-            <li tal:condition="view/groupIds">
-              <a href="#" 
-                tal:attributes="href view/all_site_search_link">Search
-                all groups.</a>
-            </li>
-            <li tal:condition="python:view.author_count() >= 1">
-              <a href="#" title="View All Authors"
-                 tal:attributes="href view/all_authors_link">Show 
-                 all authors</a>
-            </li>
-          </ul>
-          
           <div id="topics" tal:condition="view/view_topics">
             <h2 tal:condition="not:view/only_topics_shown">Topics</h2>
             <p tal:replace="structure provider:groupserver.TopicResults">
@@ -122,33 +116,26 @@
             <p tal:replace="structure provider:groupserver.PostResults">
               The baby's blood type? Human, mostly.</p>
           </div>
-          <!--  div id="profiles" tal:condition="view/view_profiles">
-            <h2 tal:condition="not:view/only_profiles_shown">Profiles</h2>          
-            <p tal:replace="structure provider:groupserver.ProfileResults">
-              The baby's blood type? Human, mostly.</p>
-          </div-->
-          <fieldset>
-            <input type="hidden" name="t" value="#"
-              tal:attributes="value python:'%d' % view.view_topics()"/>
-            <input type="hidden" name="p" value="#"
-              tal:attributes="value python: '%d' % view.view_posts()"/>
-            <input type="hidden" name="f" value="#"
-              tal:attributes="value python: '%d' % view.view_files()"/>
-            <input type="hidden" name="r" value="#"
-              tal:attributes="value python: '%d' % view.view_profiles()"/>
-            <tal:block tal:repeat="groupId view/groupIds">
-            	<input type="hidden" name="g" value="#"
-              		   tal:attributes="value groupId" />
-            </tal:block>
-            <tal:block tal:repeat="authorId view/authorIds">
-            	<input type="hidden" name="a" value="#"
-              		   tal:attributes="value authorId" />
-            </tal:block>
-            <tal:block tal:repeat="mimeType view/mimeTypes">
-            	<input type="hidden" name="m" value="#"
-              		   tal:attributes="value mimeType" />
-            </tal:block>
-          </fieldset> 
+          <input type="hidden" name="t" value="#"
+            tal:attributes="value python:'%d' % view.view_topics()"/>
+          <input type="hidden" name="p" value="#"
+            tal:attributes="value python: '%d' % view.view_posts()"/>
+          <input type="hidden" name="f" value="#"
+            tal:attributes="value python: '%d' % view.view_files()"/>
+          <input type="hidden" name="r" value="#"
+            tal:attributes="value python: '%d' % view.view_profiles()"/>
+          <tal:block tal:repeat="groupId view/groupIds">
+          	<input type="hidden" name="g" value="#"
+            		   tal:attributes="value groupId" />
+          </tal:block>
+          <tal:block tal:repeat="authorId view/authorIds">
+          	<input type="hidden" name="a" value="#"
+            		   tal:attributes="value authorId" />
+          </tal:block>
+          <tal:block tal:repeat="mimeType view/mimeTypes">
+          	<input type="hidden" name="m" value="#"
+            		   tal:attributes="value mimeType" />
+          </tal:block>
         </tal:block>
       </form>
     </tal:block>

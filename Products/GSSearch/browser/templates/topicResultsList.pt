@@ -10,7 +10,7 @@
         tal:content="topic/subject"/>
       <!--Files go here-->
       <span class="files" tal:condition="topic/files">
-        <tal:block tal:repeat="file topic/files">
+        <tal:block tal:repeat="file python:topic['files'][-7:]">
           <a href="#" title="foo"
             tal:attributes="title file/name;
               href file/url;

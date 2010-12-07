@@ -3,107 +3,101 @@
   earlierURL python:view.show_next() and view.next_link() or '';
   chunkLength view/l;
   munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
-
-      <div class="messages-nl" id="postsNavigation">
-        <p class="label">Posts Navigation</p>
-        <ul>
-          <li class="prev">
-            <a href="#" tal:condition="laterURL"
-              tal:attributes="href laterURL;
-              title string:The ${chunkLength} more recent posts;">Later 
-              <span tal:replace="chunkLength">-1</span> posts</a>
-            <span tal:condition="not:laterURL">Later
-              <span tal:replace="chunkLength">-1</span> posts
-            </span>
-          </li>
-          <li class="next">
-            <a href="#" tal:condition="earlierURL"
-              tal:attributes="href earlierURL;
-              title string:The ${chunkLength} older posts;">Earlier
-              <span tal:replace="chunkLength">-1</span> posts</a>
-            <span tal:condition="not:earlierURL">Earlier
-              <span tal:replace="chunkLength">-1</span> posts
-            </span>
-          </li>
-        </ul>
-      </div>
-
+  <ul class="inline-list navlinks" id="postsNavigation">
+    <li>
+      <a href="#" tal:condition="laterURL" class="prev"
+        tal:attributes="href laterURL;
+        title string:The ${chunkLength} more recent posts;">Later 
+        <span tal:replace="chunkLength">-1</span> posts</a>
+      <span tal:condition="not:laterURL" class="prev">Later
+        <span tal:replace="chunkLength">-1</span> posts
+      </span>
+    </li>
+    <li>
+      <a class="up" href="posts.html">Posts</a>
+    </li>
+    <li>
+      <a href="#" tal:condition="earlierURL" class="next"
+        tal:attributes="href earlierURL;
+        title string:The ${chunkLength} older posts;">Earlier
+        <span tal:replace="chunkLength">-1</span> posts</a>
+      <span tal:condition="not:earlierURL" class="next">Earlier
+        <span tal:replace="chunkLength">-1</span> posts
+      </span>
+    </li>
+  </ul>
   <table>
-  <thead>
-    <tr>
-      <th class="author" tal:condition="not:options/onlyAuthor">Author</th>
-      <th class="groupInfo" 
-        tal:condition="not:options/onlyGroup">Group</th>
-      <th class="topic">Topic</th>
-      <th class="files">Files</th>
-      <th class="date">Date</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tal:block repeat="result view/get_results">
-      <tr tal:define="n repeat/result/number;
-        odd python:n%2;
-        class python:odd and 'odd' or 'even';"
-        tal:attributes="id string:post-${result/postId};
-          class class;">
-        <td class="author" tal:condition="not:options/onlyAuthor">
-          <a tal:omit-tag="not:result/author/exists" class="name"
-            tal:attributes="href result/author/url;
-            title string:Profile of ${result/author/name};"
-            tal:content="result/author/name">Me!</a>
-        </td>
-        <td class="groupInfo"
-          tal:condition="not:options/onlyGroup">
-          <a href="#"
-            tal:attributes="href result/group/url"
-            tal:content="result/group/name">A group</a>
-        </td>
-        <td class="topic">
-          <a tal:condition="result/topicName"
-            tal:attributes="href string:/r/post/${result/postId}"
-            tal:content="python:result['topicName'][:50]">A Topic</a>
-        </td>
-        <td class="files">
-          <tal:block tal:repeat="file result/files">
-            <a href="#" title="foo"
-              tal:define="icon python:file['mime_type'].replace('/','-').replace('.','-')"
-              tal:attributes="title file/file_name;
-                href string:/r/post/${result/postId};
-                class string:fileIcon ${icon}">&#160;</a>
-          </tal:block>
-        </td>
-        <td class="date" 
-          tal:define="ctx result/context"
-          tal:content="python:munge_date(ctx, result['date'])">
-          Today, Tomorrow, Timaru
-        </td>
+    <thead>
+      <tr>
+        <th class="author" tal:condition="not:options/onlyAuthor">Author</th>
+        <th class="groupInfo" 
+          tal:condition="not:options/onlyGroup">Group</th>
+        <th class="topic">Topic</th>
+        <th class="files">Files</th>
+        <th class="date">Date</th>
       </tr>
-    </tal:block>
-  </tbody>
-</table>
-
-      <div class="messages-nl below-nl" id="postsNavigation">
-        <p class="label">Posts Navigation</p>
-        <ul>
-          <li class="prev">
-            <a href="#" tal:condition="laterURL"
-              tal:attributes="href laterURL;
-              title string:The ${chunkLength} more recent posts;">Later 
-              <span tal:replace="chunkLength">-1</span> posts</a>
-            <span tal:condition="not:laterURL">Later
-              <span tal:replace="chunkLength">-1</span> posts
-            </span>
-          </li>
-          <li class="next">
-            <a href="#" tal:condition="earlierURL"
-              tal:attributes="href earlierURL;
-              title string:The ${chunkLength} older posts;">Earlier
-              <span tal:replace="chunkLength">-1</span> posts</a>
-            <span tal:condition="not:earlierURL">Earlier
-              <span tal:replace="chunkLength">-1</span> posts
-            </span>
-          </li>
-        </ul>
-      </div>
+    </thead>
+    <tbody>
+      <tal:block repeat="result view/get_results">
+        <tr tal:define="n repeat/result/number;
+          odd python:n%2;
+          class python:odd and 'odd' or 'even';"
+          tal:attributes="id string:post-${result/postId};
+            class class;">
+          <td class="author" tal:condition="not:options/onlyAuthor">
+            <a tal:omit-tag="not:result/author/exists" class="name"
+              tal:attributes="href result/author/url;
+              title string:Profile of ${result/author/name};"
+              tal:content="result/author/name">Me!</a>
+          </td>
+          <td class="groupInfo"
+            tal:condition="not:options/onlyGroup">
+            <a href="#"
+              tal:attributes="href result/group/url"
+              tal:content="result/group/name">A group</a>
+          </td>
+          <td class="topic">
+            <a tal:condition="result/topicName"
+              tal:attributes="href string:/r/post/${result/postId}"
+              tal:content="python:result['topicName'][:50]">A Topic</a>
+          </td>
+          <td class="files">
+            <tal:block tal:repeat="file result/files">
+              <a href="#" title="foo"
+                tal:define="icon python:file['mime_type'].replace('/','-').replace('.','-')"
+                tal:attributes="title file/file_name;
+                  href string:/r/post/${result/postId};
+                  class string:fileIcon ${icon}">&#160;</a>
+            </tal:block>
+          </td>
+          <td class="date" 
+            tal:define="ctx result/context"
+            tal:content="python:munge_date(ctx, result['date'])">
+            Today, Tomorrow, Timaru
+          </td>
+        </tr>
+      </tal:block>
+    </tbody>
+  </table>
+  <ul class="inline-list navlinks" id="postsNavigationBottom">
+    <li>
+      <a href="#" tal:condition="laterURL" class="prev"
+        tal:attributes="href laterURL;
+        title string:The ${chunkLength} more recent posts;">Later 
+        <span tal:replace="chunkLength">-1</span> posts</a>
+      <span tal:condition="not:laterURL" class="prev">Later
+        <span tal:replace="chunkLength">-1</span> posts
+      </span>
+    </li>
+    <li>
+      <a href="#" tal:condition="earlierURL" class="next"
+        tal:attributes="href earlierURL;
+        title string:The ${chunkLength} older posts;">Earlier
+        <span tal:replace="chunkLength">-1</span> posts</a>
+      <span tal:condition="not:earlierURL" class="next">Earlier
+        <span tal:replace="chunkLength">-1</span> posts
+      </span>
+    </li>
+  </ul>
 
 </tal:block>
