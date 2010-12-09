@@ -3,13 +3,16 @@
     munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <ul class="searchResults">
     <tal:block tal:repeat="result view/get_results">
-       <li class="result">
-        <a title="I am a fish" href="#"
+       <li class="result fileResult">
+        <a href="#"
           tal:define="typeClass python:result['file']['type'].replace('/','-');"
-          tal:attributes="title string:View ${result/file/title}; 
-            href result/file/url;
-            class string:fileName ${typeClass}"
-          tal:content="result/file/title">Fish</a>
+          tal:attributes="href result/file/url;
+            class string:fileIcon ${typeClass}">&#160;</a>
+        <a title="I am a fish" href="#"
+          tal:attributes="title string:View ${result/file/title};
+            href result/file/url;">
+          <span class="fileName"
+            tal:content="result/file/title">Fish</span></a>
         <div class="groupInfo" tal:condition="result/post/id">
           <a href="#"
             tal:attributes="href result/topic/url"
