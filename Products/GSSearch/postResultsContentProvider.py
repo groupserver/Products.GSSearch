@@ -191,7 +191,7 @@ class GSPostResultsContentProvider(object):
             }
             yield retval
 
-    def get_summary(self, text, nLines=1, lineLength=40):
+    def get_summary(self, text, nLines=1, lineLength=38):
 
         lines = text.split('\n')
         nonBlankLines = [l.strip() for l in lines if l and l.strip()]
