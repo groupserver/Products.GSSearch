@@ -4,8 +4,7 @@ from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.contentprovider.interfaces
 from sqlalchemy.exceptions import SQLError
-
-from Products.XWFMailingListManager.emailbody import get_email_intro_and_remainder
+from gs.group.messages.post.postbody import get_post_intro_and_remainder
 
 from interfaces import IGSPostResultsContentProvider
 from queries import MessageQuery
@@ -186,7 +185,7 @@ class GSPostResultsContentProvider(object):
               'timezone': 'foo',
               'postSummary': self.get_summary(post['body']),
               'postBody': post['body'],
-              'postIntro': get_email_intro_and_remainder(self.context, post['body'])[0],
+              'postIntro': get_post_intro_and_remainder(self.context, post['body'])[0],
               'files': post['files_metadata']
             }
             yield retval
