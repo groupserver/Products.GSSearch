@@ -110,6 +110,14 @@ class IGSSearchResults(Interface):
         unique=True,
     )
 
+    st = Bool(
+        title=u"Show Thumbnails",
+        description=u"Whether the thumbnails for images should be shown",
+        required=False,
+        default=None
+    )
+
+
 class IGSTopicResultsContentProvider(IContentProvider, IGSSearchResults):
     """The GroupServer Topic Results Content Provider"""
 

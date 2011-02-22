@@ -5,6 +5,7 @@
     m python:view.mimeTypes;
     l python:view.limit;
     i python:view.startIndex;
+    st python:view.showThumbnails;
     mg python:view.memberGroupsOnly;
     gO python:modules['Products.XWFCore.XWFUtils'].getOption;
     enabled python:gO(view.context, 'searchEnabled', True);">

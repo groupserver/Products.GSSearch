@@ -29,6 +29,8 @@ class GSSearchView(BrowserView):
         
         self.memberGroupsOnly = self.request.get('mg', False) or False
         
+        self.showThumbnails = self.request.get('st', None) and True or False
+        
         self.groupIds = self.request.get('g', None) or []
         if not isinstance(self.groupIds, list):
             self.groupIds = [self.groupIds]

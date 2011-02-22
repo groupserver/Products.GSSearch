@@ -59,6 +59,7 @@
           g python:view.groupIds;
           m python:view.mimeTypes;
           a python:view.authorIds;
+          st python:view.showThumbnails;
           mg python:view.memberGroupsOnly;
           l view/limit;
           i view/startIndex;

@@ -24,13 +24,20 @@
               tal:content="result/group/name">group</a>
           </span>
         </div>
-        <div tal:condition="result/file/tags" class="tags">
+        <div class="figure" tal:condition="python:view.st == True and result['file']['thumbnail_url']">
+          <a title="I am a fish" href="#"
+            tal:attributes="title string:View ${result/file/title}; 
+              href result/file/url">
+            <img src="#" tal:attributes="src result/file/thumbnail_url" />
+          </a>
+        </div><!--figure-->
+        <!-- <div tal:condition="result/file/tags" class="tags">
           <ul>
             <tal:block tal:repeat="tag result/file/tags">
               <li tal:content="tag">Tag</li>
             </tal:block>
           </ul>
-        </div>
+        </div> -->
         <div class="metadata">
           <span class="author" tal:condition="not:result/author/only">
             By
