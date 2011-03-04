@@ -129,10 +129,15 @@ class MessageQuery(MailingListQuery):
         
         if searchTokens.phrases:
             keywordSearches = [
-              sa.select([wct.c.topic_id], wct.c.word == kw)
-              for kw in searchTokens.keywords]
+                sa.select([wct.c.topic_id], wct.c.word == kw)
+                for kw in searchTokens.keywords]
+            titleSearches = [
+                sa.select([tt.c.topic_id], 
+                    tt.c.original_subject.op('ILIKE')('%%%s%%' % kw))
+                for kw in searchTokens.keywords]
             statement.append_whereclause(
-              tt.c.topic_id.in_(sa.intersect(*keywordSearches)))
+                sa.sql.or_(tt.c.topic_id.in_(sa.intersect(*keywordSearches)),
+                    tt.c.topic_id.in_(sa.intersect(*titleSearches))))
 
             if (len(searchTokens.phrases) != len(searchTokens.keywords)):
                 # Do a phrase search. *Shudder*
