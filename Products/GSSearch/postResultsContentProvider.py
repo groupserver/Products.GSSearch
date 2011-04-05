@@ -14,6 +14,13 @@ import AccessControl
 import logging
 log = logging.getLogger('GSSearch') #@UndefinedVariable
 
+class FakeContentProviderContext:
+    def __init__(self, context, request, groupInfo, post):
+        self.context = context
+        self.request = request
+        self.groupInfo = groupInfo
+        self.post = post
+
 class GSPostResultsContentProvider(object):
     """GroupServer Post Search-Results Content Provider
     """
@@ -174,6 +181,9 @@ class GSPostResultsContentProvider(object):
               'onlyURL': self.view.only_group_link(groupInfo.get_id())
             }
             
+            fakeContext = FakeContentProviderContext(self.context, self.request,
+                                                     groupInfo, post)
+
             retval = {
               'context': groupInfo.groupObj,
               'postId': post['post_id'],
@@ -185,7 +195,7 @@ class GSPostResultsContentProvider(object):
               'timezone': 'foo',
               'postSummary': self.get_summary(post['body']),
               'postBody': post['body'],
-              'postIntro': get_post_intro_and_remainder(self.context, post['body'])[0],
+              'postIntro': get_post_intro_and_remainder(fakeContext, post['body'])[0],
               'files': post['files_metadata']
             }
             yield retval
