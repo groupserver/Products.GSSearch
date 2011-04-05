@@ -230,7 +230,7 @@ class MessageQuery(MailingListQuery):
         if (hit+miss):
             hit_perc = float(hit)/float(hit+miss)*100.0
         
-        log.info('cache hit %s (%.1f%%) times, missed %s times' % (hit, hit_perc, miss))
+        log.debug('cache hit %s (%.1f%%) times, missed %s times' % (hit, hit_perc, miss))
 
         retval.sort(topic_sorter_desc)
                 
@@ -254,11 +254,11 @@ class MessageQuery(MailingListQuery):
         
         t = time.time()
         if not searchTokens.phrases and not offset and use_cache:
-            log.info('processing as cacheable')
+            log.debug('processing as cacheable')
             retval = self._cacheable_topic_search_keyword(statement, site_id,
                                                           group_ids, limit)
         else:
-            log.info('processing as uncacheable')
+            log.debug('processing as uncacheable')
             statement = self.add_standard_where_clauses(statement, 
                                                         self.topicTable,  site_id, group_ids)
             statement = self.__add_topic_keyword_search_where_clauses(statement, 
@@ -281,7 +281,7 @@ class MessageQuery(MailingListQuery):
                                'num_posts': x['num_posts']})
             
         b = time.time()
-        log.info('topic_search_keyword took %.1fms' % ((b-t)*1000.0))
+        log.debug('topic_search_keyword took %.1fms' % ((b-t)*1000.0))
         return retval
     
     def count_topic_search_keyword(self, searchTokens, site_id, 
@@ -474,7 +474,7 @@ class MessageQuery(MailingListQuery):
         if (hit+miss):
             hit_perc = float(hit)/float(hit+miss)*100.0
         
-        log.info('topic word count cache hit %s (%.1f%%) times, missed %s times' % (hit, hit_perc, miss))
+        log.debug('topic word count cache hit %s (%.1f%%) times, missed %s times' % (hit, hit_perc, miss))
                 
         return retval
 

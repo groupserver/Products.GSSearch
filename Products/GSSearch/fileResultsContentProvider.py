@@ -102,7 +102,7 @@ class GSFileResultsContentProvider(object):
     def search_files(self, searchKeywords, groupIds,
         authorIds, mimeTypes):#--=mpj17=--TODO: Site ID!
 
-        log.info("Performing search for %s, groups %s, authors %s" %
+        log.debug("Performing search for %s, groups %s, authors %s" %
                     (searchKeywords, groupIds, authorIds))
         
         site_root = self.context.site_root()
