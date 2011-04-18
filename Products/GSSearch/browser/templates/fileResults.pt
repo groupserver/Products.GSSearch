@@ -24,13 +24,6 @@
               tal:content="result/group/name">group</a>
           </span>
         </div><!--groupInfo-->
-        <!-- <div tal:condition="result/file/tags" class="tags">
-          <ul>
-            <tal:block tal:repeat="tag result/file/tags">
-              <li tal:content="tag">Tag</li>
-            </tal:block>
-          </ul>
-        </div> --><!--tags-->
         <div class="metadata">
           <span class="author" tal:condition="not:result/author/only">
             By
