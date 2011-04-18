@@ -3,9 +3,7 @@ from zope.component import createObject
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.contentprovider.interfaces 
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
-
 import AccessControl
-
 from gs.groups.interfaces import IGSGroupsInfo
 from Products.ZCTextIndex.ParseTree import ParseError
 from interfaces import IGSFileResultsContentProvider
@@ -127,7 +125,7 @@ class GSFileResultsContentProvider(object):
         return retval
             
     def search_files_in_path(self, searchKeywords, groupIds=[], 
-    path='', metaType='', authorIds=[], mimeTypes=[]): #--=mpj17=-- TODO: Site ID!
+        path='', metaType='', authorIds=[], mimeTypes=[]): #--=mpj17=-- TODO: Site ID!
         catalog = self.context.Catalog
         results = []
         
@@ -189,6 +187,7 @@ class GSFileResultsContentProvider(object):
 
         for result in self.results:
             r = GSFileSearchResult(self.view, self.context, result)
+            postId = self.filePostMap.get(r.get_id(), '')
             
             authorInfo = authorCache.get(r.get_owner_id(), None)
             if not authorInfo:
@@ -230,7 +229,6 @@ class GSFileResultsContentProvider(object):
             tags = ' '.join(r.get_tags())
             tagSearch = self.view.get_search_url(searchText=tags)
             
-            postId = self.filePostMap.get(r.get_id(), '')
             fileURL = '/r/file/%s' % r.get_id()
             
             fileD = {'id': r.get_id(),
@@ -266,7 +264,9 @@ class GSFileResultsContentProvider(object):
             'context': self.context
             }
             assert retval
-            yield retval
+            if postId:
+                print 'Post ID: %s' % postId
+                yield retval
     
     def show_previous(self):
         retval = (self.i > 0)

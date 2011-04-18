@@ -479,10 +479,16 @@ class MessageQuery(MailingListQuery):
                 
         return retval
 
-    def post_ids_from_file_ids(self, fileIds):
-        statement = self.fileTable.select()
-        inStatement = self.fileTable.c.file_id.in_(*fileIds)
+    def post_ids_from_file_ids(self, fileIds, hidden=False):
+        p = self.postTable
+        f = self.fileTable
+        statement = f.select()
+        inStatement = f.c.file_id.in_(*fileIds)
         statement.append_whereclause(inStatement)
+        statement.append_whereclause(p.c.post_id == f.c.post_id)
+        if not hidden:
+            statement.append_whereclause(p.c.hidden == None)
+        print statement
         r = statement.execute()
         retval = {}
         if r.rowcount:
