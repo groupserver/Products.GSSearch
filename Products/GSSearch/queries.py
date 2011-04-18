@@ -315,7 +315,8 @@ class MessageQuery(MailingListQuery):
         statement = self.__add_author_where_clauses(statement, author_ids)
         statement = self.__add_post_keyword_search_where_clauses(statement, 
           searchTokens)
-
+        statement.append_whereclause(pt.c.hidden == None)
+        
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(pt.c.date))
