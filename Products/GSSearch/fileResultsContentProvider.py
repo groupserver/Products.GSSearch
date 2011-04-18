@@ -264,8 +264,7 @@ class GSFileResultsContentProvider(object):
             'context': self.context
             }
             assert retval
-            if postId:
-                print 'Post ID: %s' % postId
+            if postId: # --=mpj17=-- Skips hidden posts
                 yield retval
     
     def show_previous(self):

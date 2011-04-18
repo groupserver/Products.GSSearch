@@ -488,7 +488,7 @@ class MessageQuery(MailingListQuery):
         statement.append_whereclause(p.c.post_id == f.c.post_id)
         if not hidden:
             statement.append_whereclause(p.c.hidden == None)
-        print statement
+
         r = statement.execute()
         retval = {}
         if r.rowcount:
