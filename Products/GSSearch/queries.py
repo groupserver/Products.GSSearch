@@ -104,7 +104,7 @@ class MessageQuery(MailingListQuery):
         self.now = datetime.now()
 
     def add_standard_where_clauses(self, statement, table, 
-                                   site_id, group_ids):
+                                   site_id, group_ids, hidden):
         statement.append_whereclause(table.c.site_id==site_id)
         if group_ids:
             inStatement = table.c.group_id.in_(*group_ids)
@@ -117,7 +117,9 @@ class MessageQuery(MailingListQuery):
             #  exclusive.
             statement.append_whereclause(table.c.group_id == '')
             statement.append_whereclause(table.c.group_id != '')
-            
+        if not(hidden):
+            # We normally want to exclude hidden posts and topics.
+            statement.append_whereclause(table.c.hidden == None)
         return statement
 
     def __add_topic_keyword_search_where_clauses(self, statement, 
@@ -205,7 +207,8 @@ class MessageQuery(MailingListQuery):
             statement = self.add_standard_where_clauses(
                                                  copy.copy(templatestatement), 
                                                  self.topicTable, 
-                                                 site_id, [group_id])
+                                                 site_id, [group_id],
+                                                 False)
             statement.limit = limit
             statement.order_by(sa.desc(tt.c.last_post_date))
         
@@ -237,7 +240,7 @@ class MessageQuery(MailingListQuery):
         return retval[:limit]
         
     def topic_search_keyword(self, searchTokens, site_id, 
-        group_ids=[], limit=12, offset=0, use_cache=True):
+        group_ids=[], limit=12, offset=0, use_cache=True, hidden=False):
         """ Search for the search text in the content and subject-lines of
         topics.
         
@@ -260,9 +263,10 @@ class MessageQuery(MailingListQuery):
         else:
             log.debug('processing as uncacheable')
             statement = self.add_standard_where_clauses(statement, 
-                                                        self.topicTable,  site_id, group_ids)
+                                self.topicTable,  site_id, group_ids, 
+                                False)
             statement = self.__add_topic_keyword_search_where_clauses(statement, 
-                                                                      searchTokens)
+                                                                  searchTokens)
             statement.limit = limit
             statement.offset = offset
             statement.order_by(sa.desc(tt.c.last_post_date))
@@ -293,7 +297,7 @@ class MessageQuery(MailingListQuery):
         cols = [sa.func.count(tt.c.topic_id.distinct())]
         statement = sa.select(cols)
         statement = self.add_standard_where_clauses(statement, 
-          self.topicTable,  site_id, group_ids)
+          self.topicTable,  site_id, group_ids, False)
         statement = self.__add_topic_keyword_search_where_clauses(statement, 
           searchTokens)
             
@@ -311,12 +315,12 @@ class MessageQuery(MailingListQuery):
         cols = [pt.c.post_id.distinct(), pt.c.user_id, pt.c.group_id,
           pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
         statement = sa.select(cols)
-        self.add_standard_where_clauses(statement, pt, site_id, group_ids)
+        self.add_standard_where_clauses(statement, pt, site_id, 
+            group_ids, False)
         statement = self.__add_author_where_clauses(statement, author_ids)
         statement = self.__add_post_keyword_search_where_clauses(statement, 
           searchTokens)
-        statement.append_whereclause(pt.c.hidden == None)
-        
+       
         statement.limit = limit
         statement.offset = offset
         statement.order_by(sa.desc(pt.c.date))
@@ -345,7 +349,8 @@ class MessageQuery(MailingListQuery):
         
         cols = [sa.func.count(pt.c.post_id.distinct())]
         statement = sa.select(cols)
-        self.add_standard_where_clauses(statement, pt, site_id, group_ids)
+        self.add_standard_where_clauses(statement, pt, site_id, 
+            group_ids, False)
         statement = self.__add_author_where_clauses(statement, author_ids)
         statement = self.__add_post_keyword_search_where_clauses(statement, 
           searchTokens)
@@ -549,7 +554,8 @@ class DigestQuery(MessageQuery):
         #  FROM topic 
         #  WHERE topic.site_id = 'main' 
         #    AND topic.group_id = 'mpls' 
-        s = self.add_standard_where_clauses(s, tt, siteId, groupIds)
+        s = self.add_standard_where_clauses(s, tt, siteId, groupIds, 
+                False)
         #    AND topic.last_post_date >= timestamp 'yesterday'
         s.append_whereclause(tt.c.last_post_date >= yesterday) 
         #  ORDER BY topic.last_post_date DESC;
