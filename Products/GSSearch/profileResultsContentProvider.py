@@ -7,7 +7,6 @@ import zope.interface, zope.component, zope.publisher.interfaces
 import zope.viewlet.interfaces, zope.contentprovider.interfaces 
 
 import DocumentTemplate
-import Products.XWFMailingListManager.view
 
 import Products.GSContent, Products.XWFCore.XWFUtils
 
