@@ -250,7 +250,8 @@ class MessageQuery(MailingListQuery):
 
         cols = [tt.c.topic_id.distinct(), tt.c.last_post_id, 
           tt.c.first_post_id, tt.c.group_id, tt.c.site_id, 
-          tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts, 
+          tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts,
+          tt.c.sticky, 
           sa.select([pt.c.user_id], tt.c.last_post_id == pt.c.post_id,  
             scalar=True).label('user_id')]
         statement = sa.select(cols)
@@ -282,7 +283,8 @@ class MessageQuery(MailingListQuery):
                                'subject': unicode(x['original_subject'], 'utf-8'), 
                                'last_post_date': x['last_post_date'], 
                                'last_post_user_id': x['user_id'],
-                               'num_posts': x['num_posts']})
+                               'num_posts': x['num_posts'],
+                               'sticky': x['sticky'],})
             
         b = time.time()
         log.debug('topic_search_keyword took %.1fms' % ((b-t)*1000.0))
