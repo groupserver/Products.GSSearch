@@ -17,9 +17,7 @@ class TopicDigestView(BrowserView):
         self.context = context
         self.request = request
         
-        self.da = da = self.context.zsqlalchemy 
-        assert da, 'No data-adaptor found'
-        self.messageQuery = DigestQuery(context, da)
+        self.messageQuery = DigestQuery(context)
         
         self.siteInfo = createObject('groupserver.SiteInfo', context)
         self.groupInfo = createObject('groupserver.GroupInfo', context)
@@ -30,9 +28,8 @@ class TopicDigestView(BrowserView):
                                        subsequent_indent  = u'  ')
         self.metadataWrap = TextWrapper(initial_indent    = u'  o ',
                                         subsequent_indent = u'    ',
-                                        break_long_words = False)
-        # --=mpj17=-- TODO: When Python 2.6 is introduced we can add
-        #   "break_on_hyphens = False" to the above TextWrapper.
+                                        break_long_words = False,
+                                        break_on_hyphens = False)
         
         self.groupTz = self.groupInfo.get_property('group_tz', 'UTC')
         
