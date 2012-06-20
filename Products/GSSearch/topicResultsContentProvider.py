@@ -2,7 +2,7 @@
 from math import log10
 from difflib import get_close_matches
 from copy import copy
-from sqlalchemy.exceptions import SQLError
+from sqlalchemy.exc import SQLAlchemyError
 from zope.component import createObject, adapts, provideAdapter
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 from zope.interface import implements, Interface
@@ -10,9 +10,9 @@ from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.contentprovider.interfaces import IContentProvider
 from Products.XWFMailingListManager.stopwords import en as STOP_WORDS
 from Products.XWFCore.XWFUtils import get_the_actual_instance_from_zope
-from Products.XWFCore.cache import LRUCache
 from interfaces import IGSTopicResultsContentProvider
 from queries import MessageQuery
+from gs.cache import cache
 import AccessControl
 
 import logging
@@ -55,8 +55,6 @@ class GSTopicResultsContentProvider(object):
     implements( IGSTopicResultsContentProvider )
     adapts(Interface, IDefaultBrowserLayer, Interface)
  
-    topicKeywords = LRUCache("TopicKeywords")
-  
     def __init__(self, context, request, view):
         self.__parent__ = self.view = view
         self.__updated = False
@@ -68,12 +66,9 @@ class GSTopicResultsContentProvider(object):
     def update(self):
         self.__updated = True
 
-        self.da = self.context.zsqlalchemy 
-        assert self.da, 'No data-adaptor found'
-        
         user = AccessControl.getSecurityManager().getUser()
         
-        self.messageQuery = MessageQuery(self.context, self.da)
+        self.messageQuery = MessageQuery(self.context)
         ctx = get_the_actual_instance_from_zope(self.view.context)
         self.siteInfo = createObject('groupserver.SiteInfo', ctx)
         self.groupsInfo = createObject('groupserver.GroupsInfo', ctx)
@@ -101,7 +96,7 @@ class GSTopicResultsContentProvider(object):
             topics = self.messageQuery.topic_search_keyword(
               self.searchTokens, self.siteInfo.get_id(), 
               groupIds, limit=self.l+1, offset=self.i)
-        except SQLError:
+        except SQLAlchemyError:
             log.exception("A problem occurred with a message query:")
             self.__searchFailed = True
             return
@@ -209,11 +204,11 @@ class GSTopicResultsContentProvider(object):
               
             yield retval
 
+    # the post ID is actually very unique
+    @cache('gs.search.topic_keywords',
+                 lambda self,topic: topic['last_post_id'], 600)
     def get_keywords_for_topic(self, topic):
-        words = self.topicKeywords.get(topic['last_post_id'])
-        if not words:
-            words = self.generate_keywords_for_topic(topic)
-            self.topicKeywords.add(topic['last_post_id'], words)
+        words = self.generate_keywords_for_topic(topic)
         return words
           
     def generate_keywords_for_topic(self, topic):
