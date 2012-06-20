@@ -1,13 +1,16 @@
 # coding=utf-8
 from Products.XWFMailingListManager.queries import MessageQuery\
   as MailingListQuery
-from sqlalchemy.exceptions import NoSuchTableError
+from sqlalchemy.exc import NoSuchTableError
 import sqlalchemy as sa
-from Products.XWFCore import cache
 from datetime import datetime, timedelta
 import copy
 import time
 import logging
+
+from gs.database import getSession, getTable, getInstanceId
+from gs.cache import cache
+
 log = logging.getLogger('GSSearch') #@UndefinedVariable
 
 def topic_sorter_desc(x, y):
@@ -21,10 +24,10 @@ def topic_sorter_desc(x, y):
 # when we have keywords in the RDB
 #
 class FileQuery(object):
-    def __init__(self, context, da):
+    def __init__(self, context):
         self.context = context
-        self.fileTable = da.createTable('file')
-        self.postTable = da.createTable('post')
+        self.fileTable = getTable('file')
+        self.postTable = getTable('post')
         
     def file_search(self, siteId, groupIds, authorIds, keywords, mimeTypes):
         ft = self.fileTable
@@ -33,23 +36,23 @@ class FileQuery(object):
           pt.c.site_id, pt.c.group_id, pt.c.topic_id, pt.c.user_id, 
           ft.c.post_id, ft.c.file_id, ft.c.mime_type, ft.c.file_name,
           ft.c.file_size, ft.c.date,]
-        statement = sa.select(cols, ft.c.post_id == pt.c.post_id)
+        statement = sa.select(cols, ft.c.post_id == pt.c.post_id,
+                              order_by=self.fileTable.c.date)
         
         if siteId:
             statement.append_whereclause(pt.c.site_id==siteId)
         
         if groupIds:
-            statement.append_whereclause(pt.c.group_id.in_(*groupIds))
+            statement.append_whereclause(pt.c.group_id.in_(groupIds))
         
         if authorIds:
-            statement.append_whereclause(pt.c.user_id.in_(*authorIds))
+            statement.append_whereclause(pt.c.user_id.in_(authorIds))
         
         if mimeTypes:
-            statement.append_whereclause(pt.c.mime_type.in_(*mimeTypes))
-            
-        statement.order_by(self.fileTable.c.date)
-
-        r = statement.execute()
+            statement.append_whereclause(pt.c.mime_type.in_(mimeTypes))
+        
+        session = getSession()
+        r = session.execute(statement)
         
         retval = [{
                   'site_id': x['site_id'],
@@ -69,6 +72,12 @@ class FileQuery(object):
 # END OF TOTALLY UNTESTED FILE QUERY
 #
 
+def ck_simple(*args):
+    return "REPLACEME"+'%'.join(map(str, args[1:]))
+
+def ck_tsk(*args):
+    return "REPLACEME"+'%'.join(map(str, args[2:]))
+
 class MessageQuery(MailingListQuery):
     """Query the message database"""
 
@@ -79,35 +88,22 @@ class MessageQuery(MailingListQuery):
 
     # a cache for the count of keywords across the whole database, keyed
     # by the name of the database, since we might have more than one.
-    cache_wordCount = cache.SimpleCacheWithExpiry("cache_wordCount")
-    cache_wordCount.set_expiry_interval(timedelta(0,86400)) # 1 day 
 
-    cache_topicWordCounts = cache.SimpleCacheWithExpiry("cache_topicWordCounts")
-    cache_topicWordCounts.set_expiry_interval(timedelta(0,180)) # 180 seconds
-    
-    cache_topicQuery = cache.SimpleCacheWithExpiry("cache_topicQuery")
-    cache_topicQuery.set_expiry_interval(timedelta(0,90)) # 90 seconds
-    
-    def __init__(self, context, da):
-        super_query = MailingListQuery
-        super_query.__init__(self, context, da)
+    def __init__(self, context):
+        MailingListQuery.__init__(self, context)
         
-        self.word_countTable = da.createTable('word_count')
+        self.word_countTable = getTable('word_count')
 
         try:
-            self.rowcountTable = da.createTable('rowcount')
+            self.rowcountTable = getTable('rowcount')
         except NoSuchTableError:
             self.rowcountTable = None    
-
-        # useful for cache
-        self.dbname = da.getProperty('database')
-        self.now = datetime.now()
 
     def add_standard_where_clauses(self, statement, table, 
                                    site_id, group_ids, hidden):
         statement.append_whereclause(table.c.site_id==site_id)
         if group_ids:
-            inStatement = table.c.group_id.in_(*group_ids)
+            inStatement = table.c.group_id.in_(group_ids)
             statement.append_whereclause(inStatement)
         else:
             # --=mpj17=-- No, I am not smoking (much) crack. If the 
@@ -166,11 +162,11 @@ class MessageQuery(MailingListQuery):
         if searchTokens.phrases:
             keywordSearches = [
               sa.select([pt.c.post_id], 
-                sa.and_(wct.c.word.in_(*kw.split()),
+                sa.and_(wct.c.word.in_(kw.split()),
                   pt.c.topic_id == wct.c.topic_id, pt.c.body.op('~*')(kw)))
               for kw in searchTokens.phrases]
             statement.append_whereclause(
-              pt.c.post_id.in_(sa.intersect(*keywordSearches)))
+              pt.c.post_id.in_(sa.intersect(keywordSearches)))
 
         return statement
         
@@ -178,63 +174,45 @@ class MessageQuery(MailingListQuery):
         pt = self.postTable
         author_ids = author_ids and [a for a in author_ids if a] or []
         if author_ids:
-            statement.append_whereclause(pt.c.user_id.in_(*author_ids))
+            statement.append_whereclause(pt.c.user_id.in_(author_ids))
         return statement
-    
-    def _cacheable_topic_search_keyword( self, templatestatement, site_id,
-                                         group_ids, limit ):
+   
+    @cache('gs.search._cacheable_topic_search_keyword', ck_tsk, 300) 
+    def _tsk_group(self, templatestatement, site_id, group_id, limit):
+        tt = self.topicTable
+        tstatement = copy.copy(templatestatement)
+        statement = self.add_standard_where_clauses(
+                                                 tstatement,
+                                                 tt,
+                                                 site_id, [group_id],
+                                                 False)
+            
+        session = getSession()
+        r = session.execute(statement)
+        result = []
+        for x in r:
+            result.append({'topic_id': x['topic_id'],
+                           'last_post_id': x['last_post_id'],
+                           'first_post_id': x['first_post_id'],
+                           'group_id': x['group_id'],
+                           'site_id': x['site_id'],
+                           'subject': x['original_subject'].decode('utf-8'), 
+                           'last_post_date': x['last_post_date'],
+                           'last_post_user_id': x['user_id'],
+                           'num_posts': x['num_posts']}) 
+        return result
+
+    def _cacheable_topic_search_keyword(self, templatestatement, site_id,
+                                        group_ids, limit):
         """ If the statement is likely to be highly cacheable, this offers
         an alternative to much of topic_search_keyword.
         
         """
-        tt = self.topicTable
         retval = []
-        hit = miss = 0
         for group_id in group_ids:
-            cacheKey = 'db=%s&sid=%s&gid=%s&l=%s' % (self.dbname,
-                                                     site_id, group_id, limit)
-            
-            # lookup the cache key in the cache, and if we have a good cache
-            # result, skip
-            cache_result = self.cache_topicQuery.get(cacheKey)
-            if cache_result != None:
-                retval += cache_result
-                hit += 1
-                continue
-            
-            miss += 1
-            
-            statement = self.add_standard_where_clauses(
-                                                 copy.copy(templatestatement), 
-                                                 self.topicTable, 
-                                                 site_id, [group_id],
-                                                 False)
-            statement.limit = limit
-            statement.order_by(sa.desc(tt.c.last_post_date))
-        
-            r = statement.execute()
-            result = []
-            for x in r:
-                result.append({'topic_id': x['topic_id'],
-                               'last_post_id': x['last_post_id'], 
-                               'first_post_id': x['first_post_id'], 
-                               'group_id': x['group_id'], 
-                               'site_id': x['site_id'], 
-                               'subject': unicode(x['original_subject'], 'utf-8'), 
-                               'last_post_date': x['last_post_date'], 
-                               'last_post_user_id': x['user_id'],
-                               'num_posts': x['num_posts']})
-                
-            self.cache_topicQuery.add(cacheKey, result)
-            
+            result = self._tsk_group(templatestatement, site_id, group_id, limit) 
             retval += result
         
-        hit_perc = 0.0
-        if (hit+miss):
-            hit_perc = float(hit)/float(hit+miss)*100.0
-        
-        log.debug('cache hit %s (%.1f%%) times, missed %s times' % (hit, hit_perc, miss))
-
         retval.sort(topic_sorter_desc)
                 
         return retval[:limit]
@@ -250,11 +228,10 @@ class MessageQuery(MailingListQuery):
 
         cols = [tt.c.topic_id.distinct(), tt.c.last_post_id, 
           tt.c.first_post_id, tt.c.group_id, tt.c.site_id, 
-          tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts,
-          tt.c.sticky, 
-          sa.select([pt.c.user_id], tt.c.last_post_id == pt.c.post_id,  
-            scalar=True).label('user_id')]
-        statement = sa.select(cols)
+          tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts, 
+          sa.select([pt.c.user_id], tt.c.last_post_id == pt.c.post_id).as_scalar().label('user_id')]
+        statement = sa.select(cols, limit=limit, offset=offset,
+                        order_by=sa.desc(tt.c.last_post_date))
         
         t = time.time()
         if not searchTokens.phrases and not offset and use_cache:
@@ -268,11 +245,8 @@ class MessageQuery(MailingListQuery):
                                 False)
             statement = self.__add_topic_keyword_search_where_clauses(statement, 
                                                                   searchTokens)
-            statement.limit = limit
-            statement.offset = offset
-            statement.order_by(sa.desc(tt.c.last_post_date))
-        
-            r = statement.execute()
+            session = getSession()
+            r = session.execute(statement)
             retval = []
             for x in r:
                 retval.append({'topic_id': x['topic_id'],
@@ -280,11 +254,10 @@ class MessageQuery(MailingListQuery):
                                'first_post_id': x['first_post_id'], 
                                'group_id': x['group_id'], 
                                'site_id': x['site_id'], 
-                               'subject': unicode(x['original_subject'], 'utf-8'), 
+                               'subject': x['original_subject'].decode('utf-8'), 
                                'last_post_date': x['last_post_date'], 
                                'last_post_user_id': x['user_id'],
-                               'num_posts': x['num_posts'],
-                               'sticky': x['sticky'],})
+                               'num_posts': x['num_posts']})
             
         b = time.time()
         log.debug('topic_search_keyword took %.1fms' % ((b-t)*1000.0))
@@ -302,8 +275,9 @@ class MessageQuery(MailingListQuery):
           self.topicTable,  site_id, group_ids, False)
         statement = self.__add_topic_keyword_search_where_clauses(statement, 
           searchTokens)
-            
-        r = statement.execute()
+        
+        session = getSession() 
+        r = session.execute(statement)
         retval = r.scalar()
         if retval == None:
             retval = 0
@@ -316,28 +290,25 @@ class MessageQuery(MailingListQuery):
         pt = self.postTable
         cols = [pt.c.post_id.distinct(), pt.c.user_id, pt.c.group_id,
           pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
-        statement = sa.select(cols)
+        statement = sa.select(cols, limit=limit, offset=offset,
+                  order_by=sa.desc(pt.c.date))
         self.add_standard_where_clauses(statement, pt, site_id, 
             group_ids, False)
         statement = self.__add_author_where_clauses(statement, author_ids)
         statement = self.__add_post_keyword_search_where_clauses(statement, 
           searchTokens)
        
-        statement.limit = limit
-        statement.offset = offset
-        statement.order_by(sa.desc(pt.c.date))
-
-        r = statement.execute()
-        
+        session = getSession()
+        r = session.execute(statement)
         retval = []
         for x in r:
             p = {
               'post_id':          x['post_id'],
               'user_id':          x['user_id'],
               'group_id':         x['group_id'],
-              'subject':          unicode(x['subject'], 'utf-8'),
+              'subject':          x['subject'].decode('utf-8'),
               'date':             x['date'],
-              'body':             unicode(x['body'], 'utf-8'),
+              'body':             x['body'].decode('utf-8'),
               'files_metadata':   x['has_attachments'] 
                                   and self.files_metadata(x['post_id']) 
                                   or [],
@@ -357,7 +328,8 @@ class MessageQuery(MailingListQuery):
         statement = self.__add_post_keyword_search_where_clauses(statement, 
           searchTokens)
 
-        r = statement.execute()
+        session = getSession()
+        r = session.execute(statement)
         retval = r.scalar()
         if retval == None:
             retval = 0
@@ -366,16 +338,18 @@ class MessageQuery(MailingListQuery):
 
     def __row_count(self, table, tablename):
         count = 0
-        if self.rowcountTable:
+        session = getSession()
+        if self.rowcountTable != None:
             statement = self.rowcountTable.select()
             statement.append_whereclause(self.rowcountTable.c.table_name==tablename)
-            r = statement.execute()
+            
+            r = session.execute(statement)
             if r.rowcount:
                 count = r.fetchone()['total_rows']
         
         if not count:
             statement = sa.select([sa.func.count("*")], from_obj=[table])
-            r = statement.execute()
+            r = session.execute(statement)
             count = r.scalar()
         
         return count
@@ -385,22 +359,20 @@ class MessageQuery(MailingListQuery):
 
     def count_posts(self):
         return self.__row_count(self.postTable, 'post')
-        
+    
+    @cache('gs.search.word_counts', ck_simple, 86400)    
     def word_counts(self):
-        retval = self.cache_wordCount.get(self.dbname)
-        if not retval:
-            statement = self.word_countTable.select()
-            # The following where clause speeds up the query: we will assume 1
-            #   later on, if the word is not in the dictionary.
-            statement.append_whereclause(self.word_countTable.c.count > 1)
-            r = statement.execute()
-            retval = {}
-            if r.rowcount:
-                for x in r:
-                    retval[unicode(x['word'], 'utf-8')] = x['count']
+        statement = self.word_countTable.select()
+        # The following where clause speeds up the query: we will assume 1
+        # later on, if the word is not in the dictionary.
+        statement.append_whereclause(self.word_countTable.c.count > 1)
+        session = getSession()
+        r = session.execute(statement)
+        retval = {}
+        if r.rowcount:
+            for x in r:
+                retval[x['word'].decode('utf-8')] = x['count']
             
-            self.cache_wordCount.add(self.dbname, retval)
-        
         return retval
         
     def count_total_topic_word(self, word):
@@ -409,7 +381,8 @@ class MessageQuery(MailingListQuery):
         statement = countTable.select()
         statement.append_whereclause(countTable.c.word == word)
 
-        r = statement.execute()
+        session = getSession()
+        r = session.execute(statement)
         retval = 0
         if r.rowcount:
             v = [{'count': x['count']} for x in r]
@@ -420,7 +393,9 @@ class MessageQuery(MailingListQuery):
         countTable = self.word_countTable
         statement = sa.select(
                     [sa.func.sum(countTable.c.count)]) #@UndefinedVariable
-        r = statement.execute()
+
+        session = getSession()
+        r = session.execute(statement)
         return r.scalar()
         
     def count_word_in_topic(self, word, topicId):
@@ -429,12 +404,32 @@ class MessageQuery(MailingListQuery):
         statement = sa.select([countTable.c.count])
         statement.append_whereclause(countTable.c.topic_id == topicId)
         statement.append_whereclause(countTable.c.word == word)
-        r = statement.execute()
+        
+        session = getSession()
+        r = session.execute(statement)
         retval = 0
         if r.rowcount:
             val = [{'count': x['count']} for x in r]
             retval = val[0]['count']
         return retval
+
+    @cache('gs.search.topic_word_count', ck_simple, 300)
+    def topic_word_count(self, topicId):
+        countTable = self.topic_word_countTable
+        statement = countTable.select()
+        statement.append_whereclause(countTable.c.topic_id == topicId)
+        statement.append_whereclause(countTable.c.count > 1)
+        
+        session = getSession()
+        r = session.execute(statement)
+        result = []
+        if r.rowcount:
+            result = [{'topic_id': x['topic_id'],
+                       'word': x['word'],
+                       'count': x['count']} for x in r]
+            retval = result
+        
+        return result
 
     def topics_word_count(self, topicIds):
         """Get a count for all the words in a list of topics
@@ -451,38 +446,9 @@ class MessageQuery(MailingListQuery):
             * "count" The count of "word" in the topic (always greater than
               one).
         """
-        hit = miss = 0
         retval = []
         for topicId in topicIds:
-            cacheKey = 'db=%s&tid=%s' % (self.dbname, topicId)
-            cachedCounts = self.cache_topicWordCounts.get(cacheKey)
-            if cachedCounts != None: # no record
-                hit += 1
-                if cachedCounts != {}: # empty record
-                    retval += cachedCounts
-                continue
-
-            miss += 1
-               
-            countTable = self.topic_word_countTable
-            statement = countTable.select()
-            statement.append_whereclause(countTable.c.topic_id == topicId)
-            statement.append_whereclause(countTable.c.count > 1)
-            r = statement.execute()
-            if r.rowcount:
-                result = [{'topic_id': x['topic_id'],
-                           'word': x['word'],
-                           'count': x['count']} for x in r]
-                retval += result
-                self.cache_topicWordCounts.add(cacheKey, result)
-            else:
-                self.cache_topicWordCounts.add(cacheKey, {})
-
-        hit_perc = 0.0
-        if (hit+miss):
-            hit_perc = float(hit)/float(hit+miss)*100.0
-        
-        log.debug('topic word count cache hit %s (%.1f%%) times, missed %s times' % (hit, hit_perc, miss))
+            retval += self.topic_word_count(topicId)
                 
         return retval
 
@@ -490,13 +456,14 @@ class MessageQuery(MailingListQuery):
         p = self.postTable
         f = self.fileTable
         statement = f.select()
-        inStatement = f.c.file_id.in_(*fileIds)
+        inStatement = f.c.file_id.in_(fileIds)
         statement.append_whereclause(inStatement)
         statement.append_whereclause(p.c.post_id == f.c.post_id)
         if not hidden:
             statement.append_whereclause(p.c.hidden == None)
 
-        r = statement.execute()
+        session = getSession()
+        r = session.execute(statement)
         retval = {}
         if r.rowcount:
             for x in r:
@@ -510,11 +477,12 @@ class MessageQuery(MailingListQuery):
           pt.c.site_id, pt.c.group_id, pt.c.topic_id, pt.c.user_id, 
           ft.c.post_id, ft.c.file_id, ft.c.mime_type, ft.c.file_name,
           ft.c.file_size, ft.c.date,]
-        statement = sa.select(cols, ft.c.topic_id.in_(*topic_ids))
+        statement = sa.select(cols, ft.c.topic_id.in_(topic_ids),
+                    order_by=self.fileTable.c.date)
         statement.append_whereclause(ft.c.post_id == pt.c.post_id)
-        statement.order_by(self.fileTable.c.date)
 
-        r = statement.execute()
+        session = getSession()
+        r = session.execute(statement)
         
         retval = [{
                   'site_id': x['site_id'],
@@ -552,7 +520,7 @@ class DigestQuery(MessageQuery):
                sa.select([pt.c.user_id], 
                          pt.c.post_id == tt.c.last_post_id,
                          scalar=True).label('last_author_id')]
-        s = sa.select(cols)
+        s = sa.select(cols, order_by=sa.desc(tt.c.last_post_date))
         #  FROM topic 
         #  WHERE topic.site_id = 'main' 
         #    AND topic.group_id = 'mpls' 
@@ -560,10 +528,9 @@ class DigestQuery(MessageQuery):
                 False)
         #    AND topic.last_post_date >= timestamp 'yesterday'
         s.append_whereclause(tt.c.last_post_date >= yesterday) 
-        #  ORDER BY topic.last_post_date DESC;
-        s.order_by(sa.desc(tt.c.last_post_date))
         
-        r = s.execute()
+        session = getSession()
+        r = session.execute(s)
         
         retval = [{
                   'topic_id':         x['topic_id'],
