@@ -360,9 +360,7 @@ class GSSearchATOMView(GSSearchView):
     def __init__(self, context, request):
         GSSearchView.__init__(self, context, request)
         
-        da = self.context.zsqlalchemy 
-        assert da, 'No data-adaptor found'
-        messageQuery = MessageQuery(self.context, da)
+        messageQuery = MessageQuery(self.context)
         
         #searchTokens = createObject('groupserver.SearchTextTokens',
         #    self.searchText)
