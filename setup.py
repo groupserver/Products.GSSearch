@@ -23,6 +23,8 @@ setup(name='Products.GSSearch',
       zip_safe=False,
       install_requires=[
           'setuptools',
+          'gs.cache',
+          'gs.database',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
