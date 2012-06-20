@@ -33,9 +33,7 @@ class GSFileResultsContentProvider(object):
     def update(self):
         self.__updated = True
 
-        self.da = self.context.zsqlalchemy 
-        assert self.da, 'No data-adaptor found'
-        self.messageQuery = MessageQuery(self.context, self.da)
+        self.messageQuery = MessageQuery(self.context)
         
         # Both of the following should be acquired from adapters.
         self.groupsInfo = IGSGroupsInfo(self.context)

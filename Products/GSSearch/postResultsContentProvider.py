@@ -3,7 +3,7 @@ from zope.component import createObject
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import zope.interface, zope.component, zope.publisher.interfaces
 import zope.contentprovider.interfaces
-from sqlalchemy.exceptions import SQLError
+from sqlalchemy.exc import SQLAlchemyError
 from gs.group.messages.post.postbody import get_post_intro_and_remainder
 
 from interfaces import IGSPostResultsContentProvider
@@ -41,9 +41,7 @@ class GSPostResultsContentProvider(object):
         
     def update(self):
         self.__updated = True
-        self.da = self.context.zsqlalchemy 
-        assert self.da, 'No data-adaptor found'
-        self.messageQuery = MessageQuery(self.context, self.da)
+        self.messageQuery = MessageQuery(self.context)
         # Both of the following should be aquired from adapters.
         self.siteInfo = createObject('groupserver.SiteInfo', 
           self.context)
@@ -76,7 +74,7 @@ class GSPostResultsContentProvider(object):
             posts = self.messageQuery.post_search_keyword(
               self.searchTokens, self.siteInfo.get_id(), self.groupIds, 
               self.a, limit=self.l+1, offset=self.i)
-        except SQLError:
+        except SQLAlchemyError:
             log.exception("A problem occurred with a messageQuery:")
             self.__searchFailed = True
             return
