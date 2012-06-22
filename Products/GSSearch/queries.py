@@ -160,14 +160,15 @@ class MessageQuery(MailingListQuery):
         wct = self.topic_word_countTable
 
         if searchTokens.phrases:
-            keywordSearches = [
-              sa.select([pt.c.post_id], 
-                sa.and_(wct.c.word.in_(kw.split()),
-                  pt.c.topic_id == wct.c.topic_id, pt.c.body.op('~*')(kw)))
-              for kw in searchTokens.phrases]
-            statement.append_whereclause(
-              pt.c.post_id.in_(sa.intersect(keywordSearches)))
-
+            keywordSearches = []
+            for kw in searchTokens.phrases:
+                s = sa.select([pt.c.post_id])
+                s.append_whereclause(wct.c.word.in_(kw.split()))
+                s.append_whereclause(pt.c.topic_id == wct.c.topic_id)
+                s.append_whereclause(pt.c.body.op('~*')(kw))
+                keywordSearches.append(s)
+            intersect = sa.intersect(*keywordSearches)
+            statement.append_whereclause(pt.c.post_id.in_(intersect))
         return statement
         
     def __add_author_where_clauses(self, statement, author_ids):
