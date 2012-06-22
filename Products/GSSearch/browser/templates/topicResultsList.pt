@@ -4,7 +4,8 @@
   topics view/get_results"
   class="searchResults">
   <tal:block tal:repeat="topic topics">
-    <li id="abc123" tal:attributes="id topic/topic_id">
+    <li id="abc123" tal:attributes="id topic/topic_id"
+	class="gs-search-result">
       <a class="topic" href="#"
         tal:attributes="href string:/r/topic/${topic/last_post_id}"
         tal:content="topic/subject"/>
@@ -26,7 +27,7 @@
       <div class="tags" tal:condition="topic/keywords">
         <ul class="inline-list">
           <tal:block tal:repeat="keyword topic/keywords">
-            <li tal:content="keyword"/>
+            <li class="gs-search-keyword" tal:content="keyword"/>
           </tal:block>
         </ul>
       </div><!--tags-->
