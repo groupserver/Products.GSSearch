@@ -179,9 +179,9 @@ class GSTopicResultsContentProvider(object):
                   self.context, topic['group_id'])
                 groupCache[topic['group_id']] = groupInfo
             groupD = {
-                'id': groupInfo.get_id(),
-                'name': groupInfo.get_name(),
-                'url': groupInfo.get_url(),
+                'id': groupInfo.id,
+                'name': groupInfo.name,
+                'url': groupInfo.relativeURL,
                 'onlyURL': self.view.only_group_link(groupInfo.get_id())
             }
             retval['group'] = groupD
