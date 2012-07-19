@@ -8,7 +8,7 @@ import copy
 import time
 import logging
 
-from gs.database import getSession, getTable, getInstanceId
+from gs.database import getSession, getTable
 from gs.cache import cache
 
 log = logging.getLogger('GSSearch') #@UndefinedVariable
