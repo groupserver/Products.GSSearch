@@ -307,9 +307,9 @@ class MessageQuery(MailingListQuery):
               'post_id':          x['post_id'],
               'user_id':          x['user_id'],
               'group_id':         x['group_id'],
-              'subject':          x['subject'].decode('utf-8'),
+              'subject':          x['subject'],
               'date':             x['date'],
-              'body':             x['body'].decode('utf-8'),
+              'body':             x['body'],
               'files_metadata':   x['has_attachments'] 
                                   and self.files_metadata(x['post_id']) 
                                   or [],
