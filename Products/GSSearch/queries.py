@@ -516,11 +516,11 @@ class DigestQuery(MessageQuery):
         #  AS num_posts_day
                sa.select([sa.func.count(pt.c.post_id.distinct())], 
                          sa.and_(pt.c.date >= yesterday, 
-                         pt.c.topic_id == tt.c.topic_id),
-                         scalar=True).label('num_posts_day'),
+                         pt.c.topic_id == tt.c.topic_id)
+                         ).as_scalar().label('num_posts_day'),
                sa.select([pt.c.user_id], 
-                         pt.c.post_id == tt.c.last_post_id,
-                         scalar=True).label('last_author_id')]
+                         pt.c.post_id == tt.c.last_post_id
+                         ).as_scalar().label('last_author_id')]
         s = sa.select(cols, order_by=sa.desc(tt.c.last_post_date))
         #  FROM topic 
         #  WHERE topic.site_id = 'main' 
