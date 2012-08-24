@@ -149,9 +149,11 @@ class GSSearchView(BrowserView):
         if len(self.groupIds) == 1:
             groupInfo = createObject('groupserver.GroupInfo', 
                          self.context, self.groupIds[0])
-            link = '<a class="group" href="%s">%s</a>' % \
-              (groupInfo.get_url(), groupInfo.get_name())
-            grp = u' in the group %s' % link
+            if groupInfo:
+                link = '<a class="group" href="%s">%s</a>' % \
+                  (groupInfo.get_url(), groupInfo.get_name())
+                grp = u' in the group %s' % link
+            
         else:
             grp = u' in the site %s' % self.siteInfo.get_name()
             
