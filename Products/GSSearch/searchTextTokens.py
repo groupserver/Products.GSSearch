@@ -25,13 +25,10 @@ class GSSearchTextTokensFactory(object):
         assert retval
         return retval
 
+
 class SearchTextTokens(object):
 
     implements(interfaces.IGSSearchTextTokens)
-
-    __phraseCache = None
-    __keywordCache = None
-    __nonwordCache = None
     __tokenCache = None
 
     def set_search_text(self, searchText):
