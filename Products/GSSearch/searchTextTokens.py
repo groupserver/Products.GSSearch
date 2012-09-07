@@ -1,10 +1,11 @@
 # coding=utf-8
 import re
 import interfaces
-from zope.cachedescriptor.property import Lazy
+from zope.cachedescriptors.property import Lazy
 from zope.component.interfaces import IFactory
-from zope.interface import implements
+from zope.interface import implements, implementedBy
 from Products.XWFMailingListManager.stopwords import en as STOPWORDS
+
 
 class GSSearchTextTokensFactory(object):
     implements(IFactory)
@@ -60,7 +61,8 @@ class SearchTextTokens(object):
     @Lazy
     def keywords(self):
         tokens = self.__get_tokens()
-        # --=mpj17=-- The following line contains a UI bug: we never
+        # --=mpj17=--
+        # FIXME: The following line contains a UI bug: we never
         #   tell the user that the number of keywords is limited to
         #   seven.
         retval = [w for w in tokens if w not in STOPWORDS][:7]
