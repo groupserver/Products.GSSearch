@@ -4,8 +4,6 @@ from Products.XWFMailingListManager.queries import MessageQuery\
 from sqlalchemy.exc import NoSuchTableError
 import sqlalchemy as sa
 from datetime import datetime, timedelta
-import copy
-import time
 import logging
 
 from gs.database import getSession, getTable
@@ -98,7 +96,6 @@ class MessageQuery(MailingListQuery):
 
     def __init__(self, context):
         MailingListQuery.__init__(self, context)
-        self.word_countTable = getTable('word_count')
         try:
             self.rowcountTable = getTable('rowcount')
         except NoSuchTableError:
@@ -258,120 +255,26 @@ class MessageQuery(MailingListQuery):
         return retval
 
     def __row_count(self, table, tablename):
-        count = 0
+        retval = 0
         session = getSession()
         if self.rowcountTable is not None:
             statement = self.rowcountTable.select()
             statement.append_whereclause(self.rowcountTable.c.table_name ==
                                         tablename)
-
             r = session.execute(statement)
             if r.rowcount:
-                count = r.fetchone()['total_rows']
-
-        if not count:
+                retval = r.fetchone()['total_rows']
+        if not retval:
             statement = sa.select([sa.func.count("*")], from_obj=[table])
             r = session.execute(statement)
-            count = r.scalar()
-
-        return count
+            retval= r.scalar()
+        return retval
 
     def count_topics(self):
         return self.__row_count(self.topicTable, 'topic')
 
     def count_posts(self):
         return self.__row_count(self.postTable, 'post')
-
-    @cache('gs.search.word_counts', ck_simple, 86400)
-    def word_counts(self):
-        statement = self.word_countTable.select()
-        # The following where clause speeds up the query: we will assume 1
-        # later on, if the word is not in the dictionary.
-        statement.append_whereclause(self.word_countTable.c.count > 1)
-        session = getSession()
-        r = session.execute(statement)
-        retval = {}
-        if r.rowcount:
-            for x in r:
-                retval[x['word'].decode('utf-8')] = x['count']
-
-        return retval
-
-    def count_total_topic_word(self, word):
-        """Count the total number of topics that contain a particular word"""
-        countTable = self.word_countTable
-        statement = countTable.select()
-        statement.append_whereclause(countTable.c.word == word)
-
-        session = getSession()
-        r = session.execute(statement)
-        retval = 0
-        if r.rowcount:
-            v = [{'count': x['count']} for x in r]
-            retval = v[0]['count']
-        return retval
-
-    def count_words(self):
-        countTable = self.word_countTable
-        statement = sa.select(
-                    [sa.func.sum(countTable.c.count)])
-        session = getSession()
-        r = session.execute(statement)
-        return r.scalar()
-
-    def count_word_in_topic(self, word, topicId):
-        """Count the number of times word occurs in a topic"""
-        countTable = self.topic_word_countTable
-        statement = sa.select([countTable.c.count])
-        statement.append_whereclause(countTable.c.topic_id == topicId)
-        statement.append_whereclause(countTable.c.word == word)
-
-        session = getSession()
-        r = session.execute(statement)
-        retval = 0
-        if r.rowcount:
-            val = [{'count': x['count']} for x in r]
-            retval = val[0]['count']
-        return retval
-
-    @cache('gs.search.topic_word_count', ck_simple, 300)
-    def topic_word_count(self, topicId):
-        countTable = self.topic_word_countTable
-        statement = countTable.select()
-        statement.append_whereclause(countTable.c.topic_id == topicId)
-        statement.append_whereclause(countTable.c.count > 1)
-
-        session = getSession()
-        r = session.execute(statement)
-        retval = []
-        if r.rowcount:
-            result = [{'topic_id': x['topic_id'],
-                       'word': x['word'],
-                       'count': x['count']} for x in r]
-            retval = result
-
-        return retval
-
-    def topics_word_count(self, topicIds):
-        """Get a count for all the words in a list of topics
-
-        DESCRIPTION
-          Returns the count of the topics specified by the list "topicIds".
-          However, for the sake of speed, words with a count of 1 are not
-          returned.
-
-        RETURNS
-          A list of dictionaries. Each dictionary contains three values:
-            * "topic_id" The ID of the topic,
-            * "word" A word in the topic, and
-            * "count" The count of "word" in the topic (always greater than
-              one).
-        """
-        retval = []
-        for topicId in topicIds:
-            retval += self.topic_word_count(topicId)
-
-        return retval
 
     def post_ids_from_file_ids(self, fileIds, hidden=False):
         p = self.postTable
