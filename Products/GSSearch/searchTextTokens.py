@@ -4,7 +4,6 @@ import interfaces
 from zope.cachedescriptors.property import Lazy
 from zope.component.interfaces import IFactory
 from zope.interface import implements, implementedBy
-from Products.XWFMailingListManager.stopwords import en as STOPWORDS
 
 
 class GSSearchTextTokensFactory(object):
@@ -52,20 +51,13 @@ class SearchTextTokens(object):
         return retval
 
     @Lazy
-    def nonwords(self):
-        '''When is a word not a word? When it is a stopword!'''
-        tokens = self.__get_tokens()
-        retval = [w.lower() for w in tokens if w.lower() in STOPWORDS]
-        return retval
-
-    @Lazy
     def keywords(self):
         tokens = self.__get_tokens()
         # --=mpj17=--
         # FIXME: The following line contains a UI bug: we never
         #   tell the user that the number of keywords is limited to
         #   seven.
-        retval = [w for w in tokens if w not in STOPWORDS][:7]
+        retval = [w for w in tokens][:7]
         return retval
 
     @Lazy
@@ -86,8 +78,7 @@ class SearchTextTokens(object):
                     token = token.strip(self.phraseDelimiter).strip()
                     retval.append(token)
                 else:
-                    ws = [t.lower() for t in token.split()
-                          if t.lower() not in STOPWORDS]
+                    ws = [t.lower() for t in token.split()]
                     retval = retval + ws
             # --=mpj17=-- The following line contains a UI bug: we
             #   never tell the user that the number of phrases is
