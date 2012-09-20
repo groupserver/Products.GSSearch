@@ -8,11 +8,18 @@ setup(name='Products.GSSearch',
       description="",
       long_description=open("README.txt").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
-      # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
-        "Programming Language :: Python",
+          "Development Status :: 4 - Beta",
+          "Environment :: Web Environment",
+          "Framework :: Zope2",
+          "Intended Audience :: Developers",
+          "License :: Other/Proprietary License",
+          "Natural Language :: English",
+          "Operating System :: POSIX :: Linux"
+          "Programming Language :: Python",
+          "Topic :: Software Development :: Libraries :: Python Modules",
         ],
-      keywords='',
+      keywords='search, ATOM, RSS, Web Feed, AJAX, query',
       author='Michael JasonSmith',
       author_email='mpj17@onlinegroups.net',
       url='http://groupserver.org',
@@ -24,7 +31,9 @@ setup(name='Products.GSSearch',
       install_requires=[
           'setuptools',
           'gs.cache',
+          'gs.content.base',
           'gs.database',
+          'gs.viewlet',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
