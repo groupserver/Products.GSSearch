@@ -72,8 +72,8 @@ class MessageQuery(MailingListQuery):
             statement.append_whereclause(pt.c.user_id.in_(author_ids))
         return statement
 
-    def topic_search_keyword(self, searchTokens, site_id,
-        group_ids=[], limit=12, offset=0, use_cache=True, hidden=False):
+    def topic_search_keyword(self, searchTokens, site_id, group_ids=[],
+                            limit=12, offset=0, use_cache=True, hidden=False):
         """ Search for the search text in the content and subject-lines of
         topics.
 
@@ -108,6 +108,37 @@ class MessageQuery(MailingListQuery):
                            'last_post_user_id': x['user_id'],
                            'num_posts': x['num_posts']})
 
+        return retval
+
+    def post_search_keyword(self, searchTokens, site_id, group_ids=[],
+                            author_ids=[], limit=12, offset=0):
+        pt = self.postTable
+        cols = [pt.c.post_id.distinct(), pt.c.user_id, pt.c.group_id,
+          pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
+        statement = sa.select(cols, limit=limit, offset=offset,
+                  order_by=sa.desc(pt.c.date))
+        self.add_standard_where_clauses(statement, pt, site_id, group_ids,
+                                        False)
+        statement = self.__add_author_where_clauses(statement, author_ids)
+        statement = self.__add_post_keyword_search_where_clauses(statement,
+          searchTokens)
+
+        session = getSession()
+        r = session.execute(statement)
+        retval = []
+        for x in r:
+            p = {
+              'post_id': x['post_id'],
+              'user_id': x['user_id'],
+              'group_id': x['group_id'],
+              'subject': x['subject'],
+              'date': x['date'],
+              'body': x['body'],
+              'files_metadata': x['has_attachments']
+                                  and self.files_metadata(x['post_id'])
+                                  or [],
+              }
+            retval.append(p)
         return retval
 
     def post_ids_from_file_ids(self, fileIds, hidden=False):
