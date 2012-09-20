@@ -1,14 +1,12 @@
 # coding=utf-8
+from datetime import datetime, timedelta
+import sqlalchemy as sa
+from sqlalchemy.exc import NoSuchTableError
+from gs.database import getSession, getTable
 from Products.XWFMailingListManager.queries import MessageQuery\
   as MailingListQuery
-from sqlalchemy.exc import NoSuchTableError
-import sqlalchemy as sa
-from datetime import datetime, timedelta
+
 import logging
-
-from gs.database import getSession, getTable
-from gs.cache import cache
-
 log = logging.getLogger('GSSearch')
 
 
@@ -92,7 +90,6 @@ class MessageQuery(MailingListQuery):
     POST_SEARCH = 4
     POST_SEARCH_COUNT = 8
 #lint:enable
-
 
     def __init__(self, context):
         MailingListQuery.__init__(self, context)
@@ -221,13 +218,13 @@ class MessageQuery(MailingListQuery):
         retval = []
         for x in r:
             p = {
-              'post_id':          x['post_id'],
-              'user_id':          x['user_id'],
-              'group_id':         x['group_id'],
-              'subject':          x['subject'],
-              'date':             x['date'],
-              'body':             x['body'],
-              'files_metadata':   x['has_attachments']
+              'post_id': x['post_id'],
+              'user_id': x['user_id'],
+              'group_id': x['group_id'],
+              'subject': x['subject'],
+              'date': x['date'],
+              'body': x['body'],
+              'files_metadata': x['has_attachments']
                                   and self.files_metadata(x['post_id'])
                                   or [],
               }
@@ -267,7 +264,7 @@ class MessageQuery(MailingListQuery):
         if not retval:
             statement = sa.select([sa.func.count("*")], from_obj=[table])
             r = session.execute(statement)
-            retval= r.scalar()
+            retval = r.scalar()
         return retval
 
     def count_topics(self):
@@ -284,7 +281,7 @@ class MessageQuery(MailingListQuery):
         statement.append_whereclause(inStatement)
         statement.append_whereclause(p.c.post_id == f.c.post_id)
         if not hidden:
-            statement.append_whereclause(p.c.hidden == None)
+            statement.append_whereclause(p.c.hidden == None)  # lint:ok
 
         session = getSession()
         r = session.execute(statement)
@@ -358,14 +355,12 @@ class DigestQuery(MessageQuery):
         r = session.execute(s)
 
         retval = [{
-                  'topic_id':         x['topic_id'],
+                  'topic_id': x['topic_id'],
                   'original_subject': x['original_subject'],
-                  'last_post_id':     x['last_post_id'],
-                  'last_post_date':   x['last_post_date'],
-                  'num_posts':        x['num_posts'],
-                  'num_posts_day':    x['num_posts_day'],
-                  'last_author_id':   x['last_author_id'],
+                  'last_post_id': x['last_post_id'],
+                  'last_post_date': x['last_post_date'],
+                  'num_posts': x['num_posts'],
+                  'num_posts_day': x['num_posts_day'],
+                  'last_author_id': x['last_author_id'],
                   } for x in r]
-
         return retval
-
