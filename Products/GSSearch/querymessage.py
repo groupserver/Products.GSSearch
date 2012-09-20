@@ -1,4 +1,4 @@
-# -*- coding: utf-8 *-*
+ # -*- coding: utf-8 *-*
 import sqlalchemy as sa
 from Products.XWFMailingListManager.queries import MessageQuery\
     as MailingListQuery
@@ -103,7 +103,8 @@ class MessageQuery(MailingListQuery):
                            'group_id': x['group_id'],
                            'site_id': x['site_id'],
                            'subject': x['original_subject'],
-                           'keywords': x['keywords'],
+                           'keywords': [unicode(k, 'utf-8', 'ignore')
+                                           for k in x['keywords']],
                            'last_post_date': x['last_post_date'],
                            'last_post_user_id': x['user_id'],
                            'num_posts': x['num_posts']})
