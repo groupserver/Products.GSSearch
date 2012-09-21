@@ -79,16 +79,17 @@ class MessageQuery(MailingListQuery):
 
         """
         tt = self.topicTable
+        tkt = self.topicKeywordsTable
         pt = self.postTable
 
         cols = [tt.c.topic_id.distinct(), tt.c.last_post_id,
-          tt.c.first_post_id, tt.c.group_id, tt.c.site_id, tt.c.keywords,
+          tt.c.first_post_id, tt.c.group_id, tt.c.site_id, tkt.c.keywords,
           tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts,
           sa.select([pt.c.user_id], tt.c.last_post_id ==
                                     pt.c.post_id).as_scalar().label('user_id')]
         statement = sa.select(cols, limit=limit, offset=offset,
                         order_by=sa.desc(tt.c.last_post_date))
-
+        statement.append_whereclause(tkt.c.topic_id == tt.c.topic_id)
         statement = self.add_standard_where_clauses(statement,
                         self.topicTable, site_id, group_ids, False)
         statement = self.__add_topic_keyword_search_where_clauses(statement,
