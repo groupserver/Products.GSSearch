@@ -82,7 +82,7 @@ class MessageQuery(MailingListQuery):
         tkt = self.topicKeywordsTable
         pt = self.postTable
 
-        cols = [tt.c.topic_id.distinct(), tt.c.last_post_id,
+        cols = [tt.c.topic_id, tt.c.last_post_id,
           tt.c.first_post_id, tt.c.group_id, tt.c.site_id, tkt.c.keywords,
           tt.c.original_subject, tt.c.last_post_date, tt.c.num_posts,
           sa.select([pt.c.user_id], tt.c.last_post_id ==
