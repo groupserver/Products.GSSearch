@@ -1,4 +1,4 @@
-<tal:block tal:define="view options/view; 
+<tal:block tal:define="view options/view;
   onlyGroup options/onlyGroup;
   munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <ul class="searchResults">
@@ -17,7 +17,7 @@
           </tal:block>
         </span>
         <div class="groupInfo" tal:condition="not:onlyGroup">
-          <a class="group" href="#" 
+          <a class="group" href="#"
             tal:attributes="href topic/group/url;"
             tal:content="topic/group/name"/>
         </div>
@@ -32,18 +32,18 @@
           tal:define="multiplePosts python:topic['num_posts']&gt;1">
           <span class="postCount">
             <span class="cardinal" tal:content="topic/num_posts"/>
-            post<tal:block condition="multiplePosts">s</tal:block> 
+            post<tal:block condition="multiplePosts">s</tal:block>
           </span>
           &#8212;
           <tal:block condition="multiplePosts">latest post</tal:block>
           by
-          <a class="name" href="#" 
+          <a class="name" href="#"
             tal:omit-tag="not:topic/last_author/exists"
             tal:attributes="href topic/last_author/url"
             tal:content="topic/last_author/name">Me!</a>
           at
           <span class="date"
-            tal:define="ctx topic/context" 
+            tal:define="ctx topic/context"
             tal:content="python:munge_date(ctx, topic['last_post_date'])"/>
         </div><!--metadata-->
         <div class="disclosureWidget" id="#"
@@ -60,13 +60,8 @@
                 <li tal:condition="not:onlyGroup">
                   <a tal:attributes="href topic/group/onlyURL"
                     href="#">Only search the group
-                    <cite class="group" 
+                    <cite class="group"
                       tal:content="topic/group/name"/></a>
-                </li>
-                <li>
-                  <a tal:attributes="href topic/keywordSearch"
-                    href="#">Search for documents related to
-                    <cite tal:content="topic/subject">this topic</cite></a>
                 </li>
               </ul>
             </div>
