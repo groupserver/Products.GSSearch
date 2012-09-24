@@ -117,7 +117,7 @@ class GSSearchView(SitePage):
         if len(self.groupIds) == 1:
             groupInfo = createObject('groupserver.GroupInfo',
                          self.context, self.groupIds[0])
-            grp = ': %s' % groupInfo.get_name()
+            grp = ': %s' % groupInfo.name
 
         auth = ''
         if len(self.authorIds) == 1:
@@ -127,7 +127,7 @@ class GSSearchView(SitePage):
                 auth = u' by %s' % authorInfo.name
 
         r = r'%s %s%s%s: %s'
-        retval = r % (s, inStr, auth, grp, self.siteInfo.get_name())
+        retval = r % (s, inStr, auth, grp, self.siteInfo.name)
 
         return retval
 
@@ -168,15 +168,15 @@ class GSSearchView(SitePage):
 
         grp = ''
         if len(self.groupIds) == 1:
-            groupInfo = createObject('groupserver.GroupInfo',
-                         self.context, self.groupIds[0])
-            if groupInfo:
+            groupInfo = createObject('groupserver.GroupInfo', self.context,
+                                        self.groupIds[0])
+            if (groupInfo and (groupInfo.group_exists())):
                 link = '<a class="group" href="%s">%s</a>' % \
-                  (groupInfo.get_url(), groupInfo.get_name())
+                  (groupInfo.relativeURL, groupInfo.name)
                 grp = u' in the group %s' % link
 
         else:
-            grp = u' in the site %s' % self.siteInfo.get_name()
+            grp = u' in the site %s' % self.siteInfo.name
 
         r = u'%s %s%s%s.' % (s, inStr, auth, grp)
         return r
@@ -422,7 +422,7 @@ class GSSearchGroupView(GSSearchView):
     def __init__(self, context, request):
         GSSearchView.__init__(self, context, request)
         self.groupInfo = createObject('groupserver.GroupInfo', context)
-        self.groupIds = [self.groupInfo.get_id()]
+        self.groupIds = [self.groupInfo.id]
 
     def only_group(self, groupId=None):
         """By definition, only the group is being searched."""
