@@ -115,8 +115,8 @@ class MessageQuery(MailingListQuery):
     def post_search_keyword(self, searchTokens, site_id, group_ids=[],
                             author_ids=[], limit=12, offset=0):
         pt = self.postTable
-        cols = [pt.c.post_id.distinct(), pt.c.user_id, pt.c.group_id,
-          pt.c.subject, pt.c.date, pt.c.body, pt.c.has_attachments]
+        cols = [pt.c.post_id, pt.c.user_id, pt.c.group_id, pt.c.subject,
+                pt.c.date, pt.c.body, pt.c.has_attachments]
         statement = sa.select(cols, limit=limit, offset=offset,
                   order_by=sa.desc(pt.c.date))
         self.add_standard_where_clauses(statement, pt, site_id, group_ids,

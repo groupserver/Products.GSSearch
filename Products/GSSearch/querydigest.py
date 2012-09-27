@@ -20,7 +20,7 @@ class DigestQuery(MessageQuery):
         #    WHERE (post.topic_id = topic.topic_id)
         #      AND post.date >= timestamp 'yesterday')
         #  AS num_posts_day
-               sa.select([sa.func.count(pt.c.post_id.distinct())],
+               sa.select([sa.func.count(pt.c.post_id)],
                          sa.and_(pt.c.date >= yesterday,
                          pt.c.topic_id == tt.c.topic_id)
                          ).as_scalar().label('num_posts_day'),
