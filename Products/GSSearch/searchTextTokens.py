@@ -32,8 +32,13 @@ class SearchTextTokens(object):
     __tokenCache = None
 
     def set_search_text(self, t):
-        self.searchText = (((type(t) == unicode) and t)
-                            or t.decode('utf-8', 'ignore'))
+        if isinstance(t, unicode):
+            s = t
+        elif isinstance(t, str):
+            s = t.decode('utf-8', 'ignore')
+        else:
+            s = u''
+        self.searchText = s
 
     def set_phrase_delimiter(self, phraseDelimiter):
         self.phraseDelimiter = phraseDelimiter
