@@ -38,7 +38,7 @@ setup(name='Products.GSSearch',
           'zope.interface',
           'zope.pagetemplate',
           'zope.schema',
-          'zope.publisher'
+          'zope.publisher',
           'AccessControl',
           'Zope2',
           'gs.cache',
