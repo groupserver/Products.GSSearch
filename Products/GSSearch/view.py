@@ -232,13 +232,11 @@ class GSSearchView(SitePage):
         else:
             queries.append('g=')
 
-        if authorId is None:
-            queries.append(self.get_query(r'a=%s',
-                                          authorId, authorId))
+        if authorId is not None:
+            queries.append(self.get_query(r'a=%s', authorId, authorId))
         elif self.authorIds:
             for authorId in self.authorIds:
-                queries.append(self.get_query(r'a=%s',
-                                              authorId, authorId))
+                queries.append(self.get_query(r'a=%s', authorId, authorId))
         else:
             queries.append('a=')
 
