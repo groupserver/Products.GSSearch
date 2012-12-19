@@ -81,11 +81,5 @@
     name="groupserver.SearchTextTokens"
     permission="zope.Public"/>
 
-  <browser:page
-    for="Products.XWFChat.interfaces.IGSGroupFolder"
-    name="digest.txt"
-    class=".topicdigestview.TopicDigestView"
-    permission="zope2.View" />
-      
 </configure>
 
