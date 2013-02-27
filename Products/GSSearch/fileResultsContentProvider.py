@@ -241,7 +241,8 @@ class GSFileResultsContentProvider(object):
                 'url': r.get_url(),
                 'thumbnail_url': r.thumbnail_url,}
             
-            topicURL = '/r/topic/%s' % postId
+            topicURL = '/groups/{0}/messages/topic/{1}'.format(groupInfo.id, 
+                                                               postId)
             topicD = {
             'name': r.get_topic_name(),
             'url': topicURL,

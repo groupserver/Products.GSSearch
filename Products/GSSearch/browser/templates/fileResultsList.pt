@@ -13,18 +13,18 @@
             href result/file/url;">
           <span class="fileName"
             tal:content="result/file/title">Fish</span></a>
-        <div tal:condition="result/post/id"> 
-	  Topic: 
-	  <a href="#"
-	     tal:attributes="href result/topic/url">
-	    <span class="fileTopic"
-		  tal:content="result/topic/name">topic</span></a>
-	    <span tal:condition="not:result/group/only">
-	      &mdash;
-	      <a href="#" class="group"
-		 tal:attributes="href result/group/url"
-		 tal:content="result/group/name">group</a>
-	    </span>
+        <div tal:condition="result/post/id" class="muted"> 
+          Posted in
+          <a href="#"
+             tal:attributes="href result/topic/url">
+            <em class="fileTopic"
+                  tal:content="result/topic/name">topic</em></a>
+            <span tal:condition="not:result/group/only">
+              &mdash;
+              <a href="#" class="group"
+                 tal:attributes="href result/group/url"
+                 tal:content="result/group/name">group</a>
+            </span>
         </div>
         <div class="figure" tal:condition="python:view.st == True and result['file']['thumbnail_url']">
           <a title="I am a fish" href="#"
