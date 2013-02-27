@@ -5,50 +5,40 @@
   class="searchResults">
   <tal:block tal:repeat="topic topics">
     <li id="abc123" tal:attributes="id topic/topic_id"
-	class="gs-search-result">
+        class="gs-search-result">
       <a class="topic" href="#"
         tal:attributes="href string:/r/topic/${topic/last_post_id}"
         tal:content="topic/subject"/>
       <!--Files go here-->
-      <span class="files" tal:condition="topic/files">
-        <tal:block tal:repeat="file python:topic['files'][-7:]">
-          <a href="#" title="foo"
-            tal:attributes="title file/name;
-              href file/url;
-              class string:fileIcon ${file/icon}">&#160;</a>
+      <abbr class="postCount value" role="tooltip"
+            tal:define="p python:'posts' if topic['num_posts'] != 1 else 'post'"
+            tal:attributes="title string:${topic/num_posts} ${p}"
+            tal:content="topic/num_posts">n</abbr> 
+      <ul class="muted dotted-inline-list">
+        <li class="groupInfo muted" tal:condition="not:onlyGroup">
+          in
+          <a class="group"
+             tal:attributes="href topic/group/url;"
+             href="#"><em tal:content="topic/group/name">this group</em></a>
+        </li><!--groupInfo-->
+        <li>
+          Last post by
+          <a class="name" href="#" 
+             tal:omit-tag="not:topic/last_author/exists"
+             tal:attributes="href topic/last_author/url">
+          <em tal:content="topic/last_author/name">Me!</em></a>
+          at
+          <em class="date"
+              tal:define="ctx topic/context" 
+              tal:content="python:munge_date(ctx, topic['last_post_date'])">Now</em>
+        </li><!--metadata-->
+      </ul>
+      <ul class="inline-list tags muted small" tal:condition="topic/keywords">
+        <li>Keywords:</li>
+        <tal:block tal:repeat="keyword topic/keywords">
+          <li class="gs-search-keyword" tal:content="keyword"/>
         </tal:block>
-      </span>
-      <div class="groupInfo" tal:condition="not:onlyGroup">
-        in
-        <a class="group" href="#" 
-          tal:attributes="href topic/group/url;"
-          tal:content="topic/group/name"/>
-      </div>
-      <div class="tags" tal:condition="topic/keywords">
-        <ul class="inline-list">
-          <tal:block tal:repeat="keyword topic/keywords">
-            <li class="gs-search-keyword" tal:content="keyword"/>
-          </tal:block>
-        </ul>
-      </div><!--tags-->
-      <div class="metadata"
-        tal:define="multiplePosts python:topic['num_posts']&gt;1">
-        <span class="postCount">
-          <span class="cardinal" tal:content="topic/num_posts"/>
-          post<tal:block condition="multiplePosts">s</tal:block> 
-        </span>
-        &#8212;
-        <tal:block condition="multiplePosts">latest post</tal:block>
-        by
-        <a class="name" href="#" 
-          tal:omit-tag="not:topic/last_author/exists"
-          tal:attributes="href topic/last_author/url"
-          tal:content="topic/last_author/name">Me!</a>
-        at
-        <span class="date"
-          tal:define="ctx topic/context" 
-          tal:content="python:munge_date(ctx, topic['last_post_date'])"/>
-      </div><!--metadata-->
+      </ul><!--tags-->
     </li>
   </tal:block>
 </ul>
