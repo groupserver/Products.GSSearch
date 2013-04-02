@@ -16,7 +16,7 @@
             tal:content="topic/num_posts">n</abbr> 
       <ul class="muted dotted-inline-list">
         <li class="groupInfo muted" tal:condition="not:onlyGroup">
-          in
+          In
           <a class="group"
              tal:attributes="href topic/group/url;"
              href="#"><em tal:content="topic/group/name">this group</em></a>
@@ -36,7 +36,13 @@
       <ul class="inline-list tags muted small" tal:condition="topic/keywords">
         <li>Keywords:</li>
         <tal:block tal:repeat="keyword topic/keywords">
-          <li class="gs-search-keyword" tal:content="keyword"/>
+          <li>
+            <a class="keyword gs-search-keyword muted" rel="tag"
+               tal:attributes="title string:Search for &#8220;${keyword}&#8221;"
+               tal:content="keyword"
+               href="#">Keyword</a><tal:block define="n repeat/keyword/number;" 
+               condition="python:n &lt; len(topic['keywords'])">,</tal:block>
+          </li>
         </tal:block>
       </ul><!--tags-->
     </li>
