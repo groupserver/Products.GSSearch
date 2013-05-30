@@ -175,7 +175,7 @@ class GSPostResultsContentProvider(object):
             groupD = {
               'id': groupInfo.get_id(),
               'name': groupInfo.get_name(),
-              'url': groupInfo.get_url(),
+              'url': groupInfo.relativeURL,
               'onlyURL': self.view.only_group_link(groupInfo.get_id())
             }
             
