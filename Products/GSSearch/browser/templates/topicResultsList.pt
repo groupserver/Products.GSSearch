@@ -14,7 +14,7 @@
             tal:define="p python:'posts' if topic['num_posts'] != 1 else 'post'"
             tal:attributes="title string:${topic/num_posts} ${p}"
             tal:content="topic/num_posts">n</abbr> 
-      <ul class="muted dotted-inline-list">
+      <ul class="muted small dotted-inline-list">
         <li class="groupInfo muted" tal:condition="not:onlyGroup">
           In
           <a class="group"
