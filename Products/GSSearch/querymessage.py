@@ -1,8 +1,9 @@
- # -*- coding: utf-8 *-*
+# -*- coding: utf-8 -*-
 import sqlalchemy as sa
+from gs.core import to_unicode_or_bust
+from gs.database import getSession
 from Products.XWFMailingListManager.queries import MessageQuery\
     as MailingListQuery
-from gs.database import getSession
 
 
 def topic_sorter_desc(x, y):
@@ -104,7 +105,7 @@ class MessageQuery(MailingListQuery):
                            'group_id': x['group_id'],
                            'site_id': x['site_id'],
                            'subject': x['original_subject'],
-                           'keywords': [unicode(k, 'utf-8', 'ignore')
+                           'keywords': [to_unicode_or_bust(k)
                                            for k in x['keywords']],
                            'last_post_date': x['last_post_date'],
                            'last_post_user_id': x['user_id'],
