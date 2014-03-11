@@ -1,4 +1,5 @@
 # coding=utf-8
+from __future__ import absolute_import, unicode_literals
 from sqlalchemy.exc import SQLAlchemyError
 from zope.component import createObject, adapts, provideAdapter
 from zope.contentprovider.interfaces import IContentProvider, UpdateNotCalled
@@ -7,8 +8,8 @@ from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from gs.viewlet.contentprovider import SiteContentProvider
 from Products.XWFCore.XWFUtils import get_the_actual_instance_from_zope
-from interfaces import IGSTopicResultsContentProvider
-from queries import MessageQuery
+from .interfaces import IGSTopicResultsContentProvider
+from .queries import MessageQuery
 
 import logging
 log = logging.getLogger('GSSearch')
@@ -83,7 +84,7 @@ class GSTopicResultsContentProvider(SiteContentProvider):
             raise UpdateNotCalled
 
         if self.__searchFailed:
-            r = u'''<div class="error" id="topic-serch-timeout">
+            r = '''<div class="error" id="topic-serch-timeout">
                   <p><strong>Topics Failed to Load</strong></p>
                   <p>Sorry, the topics failed to load, because the server
                     took too long to respond.
@@ -100,7 +101,7 @@ class GSTopicResultsContentProvider(SiteContentProvider):
             if self.topics:
                 r = pageTemplate(view=self, onlyGroup=onlyGroup)
             else:
-                r = u'<p id="topic-search-none">No topics found.</p>'
+                r = '<p id="topic-search-none">No topics found.</p>'
         return r
 
     #########################################
