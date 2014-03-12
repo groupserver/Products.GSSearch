@@ -1,22 +1,37 @@
-# coding=utf-8
-import re
-import interfaces
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2012, 2013, 2014 OnlineGroups.net and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+from __future__ import absolute_import, unicode_literals
+from re import compile as re_compile
 from zope.cachedescriptors.property import Lazy
 from zope.component.interfaces import IFactory
 from zope.interface import implements, implementedBy
+from gs.core import to_unicode_or_bust
+from .interfaces import IGSSearchTextTokens
 
 
 class GSSearchTextTokensFactory(object):
     implements(IFactory)
 
-    title = u'GroupServer Search Text Tokeniser Factory'
-    descripton = u'Create a new tokeniser for search-text'
+    title = 'GroupServer Search Text Tokeniser Factory'
+    descripton = 'Create a new tokeniser for search-text'
 
     def __call__(self, searchText):
         retval = None
         retval = SearchTextTokens()
         retval.set_search_text(searchText)
-        retval.set_phrase_delimiter(u'"')
+        retval.set_phrase_delimiter('"')
         assert retval
         return retval
 
@@ -28,16 +43,13 @@ class GSSearchTextTokensFactory(object):
 
 class SearchTextTokens(object):
 
-    implements(interfaces.IGSSearchTextTokens)
+    implements(IGSSearchTextTokens)
     __tokenCache = None
 
     def set_search_text(self, t):
-        if isinstance(t, unicode):
-            s = t
-        elif isinstance(t, str):
-            s = t.decode('utf-8', 'ignore')
-        else:
-            s = u''
+        s = to_unicode_or_bust(t)
+        if not isinstance(s, unicode):
+            s = ''
         self.searchText = s
 
     def set_phrase_delimiter(self, phraseDelimiter):
@@ -72,9 +84,9 @@ class SearchTextTokens(object):
             retval = self.keywords
         else:
             retval = []
-            phraseSearchString = u'(%s.*?%s)' % (self.phraseDelimiter,
+            phraseSearchString = '(%s.*?%s)' % (self.phraseDelimiter,
               self.phraseDelimiter)
-            phraseSearch = re.compile(phraseSearchString)
+            phraseSearch = re_compile(phraseSearchString)
             tokens = phraseSearch.split(self.searchText)
 
             for token in tokens:

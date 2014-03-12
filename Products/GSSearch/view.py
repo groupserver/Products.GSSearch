@@ -1,12 +1,26 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2012, 2013, 2014 OnlineGroups.net and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+from __future__ import absolute_import, unicode_literals
 from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from zope.interface import implements
 from App.class_init import InitializeClass
 from Products.PythonScripts.standard import url_quote
 from gs.content.base.page import SitePage
-from interfaces import IGSSearchResults
-from querymessage import MessageQuery
+from .interfaces import IGSSearchResults
+from .querymessage import MessageQuery
 
 
 class GSSearchView(SitePage):
@@ -49,7 +63,7 @@ class GSSearchView(SitePage):
             retval = [retval]
         assert isinstance(retval, list), \
             "groupIds were not in a list: %s" % retval
-        retval = filter(None, retval)
+        retval = [_f for _f in retval if _f]
         return retval
 
     @Lazy
@@ -59,7 +73,7 @@ class GSSearchView(SitePage):
             retval = [retval]
         assert isinstance(retval, list),\
             "authorIds were not in a list: %s" % retval
-        retval = filter(None, retval)
+        retval = [_f for _f in retval if _f]
         return retval
 
     @Lazy
@@ -69,7 +83,7 @@ class GSSearchView(SitePage):
             retval = [retval]
         assert isinstance(retval, list),\
             "mimeTypes were not in a list: %s" % retval
-        retval = filter(None, retval)
+        retval = [_f for _f in retval if _f]
         return retval
 
     @Lazy
@@ -124,11 +138,10 @@ class GSSearchView(SitePage):
             authorInfo = createObject('groupserver.UserFromId',
                                       self.context, self.authorIds[0])
             if authorInfo:
-                auth = u' by %s' % authorInfo.name
+                auth = ' by %s' % authorInfo.name
 
         r = r'%s %s%s%s: %s'
         retval = r % (s, inStr, auth, grp, self.siteInfo.name)
-
         return retval
 
     def search_description(self):
@@ -164,7 +177,7 @@ class GSSearchView(SitePage):
             if authorInfo:
                 link = '<a class="name" href="%s">%s</a>' % \
                     (authorInfo.url, authorInfo.name)
-                auth = u' by %s' % link
+                auth = ' by %s' % link
 
         grp = ''
         if len(self.groupIds) == 1:
@@ -173,12 +186,12 @@ class GSSearchView(SitePage):
             if (groupInfo and (groupInfo.group_exists())):
                 link = '<a class="group" href="%s">%s</a>' % \
                   (groupInfo.relativeURL, groupInfo.name)
-                grp = u' in the group %s' % link
+                grp = ' in the group %s' % link
 
         else:
-            grp = u' in the site %s' % self.siteInfo.name
+            grp = ' in the site %s' % self.siteInfo.name
 
-        r = u'%s %s%s%s.' % (s, inStr, auth, grp)
+        r = '%s %s%s%s.' % (s, inStr, auth, grp)
         return r
 
     def __get_boolean(self, var, default=True):
