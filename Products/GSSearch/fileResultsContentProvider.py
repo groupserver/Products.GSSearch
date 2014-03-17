@@ -21,7 +21,7 @@ from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import AccessControl
 from gs.groups.interfaces import IGSGroupsInfo
 from Products.ZCTextIndex.ParseTree import ParseError
-from interfaces import IGSFileResultsContentProvider
+from .interfaces import IGSFileResultsContentProvider
 from .fileSearchResult import GSFileSearchResult
 from .queries import MessageQuery
 

@@ -20,7 +20,7 @@ from zope.component import createObject
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 from zope.interface import implements, Interface
 from zope.component import adapts, provideAdapter
-from zope.publisher.interfaces import IDefaultBrowserLayer
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.contentprovider.interfaces import IContentProvider, UpdateNotCalled
 import AccessControl
 from gs.group.messages.post.postbody import get_post_intro_and_remainder
