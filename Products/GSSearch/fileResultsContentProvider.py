@@ -14,13 +14,14 @@
 ##############################################################################
 from __future__ import absolute_import, unicode_literals
 from zope.component import adapts, createObject, provideAdapter
+from zope.contentprovider.interfaces import UpdateNotCalled, IContentProvider
 from zope.interface import implements, Interface
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
-from zope.contentprovider.interfaces import UpdateNotCalled, IContentProvider
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
-import AccessControl
-from gs.groups.interfaces import IGSGroupsInfo
+from AccessControl import getSecurityManager
 from Products.ZCTextIndex.ParseTree import ParseError
+from gs.core import to_ascii
+from gs.groups.interfaces import IGSGroupsInfo
 from .interfaces import IGSFileResultsContentProvider
 from .fileSearchResult import GSFileSearchResult
 from .queries import MessageQuery
@@ -50,7 +51,7 @@ class GSFileResultsContentProvider(object):
         # Both of the following should be acquired from adapters.
         self.groupsInfo = IGSGroupsInfo(self.context)
 
-        user = AccessControl.getSecurityManager().getUser()
+        user = getSecurityManager().getUser()
 
         searchKeywords = self.s.split()
 
@@ -120,7 +121,10 @@ class GSFileResultsContentProvider(object):
         assert hasattr(site_root, 'FileLibrary2'), \
         'Cannot search: file library not found'
         fileLibrary = site_root.FileLibrary2
-        fileLibraryPath = '/'.join(fileLibrary.getPhysicalPath())
+        # --=mpj17=-- Without this to_ascii call I get
+        #    ValueError: invalid literal for int() with base 10: 's'
+        # Ask me not why.
+        fileLibraryPath = to_ascii('/'.join(fileLibrary.getPhysicalPath()))
         postedFiles = self.search_files_in_path(searchKeywords,
             groupIds, fileLibraryPath, 'XWF File 2',
             authorIds, mimeTypes)  # --=mpj17=-- TODO: Site ID!
@@ -133,7 +137,6 @@ class GSFileResultsContentProvider(object):
             if o['id'] not in fileIds:
                 fileIds.append(o['id'])
                 retval.append(o)
-
         return retval
 
     def search_files_in_path(self, searchKeywords, groupIds=[],
@@ -157,13 +160,11 @@ class GSFileResultsContentProvider(object):
                 if mimeTypes:
                     query['content_type'] = mimeTypes
 
-                for k in query:
-                    if not query[k]:
-                        del(query[k])
+                cleanQuery = self.sanatise_query(query)
                 try:
                     # we do unrestricted searches, since we're
                     # handling the security
-                    r = catalog.unrestrictedSearchResults(None, **query)
+                    r = catalog.unrestrictedSearchResults(None, **cleanQuery)
                 except ParseError:
                     log.exception("Error while parsing search keywords:")
                     if len(searchKeywords) == 1:
@@ -172,8 +173,17 @@ class GSFileResultsContentProvider(object):
                     else:
                         r = []
                 results += r
-
         return results
+
+    def sanatise_query(self, q):
+        if not isinstance(q, dict):
+            raise TypeError('Query is a {0}, not a dict'.format(type(q)))
+        retval = {}
+        for k in q:
+            if q[k]:
+                retval[k] = q[k]
+        assert type(retval) == dict
+        return retval
 
     def get_post_ids_from_file_ids(self, fileIds):
         retval = self.messageQuery.post_ids_from_file_ids(fileIds)
