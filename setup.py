@@ -20,8 +20,8 @@ from version import get_version
 setup(name='Products.GSSearch',
       version=get_version(),
       description="",
-      long_description=open("README.txt").read() + "\n" +
-                       open(os.path.join("docs", "HISTORY.txt")).read(),
+      long_description=open("README.rst").read() + "\n" +
+                       open(os.path.join("docs", "HISTORY.rst")).read(),
       classifiers=[
         'Development Status :: 5 - Production/Stable',
         "Environment :: Web Environment",
