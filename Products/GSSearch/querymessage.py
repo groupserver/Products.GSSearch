@@ -86,12 +86,13 @@ class MessageQuery(MailingListQuery):
             statement.append_whereclause(pt.c.user_id.in_(author_ids))
         return statement
 
-    def topic_search_keyword(self, searchTokens, site_id, group_ids=[],
+    def topic_search_keyword(self, searchTokens, site_id, group_ids=None,
                             limit=12, offset=0, use_cache=True, hidden=False):
         """ Search for the search text in the content and subject-lines of
-        topics.
+        topics."""
+        if group_ids is None:
+            group_ids = []
 
-        """
         tt = self.topicTable
         tkt = self.topicKeywordsTable
         pt = self.postTable
@@ -126,8 +127,12 @@ class MessageQuery(MailingListQuery):
 
         return retval
 
-    def post_search_keyword(self, searchTokens, site_id, group_ids=[],
-                            author_ids=[], limit=12, offset=0):
+    def post_search_keyword(self, searchTokens, site_id, group_ids=None,
+                            author_ids=None, limit=12, offset=0):
+        if group_ids is None:
+            group_ids = []
+        if author_ids is None:
+            author_ids = []
         pt = self.postTable
         cols = [pt.c.post_id, pt.c.user_id, pt.c.group_id, pt.c.subject,
                 pt.c.date, pt.c.body, pt.c.has_attachments]

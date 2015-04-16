@@ -139,9 +139,16 @@ class GSFileResultsContentProvider(object):
                 retval.append(o)
         return retval
 
-    def search_files_in_path(self, searchKeywords, groupIds=[],
-        path='', metaType='', authorIds=[], mimeTypes=[]):
-        #--=mpj17=-- TODO: Site ID!
+    def search_files_in_path(self, searchKeywords, groupIds=None,
+        path='', metaType='', authorIds=None, mimeTypes=None):
+        #--=mpj17=-- FIXME: Site ID!
+        if groupIds is None:
+            groupIds = []
+        if authorIds is None:
+            authorIds = []
+        if mimeTypes is None:
+            mimeTypes = []
+
         catalog = self.context.Catalog
         results = []
 
