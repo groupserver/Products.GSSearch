@@ -5,11 +5,7 @@
   xmlns:sqlos="http://namespaces.sqlobject.org/sqlos"
   xmlns:five="http://namespaces.zope.org/five">
 
-  <class class="OFS.Folder.Folder">
-      <implements interface="zope.app.folder.interfaces.IFolder" />
-  </class>
-
-  <class class=".view.GSSearchView">
+ <class class=".view.GSSearchView">
       <implements interface=".interfaces.IGSSearchResults" />
   </class>
 
@@ -20,60 +16,60 @@
   <class class=".searchTextTokens.SearchTextTokens">
       <implements interface=".interfaces.IGSSearchTextTokens" />
   </class>
-  
+
   <!--View of the index-page -->
-  <browser:page 
-    for=".interfaces.IGSSearchFolder"
+  <browser:page
     name="index.html"
+    for=".interfaces.IGSSearchFolder"
     class=".view.GSSearchView"
-    template="browser/templates/search.pt" 
+    template="browser/templates/search.pt"
     permission="zope2.View" />
-    
-  <browser:page 
-    for=".interfaces.IGSSearchFolder" 
+
+  <browser:page
     name="search.atom"
+    for=".interfaces.IGSSearchFolder"
     class=".view.GSSearchATOMView"
-    template="browser/templates/search_atom.pt" 
+    template="browser/templates/search_atom.pt"
     permission="zope2.View" />
 
-  <browser:page 
-    for="Products.XWFMailingListManager.interfaces.IGSMessagesFolder"
+  <browser:page
     name="postsSummary.html"
+    for="Products.XWFMailingListManager.interfaces.IGSMessagesFolder"
     class=".view.GSSearchGroupView"
-    template="browser/templates/groupPostsSummary.pt" 
+    template="browser/templates/groupPostsSummary.pt"
     permission="zope2.View" />
 
-  <browser:page 
-    for=".interfaces.IGSSearchFolder" 
+  <browser:page
     name="search.ajax"
+    for=".interfaces.IGSSearchFolder"
     class=".view.GSSearchView"
-    template="browser/templates/search_ajax.pt" 
+    template="browser/templates/search_ajax.pt"
     permission="zope2.View" />
 
-  <browser:page 
-    for=".interfaces.IGSSearchFolder" 
+  <browser:page
     name="images.html"
+    for=".interfaces.IGSSearchFolder"
     class=".view.GSSearchView"
-    template="browser/templates/search_images.pt" 
+    template="browser/templates/search_images.pt"
     permission="zope2.View" />
-    
-  <interface 
+
+  <interface
     interface=".interfaces.IGSSearchFolder"
     type="zope.app.content.interfaces.IContentType" />
-    
-  <interface 
+
+  <interface
     interface=".interfaces.IGSTopicResultsContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
-  <interface 
+  <interface
     interface=".interfaces.IGSPostResultsContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
-  <interface 
+  <interface
     interface=".interfaces.IGSFileResultsContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
-  <interface 
+  <interface
     interface=".interfaces.IGSProfileResultsContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
@@ -82,4 +78,3 @@
     permission="zope.Public"/>
 
 </configure>
-
