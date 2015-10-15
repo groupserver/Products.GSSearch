@@ -67,6 +67,7 @@ setup(
         'gs.content.base',
         'gs.core',
         'gs.database',
+        'gs.group.messages.post.text',
         'gs.viewlet',
     ],
     entry_points="""

@@ -23,7 +23,7 @@ from zope.component import adapts, provideAdapter
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.contentprovider.interfaces import IContentProvider, UpdateNotCalled
 import AccessControl
-from gs.group.messages.post.postbody import get_post_intro_and_remainder
+from gs.group.messages.post.text.postbody import get_post_intro_and_remainder
 from .interfaces import IGSPostResultsContentProvider
 from .queries import MessageQuery
 
