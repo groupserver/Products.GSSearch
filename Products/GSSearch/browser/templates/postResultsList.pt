@@ -24,7 +24,7 @@
             <strong tal:content="result/group/name">A group</strong></a>
         </div>
         <pre class="email-summary small muted"
-          tal:content="structure result/postSummary">
+          tal:content="result/postSummary">
             This is the body of the document.
         </pre><!--email-summary-->
         <div class="metadata small muted">

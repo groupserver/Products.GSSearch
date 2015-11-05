@@ -227,9 +227,9 @@ class GSPostResultsContentProvider(object):
                             end = l.index(w) + subLineLength
                         s = line[start:end].strip()
                         if start != 0:
-                            s = '&#8230;%s' % s
+                            s = '\u2026%s' % s
                         if end < len(l):
-                            s = '%s&#8230;' % s
+                            s = '%s\u2026' % s
                         matchingSnippets.append(s)
             summary = '\n'.join(matchingSnippets)
         else:
@@ -237,7 +237,7 @@ class GSPostResultsContentProvider(object):
             truncatedLines = []
             for l in firstLines:
                 if (len(l) > lineLength):
-                    truncatedLines.append('%s&#8230;' % l[:lineLength])
+                    truncatedLines.append('%s\u2026' % l[:lineLength])
                 else:
                     truncatedLines.append(l)
             summary = '\n'.join(truncatedLines)
