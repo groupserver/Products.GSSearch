@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-# Copyright © 2012, 2013, 2014 OnlineGroups.net and Contributors.
+# Copyright © 2012, 2013, 2014, 2015 OnlineGroups.net and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -12,14 +12,14 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, print_function
 from logging import getLogger
 log = getLogger('GSSearch')
 from sqlalchemy.exc import SQLAlchemyError
 from zope.component import createObject
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
-from zope.interface import implements, Interface
-from zope.component import adapts, provideAdapter
+from zope.interface import implementer, Interface
+from zope.component import adapter, provideAdapter
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.contentprovider.interfaces import IContentProvider, UpdateNotCalled
 import AccessControl
@@ -36,12 +36,10 @@ class FakeContentProviderContext:
         self.post = post
 
 
+@implementer(IGSPostResultsContentProvider)
+@adapter(Interface, IDefaultBrowserLayer, Interface)
 class GSPostResultsContentProvider(object):
     """GroupServer Post Search-Results Content Provider"""
-
-    implements(IGSPostResultsContentProvider)
-    adapts(Interface, IDefaultBrowserLayer, Interface)
-
     def __init__(self, context, request, view):
         self.__parent = view
         self.__updated = False
@@ -55,27 +53,23 @@ class GSPostResultsContentProvider(object):
         self.__updated = True
         self.messageQuery = MessageQuery(self.context)
         # Both of the following should be aquired from adapters.
-        self.siteInfo = createObject('groupserver.SiteInfo',
-          self.context)
-        self.groupsInfo = createObject('groupserver.GroupsInfo',
-          self.context)
+        self.siteInfo = createObject('groupserver.SiteInfo', self.context)
+        self.groupsInfo = createObject('groupserver.GroupsInfo', self.context)
 
         user = AccessControl.getSecurityManager().getUser()
 
-        self.searchTokens = createObject('groupserver.SearchTextTokens',
-          self.s)
+        self.searchTokens = createObject('groupserver.SearchTextTokens', self.s)
 
         self.groupIds = [gId for gId in self.g if gId]
 
         memberGroupIds = []
         if self.mg and user.getId():
             memberGroupIds = [g.getId() for g in
-                        self.groupsInfo.get_member_groups_for_user(user, user)]
+                              self.groupsInfo.get_member_groups_for_user(user, user)]
 
         if self.groupIds:
             if memberGroupIds:
-                self.groupIds = [gId for gId in self.groupIds
-                                    if gId in memberGroupIds]
+                self.groupIds = [gId for gId in self.groupIds if gId in memberGroupIds]
             else:
                 self.groupIds = \
                     self.groupsInfo.filter_visible_group_ids(self.groupIds)
@@ -87,8 +81,8 @@ class GSPostResultsContentProvider(object):
 
         try:
             posts = self.messageQuery.post_search_keyword(
-              self.searchTokens, self.siteInfo.get_id(), self.groupIds,
-              self.a, limit=self.l + 1, offset=self.i)
+                self.searchTokens, self.siteInfo.get_id(), self.groupIds,
+                self.a, limit=self.l + 1, offset=self.i)
         except SQLAlchemyError:
             log.exception("A problem occurred with a messageQuery:")
             self.__searchFailed = True
@@ -122,8 +116,7 @@ class GSPostResultsContentProvider(object):
                 onlyAuthor = self.view.author_count()
 
             if self.posts:
-                r = pageTemplate(view=self,
-                  onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
+                r = pageTemplate(view=self, onlyGroup=onlyGroup, onlyAuthor=onlyAuthor)
             else:
                 r = '<p id="post-search-none">No posts found.</p>'
         return r
@@ -170,47 +163,44 @@ class GSPostResultsContentProvider(object):
         for post in self.posts:
             authorInfo = authorCache.get(post['user_id'], None)
             if not authorInfo:
-                authorInfo = createObject('groupserver.UserFromId',
-                  self.context, post['user_id'])
+                authorInfo = createObject('groupserver.UserFromId', self.context, post['user_id'])
                 authorCache[post['user_id']] = authorInfo
             authorId = authorInfo.id
             authorD = {
-              'id': authorInfo.id,
-              'exists': not authorInfo.anonymous,
-              'url': authorInfo.url,
-              'name': authorInfo.name,
-              'onlyURL': self.view.only_author_link(authorId)
+                'id': authorInfo.id,
+                'exists': not authorInfo.anonymous,
+                'url': authorInfo.url,
+                'name': authorInfo.name,
+                'onlyURL': self.view.only_author_link(authorId),
             }
 
             groupInfo = groupCache.get(post['group_id'], None)
             if not groupInfo:
-                groupInfo = createObject('groupserver.GroupInfo',
-                  self.context, post['group_id'])
+                groupInfo = createObject('groupserver.GroupInfo', self.context, post['group_id'])
                 groupCache[post['group_id']] = groupInfo
             groupD = {
-              'id': groupInfo.get_id(),
-              'name': groupInfo.get_name(),
-              'url': groupInfo.relativeURL,
-              'onlyURL': self.view.only_group_link(groupInfo.get_id())
+                'id': groupInfo.get_id(),
+                'name': groupInfo.get_name(),
+                'url': groupInfo.relativeURL,
+                'onlyURL': self.view.only_group_link(groupInfo.get_id()),
             }
 
             fakeContext = FakeContentProviderContext(self.context, self.request,
                                                      groupInfo, post)
 
             retval = {
-              'context': groupInfo.groupObj,
-              'postId': post['post_id'],
-              'postURL': '%s/r/post/%s' % (siteURL, post['post_id']),
-              'topicName': post['subject'],
-              'author': authorD,
-              'group': groupD,
-              'date': post['date'],
-              'timezone': 'foo',
-              'postSummary': self.get_summary(post['body']),
-              'postBody': post['body'],
-              'postIntro': get_post_intro_and_remainder(fakeContext,
-                                                          post['body'])[0],
-              'files': post['files_metadata']
+                'context': groupInfo.groupObj,
+                'postId': post['post_id'],
+                'postURL': '%s/r/post/%s' % (siteURL, post['post_id']),
+                'topicName': post['subject'],
+                'author': authorD,
+                'group': groupD,
+                'date': post['date'],
+                'timezone': 'foo',
+                'postSummary': self.get_summary(post['body']),
+                'postBody': post['body'],
+                'postIntro': get_post_intro_and_remainder(fakeContext, post['body'])[0],
+                'files': post['files_metadata'],
             }
             yield retval
 
@@ -219,8 +209,7 @@ class GSPostResultsContentProvider(object):
         lines = text.split('\n')
         nonBlankLines = [l.strip() for l in lines if l and l.strip()]
         noQuoteLines = [l for l in nonBlankLines if l[0] != '>']
-        multipleWordLines = [l for l in noQuoteLines
-                              if len(l.split()) > 1]
+        multipleWordLines = [l for l in noQuoteLines if len(l.split()) > 1]
 
         firstLine = multipleWordLines and multipleWordLines[0].lower() or ''
         if 'wrote' in firstLine:
@@ -231,9 +220,8 @@ class GSPostResultsContentProvider(object):
         matchingLines = []
         if self.s:
             matchingLines = [l for l in noWroteLines
-                              if reduce(lambda a, b: a or b,
-                                        map(lambda w: w in l.lower(),
-                                            self.searchTokens.phrases), False)]
+                             if reduce(lambda a, b: a or b, map(lambda w: w in l.lower(),
+                                       self.searchTokens.phrases), False)]
         if matchingLines:
             firstLines = matchingLines[:nLines]
             matchingSnippets = []
@@ -268,4 +256,4 @@ class GSPostResultsContentProvider(object):
         return summary
 
 provideAdapter(GSPostResultsContentProvider, provides=IContentProvider,
-                  name="groupserver.PostResults")
+               name="groupserver.PostResults")
