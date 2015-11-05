@@ -4,7 +4,7 @@
   munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date">
   <ul class="searchResults gs-search-posts-results">
     <tal:block repeat="result view/get_results">
-      <li tal:attributes="id string:post-${result/postId};" 
+      <li tal:attributes="id string:post-${result/postId};"
           class="gs-search-result">
         <a class="topic" tal:condition="result/topicName"
           tal:attributes="href string:/r/post/${result/postId}"
@@ -23,14 +23,14 @@
             tal:attributes="href result/group/url">
             <strong tal:content="result/group/name">A group</strong></a>
         </div>
-        <pre class="email-summary small muted" 
+        <pre class="email-summary small muted"
           tal:content="structure result/postSummary">
             This is the body of the document.
         </pre><!--email-summary-->
         <div class="metadata small muted">
           <span class="author vcard" tal:condition="not:onlyAuthor">
             By
-            <a tal:omit-tag="not:result/author/exists" 
+            <a tal:omit-tag="not:result/author/exists"
                tal:attributes="href result/author/url;
                                title string:Profile of ${result/author/name};"
                class="url"><strong tal:content="result/author/name"
@@ -38,7 +38,7 @@
           </span>
           <span class="posted">
             at
-            <span class="date" 
+            <span class="date"
               tal:define="ctx result/context"
               tal:content="python:munge_date(ctx, result['date'])">
               Today, Tomorrow, Timaru
@@ -49,4 +49,3 @@
     </tal:block>
   </ul>
 </tal:block>
-
