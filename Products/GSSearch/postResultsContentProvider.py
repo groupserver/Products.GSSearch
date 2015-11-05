@@ -23,17 +23,9 @@ from zope.component import adapter, provideAdapter
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.contentprovider.interfaces import IContentProvider, UpdateNotCalled
 import AccessControl
-from gs.group.messages.post.text.postbody import get_post_intro_and_remainder
+from gs.group.messages.text import split_message
 from .interfaces import IGSPostResultsContentProvider
 from .queries import MessageQuery
-
-
-class FakeContentProviderContext:
-    def __init__(self, context, request, groupInfo, post):
-        self.context = context
-        self.request = request
-        self.groupInfo = groupInfo
-        self.post = post
 
 
 @implementer(IGSPostResultsContentProvider)
@@ -184,10 +176,6 @@ class GSPostResultsContentProvider(object):
                 'url': groupInfo.relativeURL,
                 'onlyURL': self.view.only_group_link(groupInfo.get_id()),
             }
-
-            fakeContext = FakeContentProviderContext(self.context, self.request,
-                                                     groupInfo, post)
-
             retval = {
                 'context': groupInfo.groupObj,
                 'postId': post['post_id'],
@@ -199,7 +187,7 @@ class GSPostResultsContentProvider(object):
                 'timezone': 'foo',
                 'postSummary': self.get_summary(post['body']),
                 'postBody': post['body'],
-                'postIntro': get_post_intro_and_remainder(fakeContext, post['body'])[0],
+                'postIntro': split_message(post['body']).intro,
                 'files': post['files_metadata'],
             }
             yield retval
